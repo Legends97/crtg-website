@@ -19,23 +19,28 @@
   [["icon","image/png"],["apple-touch-icon",""]].forEach(function(r){
     var l=document.createElement("link");l.rel=r[0];l.href=base+"icon.png";if(r[1])l.type=r[1];document.head.appendChild(l);
   });
-  // Konto: nur anzeigen, wenn es die API gibt (auf einem reinen Datei-Server passiert nichts)
+  // Zugriff nur für angemeldete Nutzer: login.html ist die einzige Ausnahme
+  var isLogin=/\/login\.html$/.test(location.pathname);
+  if(isLogin){document.documentElement.classList.add("ready");}
   fetch(base+"api/me",{credentials:"same-origin"}).then(function(r){
     if(r.status===401)return {anon:true};
     return r.ok?r.json():null;
   }).catch(function(){return null}).then(function(u){
-    if(!u)return;
-    var box=document.createElement("div");box.className="acct";
-    if(u.anon){
+    if(!u||u.anon){
+      if(!isLogin){location.href=base+"login.html";return;}
+      var box=document.createElement("div");box.className="acct";
       box.innerHTML='<a class="login" href="'+base+'login.html">Mit Discord anmelden</a>';
-    }else{
-      if(u.role==="admin")nav.querySelector(".tabs").insertAdjacentHTML("beforeend",tab(admin));
-      box.innerHTML='<span class="who"></span><button type="button" class="out">Abmelden</button>';
-      box.querySelector(".who").textContent=u.display_name;
-      box.querySelector(".out").onclick=function(){
-        fetch(base+"api/auth/logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){location.href=base});
-      };
+      nav.appendChild(box);
+      return;
     }
+    document.documentElement.classList.add("ready");
+    var box=document.createElement("div");box.className="acct";
+    if(u.role==="admin")nav.querySelector(".tabs").insertAdjacentHTML("beforeend",tab(admin));
+    box.innerHTML='<span class="who"></span><button type="button" class="out">Abmelden</button>';
+    box.querySelector(".who").textContent=u.display_name;
+    box.querySelector(".out").onclick=function(){
+      fetch(base+"api/auth/logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){location.href=base});
+    };
     nav.appendChild(box);
   });
 })();

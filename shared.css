@@ -1,5 +1,7 @@
 /* Gemeinsames Design für alle CRTG-Seiten: Farben, Hintergrund, Navigation, Buttons */
 :root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
+html{visibility:hidden}
+html.ready{visibility:visible}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
 background:radial-gradient(900px 520px at 8% -10%,rgba(43,208,255,.17),transparent 60%),radial-gradient(900px 520px at 100% 0,rgba(155,107,255,.19),transparent 60%),var(--bg)}
