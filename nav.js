@@ -1,0 +1,41 @@
+/* Gemeinsame Navigation, Konto-Anzeige, Favicon und Handy-Symbol für alle CRTG-Seiten */
+(function(){
+  var base=document.currentScript.src.replace(/[^/]*$/,"");
+  var items=[
+    ["","Start","M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
+    ["stintplan/","Stintplaner","M3 5h10v4H3zM8 11h13v4H8zM3 17h8v3H3z"],
+    ["sprit/","Sprit-Rechner","M12 2.5S5 10.2 5 15a7 7 0 0 0 14 0c0-4.8-7-12.5-7-12.5z"]
+  ];
+  var admin=["admin/","Admin","M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"];
+  var here=location.pathname.replace(/index\.html$/,"");
+  if(here.slice(-1)!=="/")here+="/";
+  var root=new URL(base).pathname;
+  function tab(i){var on=here===root+i[0];
+    return '<a href="'+base+i[0]+'"'+(on?' class="on" aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+i[2]+'"/></svg><span>'+i[1]+'</span></a>';}
+  var nav=document.createElement("nav");
+  nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
+  nav.innerHTML='<a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="34" height="34"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div>';
+  document.body.insertBefore(nav,document.body.firstChild);
+  [["icon","image/png"],["apple-touch-icon",""]].forEach(function(r){
+    var l=document.createElement("link");l.rel=r[0];l.href=base+"icon.png";if(r[1])l.type=r[1];document.head.appendChild(l);
+  });
+  // Konto: nur anzeigen, wenn es die API gibt (auf einem reinen Datei-Server passiert nichts)
+  fetch(base+"api/me",{credentials:"same-origin"}).then(function(r){
+    if(r.status===401)return {anon:true};
+    return r.ok?r.json():null;
+  }).catch(function(){return null}).then(function(u){
+    if(!u)return;
+    var box=document.createElement("div");box.className="acct";
+    if(u.anon){
+      box.innerHTML='<a class="login" href="'+base+'login.html">Mit Discord anmelden</a>';
+    }else{
+      if(u.role==="admin")nav.querySelector(".tabs").insertAdjacentHTML("beforeend",tab(admin));
+      box.innerHTML='<span class="who"></span><button type="button" class="out">Abmelden</button>';
+      box.querySelector(".who").textContent=u.display_name;
+      box.querySelector(".out").onclick=function(){
+        fetch(base+"api/auth/logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){location.href=base});
+      };
+    }
+    nav.appendChild(box);
+  });
+})();

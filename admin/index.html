@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin – CRTG</title>
+<style>
+main{max-width:1100px;margin:auto;padding:22px 20px 60px}
+h1{margin:0 0 4px;font-size:2.3rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.sub{color:var(--mute);margin:0 0 18px}
+.warn{background:rgba(255,169,77,.12);border:1px solid #ffa94d;border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.warn:empty,[hidden]{display:none!important}
+.bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}.bar input{flex:1;min-width:200px}
+input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+input:focus,select:focus{outline:2px solid var(--cy);outline-offset:1px}
+.tw{overflow-x:auto;background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:500;font-size:.85rem}
+tr.off td{opacity:.5}
+.miss{color:#ffa94d}.mono{font-variant-numeric:tabular-nums}
+.tag{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;color:var(--mute)}
+.tag.admin{color:var(--cy);border-color:var(--cy)}
+td .btn{margin-right:6px;padding:5px 12px}
+#empty,#gate{color:var(--mute);padding:18px}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(480px,92vw);padding:22px}
+dialog::backdrop{background:rgba(5,7,16,.72)}
+label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
+.hint{color:var(--mute);font-size:.8rem;margin-top:4px}
+.err{color:#ff8a8a;min-height:1.4em;margin:12px 0 0}
+.row{display:flex;gap:10px;margin-top:8px;align-items:center}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<main>
+  <div id="gate" hidden></div>
+  <div id="app">
+    <h1>Fahrer-Verwaltung</h1>
+    <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
+    <div class="warn" id="warn" role="status"></div>
+    <div class="bar"><input id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="btn go" id="new" type="button">Fahrer anlegen</button></div>
+    <div class="tw"><table><thead><tr><th>Name</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+  </div>
+</main>
+<dialog id="dlg">
+  <form id="f">
+    <h2 id="ttl" style="margin:0">Fahrer</h2>
+    <label for="fn">Anzeigename</label><input id="fn" required maxlength="60">
+    <label for="fd">Discord-ID</label><input id="fd" inputmode="numeric" placeholder="17 bis 19 Ziffern">
+    <label for="fs">Steam-ID (SteamID64)</label><input id="fs" placeholder="76561198000000000">
+    <div class="hint">Mit oder ohne S, sie wird automatisch auf S + 17 Ziffern gesetzt. Ein leeres Feld löst die Verknüpfung.</div>
+    <label for="fr">Rolle</label><select id="fr"><option value="driver">Fahrer</option><option value="admin">Admin</option></select>
+    <label class="row" id="far"><input type="checkbox" id="fa" style="width:auto"> Konto aktiv</label>
+    <div class="err" id="err" role="alert"></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" id="cancel">Abbrechen</button><button class="btn go">Speichern</button></div>
+  </form>
+</dialog>
+<script src="../nav.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+async function api(path,opt){
+  const r=await fetch(path,Object.assign({credentials:"same-origin",headers:{"Content-Type":"application/json"}},opt));
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw Object.assign(new Error(d.error||"Fehler"),{status:r.status});
+  return d;
+}
+let list=[],editId=null,timer;
+function cell(tr,txt,cls){const td=document.createElement("td");td.textContent=txt;if(cls)td.className=cls;tr.appendChild(td);return td}
+async function load(){
+  try{
+    const d=await api("/api/admin/users?q="+encodeURIComponent($("q").value.trim()));
+    list=d.users;
+    $("warn").innerHTML="";
+    [[d.warnings.noDiscord,"aktive Fahrer ohne Discord-ID (kein Login, keine Erinnerung)"],[d.warnings.noSteam,"aktive Fahrer ohne Steam-ID (keine Verknüpfung mit Ergebnissen)"]].forEach(([n,t])=>{
+      if(n){const p=document.createElement("div");p.textContent="Achtung: "+n+" "+t;$("warn").appendChild(p)}});
+    const tb=$("rows");tb.innerHTML="";
+    list.forEach(u=>{
+      const tr=document.createElement("tr");if(!u.active)tr.className="off";
+      cell(tr,u.display_name);
+      cell(tr,u.discord_id||"fehlt",u.discord_id?"mono":"miss");
+      cell(tr,u.steam_id||"fehlt",u.steam_id?"mono":"miss");
+      const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Admin":"Fahrer";r.appendChild(tag);
+      cell(tr,u.active?"aktiv":"deaktiviert");
+      const a=cell(tr,"");
+      [["Bearbeiten",()=>openEdit(u)],[u.active?"Deaktivieren":"Aktivieren",()=>toggle(u)]].forEach(([t,f])=>{
+        const b=document.createElement("button");b.type="button";b.className="btn";b.textContent=t;b.onclick=f;a.appendChild(b)});
+      tb.appendChild(tr);
+    });
+    $("empty").hidden=list.length>0;
+  }catch(e){
+    $("app").hidden=true;$("gate").hidden=false;
+    $("gate").textContent=e.status===401?"Bitte melde dich zuerst an. ":e.status===403?"Dieser Bereich ist nur für Admins.":e.message;
+    if(e.status===401){const a=document.createElement("a");a.href="/login.html";a.className="btn go";a.textContent="Zur Anmeldung";$("gate").appendChild(a)}
+  }
+}
+function openEdit(u){
+  editId=u?u.id:null;$("err").textContent="";
+  $("ttl").textContent=u?"Fahrer bearbeiten":"Fahrer anlegen";
+  $("fn").value=u?u.display_name:"";$("fd").value=u?.discord_id||"";$("fs").value=u?.steam_id||"";
+  $("fr").value=u?u.role:"driver";$("fa").checked=u?u.active:true;$("far").hidden=!u;
+  $("dlg").showModal();
+}
+async function toggle(u){try{await api("/api/admin/users/"+u.id,{method:"PATCH",body:JSON.stringify({active:!u.active})});load()}catch(e){alert(e.message)}}
+$("new").onclick=()=>openEdit(null);
+$("cancel").onclick=()=>$("dlg").close();
+$("q").oninput=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
+$("f").onsubmit=async e=>{
+  e.preventDefault();$("err").textContent="";
+  const body={display_name:$("fn").value,discord_id:$("fd").value,steam_id:$("fs").value,role:$("fr").value};
+  try{
+    if(editId){body.active=$("fa").checked;await api("/api/admin/users/"+editId,{method:"PATCH",body:JSON.stringify(body)})}
+    else await api("/api/admin/users",{method:"POST",body:JSON.stringify(body)});
+    $("dlg").close();load();
+  }catch(x){$("err").textContent=x.message}
+};
+load();
+</script>
+</body>
+</html>

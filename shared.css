@@ -1,0 +1,38 @@
+/* Gemeinsames Design für alle CRTG-Seiten: Farben, Hintergrund, Navigation, Buttons */
+:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+background:radial-gradient(900px 520px at 8% -10%,rgba(43,208,255,.17),transparent 60%),radial-gradient(900px 520px at 100% 0,rgba(155,107,255,.19),transparent 60%),var(--bg)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+background:repeating-linear-gradient(115deg,transparent 0 170px,rgba(43,208,255,.10) 170px 172px,transparent 172px 360px,rgba(155,107,255,.11) 360px 364px,transparent 364px 560px);animation:drift 60s linear infinite}
+@keyframes drift{to{background-position:618px 0}}
+@media(prefers-reduced-motion:reduce){body::before{animation:none}}
+.btn{display:inline-block;font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;text-decoration:none;cursor:pointer;transition:border-color .15s}
+.btn:hover{border-color:var(--cy)}
+.btn.go{background:linear-gradient(90deg,#0f8fb0,#6a45d6);border-color:transparent;font-weight:600}
+.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:8px 20px;background:rgba(11,14,27,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-weight:800;font-style:italic;font-size:1.2rem}
+.nav .brand img{display:block;border-radius:8px}
+.nav .tabs{display:flex;gap:6px;margin-left:auto}
+.nav .tabs a{display:flex;align-items:center;gap:8px;color:var(--mute);text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid transparent}
+.nav .tabs a:hover{color:var(--text);border-color:var(--line)}
+.nav .tabs a.on{color:var(--text);background:linear-gradient(90deg,rgba(43,208,255,.2),rgba(155,107,255,.2));border-color:var(--cy)}
+.nav svg{width:18px;height:18px;fill:currentColor;flex:none}
+@media(max-width:700px){
+body{padding-bottom:76px}
+.nav{position:fixed;top:auto;bottom:0;left:0;right:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-bottom:0;border-top:1px solid var(--line)}
+.nav .brand{display:none}
+.nav .tabs{margin:0;width:100%}
+.nav .tabs a{flex:1;flex-direction:column;justify-content:center;gap:2px;font-size:.75rem;padding:6px 4px;border-radius:12px}
+#toast{bottom:92px!important}
+}
+@media print{.nav{display:none}body::before{display:none}body{padding-bottom:0}}
+/* Konto-Anzeige in der Navigation */
+.nav .acct{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:.9rem;white-space:nowrap}
+.nav .acct .who{color:var(--text)}
+.nav .acct .login,.nav .acct .out{color:var(--cy);background:none;border:1px solid var(--cy);border-radius:999px;padding:5px 12px;text-decoration:none;font:inherit;font-size:.85rem;cursor:pointer}
+@media(max-width:700px){
+.nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(11,14,27,.97)}
+.nav .acct{position:fixed;top:8px;right:10px;background:rgba(11,14,27,.92);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;z-index:30}
+.nav .acct .login{border:0;padding:3px 8px}
+}

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRTG Stintplaner</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.018) 22px 44px),var(--bg)}
+header{max-width:1280px;margin:auto;padding:26px 24px 14px}
+h1{margin:0;font-size:2.5rem;font-style:italic;font-weight:800;letter-spacing:.01em;line-height:1.1;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.sub{color:var(--mute);margin-top:2px}
+.back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
+.stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
+main{display:grid;grid-template-columns:330px 1fr;gap:22px;padding:8px 24px 48px;max-width:1280px;margin:auto;align-items:start}
+@media(max-width:880px){main{grid-template-columns:1fr;padding:8px 14px 40px}header{padding:20px 14px 10px}h1{font-size:2rem}}
+section{background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px;padding:18px}
+h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
+label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
+input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.two{display:flex;gap:10px}.two>div{flex:1}
+button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
+button:hover{border-color:var(--cy)}button:active{transform:translateY(1px)}
+button.go{background:linear-gradient(90deg,#0f8fb0,#6a45d6);border-color:transparent;font-weight:600}
+.drv{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;background:var(--c)}
+.drv button{padding:6px 12px;color:var(--mute)}
+.hero{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.trk{font-size:2.3rem;font-style:italic;font-weight:800;line-height:1.1}
+.stats{display:flex;gap:26px;flex-wrap:wrap}
+.stat b{display:block;font-size:1.8rem;line-height:1.1;color:var(--cy);font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:.85rem}
+.bar{display:flex;height:46px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.seg{display:flex;align-items:center;justify-content:center;color:#0b0e1b;font-weight:700;font-size:.85rem;overflow:hidden;white-space:nowrap;background:var(--c);border-right:3px solid var(--bg)}
+.seg:last-child{border-right:0}
+.ends{display:flex;justify-content:space-between;color:var(--mute);font-size:.85rem;margin:5px 2px 18px;font-variant-numeric:tabular-nums}
+.stint{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:9px 14px;margin-bottom:8px}
+.stint .n{width:40px;font-size:1.7rem;font-weight:800;font-style:italic;color:var(--c);line-height:1}
+.stint .who{flex:1 1 170px;display:flex;align-items:center;gap:8px;min-width:0}
+.stint .who select{max-width:260px}
+.stint .t{width:150px;font-variant-numeric:tabular-nums;font-weight:600}
+.stint .d,.stint .l{width:72px;color:var(--mute);font-variant-numeric:tabular-nums}
+.pr{display:none}
+.tot{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.chip{position:relative;overflow:hidden;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px 10px;display:flex;gap:8px;align-items:center}
+.chip small{color:var(--mute)}
+.chip i{position:absolute;left:0;bottom:0;height:3px;background:var(--c)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.empty{color:var(--mute);padding:20px 0}
+.tot-h{margin:22px 0 0;font-weight:700}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cy);padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(680px,92vw);padding:20px}
+dialog::backdrop{background:rgba(5,7,16,.72)}
+dialog p{color:var(--mute);margin:4px 0 14px}
+pre{-webkit-user-select:all;user-select:all;cursor:copy;white-space:pre-wrap;word-break:break-word;margin:0 0 8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font:14px/1.55 ui-monospace,Consolas,monospace;max-height:36vh;overflow:auto}
+.part{margin-bottom:16px}.part .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:var(--mute);font-size:.85rem}
+
+.sv{display:flex;gap:8px;margin-top:6px}.sv select,.sv input{width:auto;flex:1;min-width:0}.sv button{white-space:nowrap}
+button:disabled{opacity:.45;cursor:default}
+@media print{
+@page{size:A4 portrait;margin:14mm}
+body{background:#fff;color:#111;font-size:12pt}
+.cfg,.actions,.no-print,.stripe,.sub{display:none!important}
+header{padding:0 0 8px}
+h1{background:none;color:#111;-webkit-text-fill-color:#111;font-size:22pt}
+main{display:block;padding:0;max-width:none}
+section{background:none;border:0;padding:0}
+.hero{display:block;margin-bottom:10px}.trk{font-size:20pt}
+.stats{gap:24px;margin-top:6px}.stat b{color:#111;font-size:15pt}.stat span{color:#555}
+.bar{border:1px solid #999}.seg{border-right-color:#fff}.ends{color:#444}
+.stint{background:#fff;border:1px solid #bbb;border-left:7px solid var(--c);break-inside:avoid;padding:6px 12px}
+.stint .n{color:#111}.stint .d,.stint .l{color:#444}
+.stint .who select{display:none}.pr{display:inline;font-weight:600}
+.tot{display:block}.chip{background:#fff;border:1px solid #bbb;border-radius:8px;margin-bottom:6px;break-inside:avoid}
+.chip small{color:#444}
+}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<header>
+  <h1>CRTG Stintplaner</h1>
+  <div class="sub">ChaosRacing – Team Germany</div>
+  <div class="stripe"></div>
+</header>
+<main>
+  <section class="cfg" aria-label="Einstellungen">
+    <h2>Pläne</h2>
+    <label for="planSel">Gespeicherte Pläne</label>
+    <div class="sv"><select id="planSel"></select><button id="loadPlan" type="button">Laden</button><button id="delPlan" type="button">Löschen</button></div>
+    <label for="planName">Aktuellen Plan speichern als</label>
+    <div class="sv"><input id="planName" placeholder="z. B. Nordschleife 24H"><button id="savePlan" type="button">Speichern</button></div>
+    <h2 style="margin-top:24px">Rennen</h2>
+    <label for="track">Strecke</label>
+    <select id="track"></select>
+    <div class="two">
+      <div><label for="h">Stunden</label><input id="h" type="number" min="0" max="48"></div>
+      <div><label for="m">Minuten</label><input id="m" type="number" min="0" max="59"></div>
+    </div>
+    <label for="stint">Stint-Länge (Minuten)</label>
+    <input id="stint" type="number" min="5" max="240">
+    <div class="two">
+      <div><label for="start">Startzeit (optional)</label><input id="start" type="time"></div>
+      <div><label for="lap">Rundenzeit (optional)</label><input id="lap" placeholder="1:48.5"></div>
+    </div>
+    <h2 style="margin-top:24px">Fahrer</h2>
+    <div id="drivers" style="margin-top:10px"></div>
+    <button id="addDrv" type="button">Fahrer hinzufügen</button>
+  </section>
+
+  <section aria-label="Stintplan">
+    <div class="hero"><div class="trk" id="trk"></div><div class="stats" id="stats"></div></div>
+    <div class="bar" id="bar" role="img" aria-label="Zeitleiste der Stints"></div>
+    <div class="ends" id="ends"></div>
+    <div id="plan"></div>
+    <div class="tot-h" id="toth"></div>
+    <div class="tot" id="tot"></div>
+    <div class="actions">
+      <button class="go" id="discord" type="button">Für Discord exportieren</button>
+      <button id="print" type="button">Drucken / PDF</button>
+      <button id="reset" type="button">Rotation neu setzen</button>
+      <a class="btn go" href="../sprit/#import">Weiter zum Sprit-Rechner →</a>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <h2>Für Discord</h2>
+  <p>Text kopieren und im Kanal einfügen. Discord erlaubt 2000 Zeichen pro Nachricht, lange Pläne werden deshalb in mehrere Nachrichten geteilt.</p>
+  <div id="parts"></div>
+  <div id="imgPart"></div>
+  <button type="button" id="close">Schließen</button>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+const TRACKS=["Barcelona","Brands Hatch","Circuit of the Americas","Donington Park","Hungaroring","Imola","Indianapolis","Kyalami","Laguna Seca","Misano","Monza","Mount Panorama (Bathurst)","Nürburgring","Nürburgring Nordschleife 24H","Oulton Park","Paul Ricard","Red Bull Ring","Silverstone","Snetterton","Spa-Francorchamps","Suzuka","Valencia","Watkins Glen","Zandvoort","Zolder"];
+const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
+const EMO=["🟦","🟪","🟧","🟩","🟥","🟨","🟫","⬜","⬛"];
+const KEY="crtg-stintplan-v1";
+const $=id=>document.getElementById(id);
+let S={track:"Spa-Francorchamps",h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1","Fahrer 2","Fahrer 3"],assign:[]};
+try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.drivers))S=Object.assign(S,x)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const dur=min=>Math.floor(min/60)+":"+pad(Math.round(min%60));
+const name=i=>(S.drivers[i]||"").trim()||"Fahrer "+(i+1);
+const col=i=>COLORS[((i%COLORS.length)+COLORS.length)%COLORS.length];
+
+function stints(){
+  const total=(+S.h||0)*60+(+S.m||0),len=+S.stint||0;
+  if(total<=0||len<=0)return [];
+  const n=Math.ceil(total/len),a=[];
+  for(let i=0;i<n;i++)a.push({s:i*len,e:Math.min(total,(i+1)*len)});
+  return a;
+}
+function fill(n){
+  const D=S.drivers.length;
+  S.assign=S.assign.slice(0,n);
+  for(let i=0;i<n;i++){
+    const v=S.assign[i];
+    if(!(Number.isInteger(v)&&v>=0&&v<D))S.assign[i]=D?((i?S.assign[i-1]:-1)+1)%D:-1;
+  }
+}
+function clock(off){
+  if(!S.start)return dur(off);
+  const [hh,mm]=S.start.split(":").map(Number),t=(hh*60+mm+off)%1440;
+  return pad(Math.floor(t/60))+":"+pad(t%60);
+}
+function lapSec(){
+  const v=String(S.lap).trim().replace(",","."),m=v.match(/^(\d+):(\d+(?:\.\d+)?)$/);
+  if(m)return +m[1]*60+ +m[2];
+  return /^\d+(\.\d+)?$/.test(v)?+v:0;
+}
+function sums(){
+  const r=S.drivers.map(()=>({t:0,n:0}));
+  stints().forEach((x,i)=>{const a=r[S.assign[i]];if(a){a.t+=x.e-x.s;a.n++}});
+  return r;
+}
+
+function renderDrivers(){
+  $("drivers").innerHTML=S.drivers.map((d,i)=>`<div class="drv" style="--c:${col(i)}"><span class="dot"></span><input data-d="${i}" value="${esc(d)}" aria-label="Fahrer ${i+1}"><button type="button" data-x="${i}" aria-label="Fahrer ${i+1} entfernen">Entfernen</button></div>`).join("");
+}
+function renderPlan(){
+  const st=stints();fill(st.length);
+  const total=st.length?st[st.length-1].e:0,lap=lapSec();
+  $("trk").textContent=S.track;
+  document.title="CRTG Stintplan – "+S.track;
+  if(!S.drivers.length||!st.length){
+    ["stats","bar","ends","tot","toth"].forEach(k=>$(k).innerHTML="");
+    $("plan").innerHTML='<p class="empty">'+(S.drivers.length?"Trage eine Renndauer und eine Stint-Länge ein.":"Füge mindestens einen Fahrer hinzu.")+"</p>";
+    return;
+  }
+  const stat=(b,l)=>`<div class="stat"><b>${b}</b><span>${l}</span></div>`;
+  $("stats").innerHTML=stat(dur(total)+" h","Renndauer")+stat(st.length,"Stints")+stat(st.length-1,"Boxenstopps")+(S.start?stat(esc(S.start),"Start (Uhr)"):"");
+  $("bar").innerHTML=st.map((x,i)=>`<div class="seg" style="--c:${col(S.assign[i])};width:${(x.e-x.s)/total*100}%" title="${esc(name(S.assign[i]))}: ${clock(x.s)}–${clock(x.e)}">${(x.e-x.s)/total>.07?esc(name(S.assign[i])):""}</div>`).join("");
+  $("ends").innerHTML=`<span>Start ${clock(0)}</span><span>Ziel ${clock(total)}</span>`;
+  $("plan").innerHTML=st.map((x,i)=>{
+    const a=S.assign[i];
+    return `<div class="stint" style="--c:${col(a)}"><span class="n">${i+1}</span><span class="who"><span class="dot no-print"></span><select class="no-print" data-s="${i}" aria-label="Fahrer Stint ${i+1}">${S.drivers.map((_,j)=>`<option value="${j}"${j===a?" selected":""}>${esc(name(j))}</option>`).join("")}</select><span class="pr">${esc(name(a))}</span></span><span class="t">${clock(x.s)} – ${clock(x.e)}</span><span class="d">${Math.round(x.e-x.s)} min</span>${lap?`<span class="l">ca. ${Math.round((x.e-x.s)*60/lap)} Rd.</span>`:""}</div>`;
+  }).join("");
+  $("toth").textContent="Fahrzeit pro Fahrer";
+  $("tot").innerHTML=sums().map((a,i)=>`<div class="chip" style="--c:${col(i)}"><span class="dot"></span><b>${esc(name(i))}</b><small>${a.n} Stint${a.n===1?"":"s"} · ${dur(a.t)} h</small><i style="width:${a.t/total*100}%"></i></div>`).join("");
+  save();
+}
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)}
+function flash(btn,txt){
+  if(!btn)return;
+  const old=btn.dataset.old||btn.textContent;btn.dataset.old=old;
+  btn.textContent=txt;clearTimeout(btn._t);
+  btn._t=setTimeout(()=>{btn.textContent=old},2000);
+}
+function copyText(t,btn){
+  const ok=()=>flash(btn,"Kopiert ✓");
+  const fb=()=>{
+    const host=$("dlg").open?$("dlg"):document.body;
+    const a=document.createElement("textarea");
+    a.value=t;a.style.cssText="position:fixed;top:0;left:0;opacity:0";
+    host.appendChild(a);a.focus();a.select();
+    let r=false;try{r=document.execCommand("copy")}catch(e){}
+    a.remove();
+    r?ok():flash(btn,"Text anklicken, dann Strg+C");
+  };
+  (navigator.clipboard&&window.isSecureContext)?navigator.clipboard.writeText(t).then(ok,fb):fb();
+}
+const dn=i=>name(i).replace(/([\\*_~`|>])/g,"\\$1");
+function discordParts(){
+  const st=stints();if(!st.length||!S.drivers.length)return [];
+  const total=st[st.length-1].e,BT="`",b=[];
+  b.push("🏁 **CRTG – "+S.track+"**\n⏱️ "+dur(total)+" h · "+st.length+" Stints · "+(st.length-1)+" Boxenstopps"+(S.start?" · Start "+S.start+" Uhr":"")+"\n");
+  st.forEach((x,i)=>b.push(EMO[S.assign[i]%EMO.length]+" **"+(i+1)+"** "+BT+clock(x.s)+"–"+clock(x.e)+BT+"  "+dn(S.assign[i])+" · "+Math.round(x.e-x.s)+" min"));
+  b.push("\n**Fahrzeit**");
+  sums().forEach((a,i)=>b.push(EMO[i%EMO.length]+" "+dn(i)+" · "+a.n+" Stint"+(a.n===1?"":"s")+" · "+dur(a.t)+" h"));
+  const parts=[];let cur="";
+  b.forEach(l=>{if(cur&&(cur+"\n"+l).length>1900){parts.push(cur);cur=l}else cur=cur?cur+"\n"+l:l});
+  if(cur)parts.push(cur);
+  return parts;
+}
+function openDiscord(){
+  const p=discordParts();
+  if(!p.length){toast("Noch kein Plan vorhanden");return}
+  $("parts").innerHTML=p.map((t,i)=>`<div class="part"><div class="hd"><span>Nachricht ${i+1} von ${p.length} · ${t.length} Zeichen</span><button type="button" data-c="${i}">Kopieren</button></div><pre>${esc(t)}</pre></div>`).join("");
+  $("parts").onclick=e=>{const i=e.target.dataset.c;if(i!==undefined)copyText(p[i],e.target)};
+  renderImg();$("dlg").showModal();
+}
+
+
+function planCanvas(){
+  const st=stints();if(!st.length||!S.drivers.length)return null;
+  const total=st[st.length-1].e,W=1200,P=40,cols=st.length>16?2:1,gap=20,rw=(W-2*P-(cols-1)*gap)/cols,rh=60,rn=Math.ceil(st.length/cols);
+  const FF="Bahnschrift,'Roboto Condensed','Arial Narrow',system-ui,sans-serif",F=(w,z,i)=>(i?"italic ":"")+w+" "+z+"px "+FF;
+  const m=document.createElement("canvas").getContext("2d");m.font=F(600,24);
+  const chips=sums().map((a,i)=>({i,t:name(i)+" · "+a.n+" Stint"+(a.n===1?"":"s")+" · "+dur(a.t)+" h",w:0}));
+  chips.forEach(c=>c.w=m.measureText(c.t).width+60);
+  let cx=P,cy=0;const pos=chips.map(c=>{if(cx+c.w>W-P&&cx>P){cx=P;cy+=56}const r={x:cx,y:cy};cx+=c.w+12;return r});
+  const barY=170,rowsY=barY+88,chipsY=rowsY+rn*(rh+10)+56,H=chipsY+cy+108;
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;
+  const g=cv.getContext("2d");
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+  const fit=(t,max)=>{if(g.measureText(t).width<=max)return t;while(t.length>1&&g.measureText(t+"…").width>max)t=t.slice(0,-1);return t+"…"};
+  g.fillStyle="#0b0e1b";g.fillRect(0,0,W,H);
+  [[0,"43,208,255"],[W,"155,107,255"]].forEach(([x,c])=>{const r=g.createRadialGradient(x,0,0,x,0,760);r.addColorStop(0,"rgba("+c+",.22)");r.addColorStop(1,"rgba("+c+",0)");g.fillStyle=r;g.fillRect(0,0,W,H)});
+  const ic=document.querySelector(".nav .brand img");let tx=P;
+  if(ic&&ic.complete&&ic.naturalWidth){g.save();rr(P,36,88,88,18);g.clip();g.drawImage(ic,P,36,88,88);g.restore();tx=P+110}
+  g.fillStyle="#eaedfa";g.font=F(800,48,1);g.fillText(fit(S.track,W-P-tx),tx,86);
+  g.fillStyle="#8f98bd";g.font=F(500,26);
+  g.fillText(dur(total)+" h · "+st.length+" Stints · "+(st.length-1)+" Boxenstopps"+(S.start?" · Start "+S.start+" Uhr":""),tx,124);
+  const sg=g.createLinearGradient(P,0,W-P,0);sg.addColorStop(0,"#2bd0ff");sg.addColorStop(1,"#9b6bff");g.fillStyle=sg;g.fillRect(P,146,W-2*P,5);
+  g.save();rr(P,barY,W-2*P,44,10);g.clip();
+  st.forEach((x,i)=>{
+    const x0=P+x.s/total*(W-2*P),w=(x.e-x.s)/total*(W-2*P);
+    g.fillStyle=col(S.assign[i]);g.fillRect(x0,barY,w,44);
+    if(i<st.length-1){g.fillStyle="#0b0e1b";g.fillRect(x0+w-3,barY,3,44)}
+    if(w>120){g.font=F(700,20);g.fillStyle="#0b0e1b";g.textAlign="center";g.fillText(fit(name(S.assign[i]),w-16),x0+w/2,barY+29);g.textAlign="left"}
+  });
+  g.restore();
+  g.font=F(500,20);g.fillStyle="#8f98bd";g.fillText("Start "+clock(0),P,barY+68);g.textAlign="right";g.fillText("Ziel "+clock(total),W-P,barY+68);g.textAlign="left";
+  st.forEach((x,i)=>{
+    const c=Math.floor(i/rn),r=i%rn,X=P+c*(rw+gap),Y=rowsY+r*(rh+10),a=S.assign[i],cl=col(a);
+    g.fillStyle="#1a2040";rr(X,Y,rw,rh,12);g.fill();
+    g.save();rr(X,Y,rw,rh,12);g.clip();g.fillStyle=cl;g.fillRect(X,Y,8,rh);g.restore();
+    g.font=F(800,34,1);g.fillStyle=cl;g.fillText(String(i+1),X+24,Y+43);
+    const ts=clock(x.s)+" – "+clock(x.e);
+    g.font=F(600,26);const tw=g.measureText(ts).width;
+    g.fillStyle="#eaedfa";g.font=F(700,28);g.fillText(fit(name(a),rw-78-110-tw-24),X+78,Y+41);
+    g.font=F(600,26);g.fillText(ts,X+rw-110-tw,Y+41);
+    g.fillStyle="#8f98bd";g.font=F(500,22);g.textAlign="right";g.fillText(Math.round(x.e-x.s)+" min",X+rw-18,Y+40);g.textAlign="left";
+  });
+  g.fillStyle="#8f98bd";g.font=F(700,24);g.fillText("Fahrzeit pro Fahrer",P,chipsY-16);
+  chips.forEach((c,k)=>{
+    const X=pos[k].x,Y=chipsY+pos[k].y;
+    g.fillStyle="#1a2040";rr(X,Y,c.w,44,22);g.fill();g.strokeStyle="#2a3157";g.lineWidth=1.5;g.stroke();
+    g.fillStyle=col(c.i);g.beginPath();g.arc(X+24,Y+22,8,0,7);g.fill();
+    g.fillStyle="#eaedfa";g.font=F(600,24);g.fillText(c.t,X+42,Y+30);
+  });
+  g.fillStyle="#8f98bd";g.font=F(500,20);g.textAlign="right";g.fillText("ChaosRacing – Team Germany",W-P,H-26);g.textAlign="left";
+  return cv;
+}
+function renderImg(){
+  const box=$("imgPart"),cv=planCanvas();
+  if(!cv){box.innerHTML="";return}
+  const url=cv.toDataURL("image/png");
+  const canCopy=!!(navigator.clipboard&&window.ClipboardItem&&window.isSecureContext);
+  box.innerHTML=`<div class="part"><div class="hd"><span>Als Bild (PNG) · ${cv.width}×${cv.height}</span><span><button type="button" data-img="dl">Herunterladen</button>${canCopy?' <button type="button" data-img="cp">Bild kopieren</button>':""}</span></div><img src="${url}" alt="Vorschau des Stintplans als Bild" style="width:100%;border-radius:10px;border:1px solid var(--line)"></div>`;
+  box.onclick=e=>{
+    const k=e.target.dataset.img;if(!k)return;
+    if(k==="dl"){
+      const a=document.createElement("a");a.href=url;a.download="stintplan-"+S.track.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".png";
+      $("dlg").appendChild(a);a.click();a.remove();flash(e.target,"Gespeichert ✓");
+    }else cv.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(()=>flash(e.target,"Kopiert ✓"),()=>flash(e.target,"Nicht möglich")));
+  };
+}
+const PKEY="crtg-stintplan-plans";
+let PL=[];try{PL=JSON.parse(localStorage.getItem(PKEY))||[]}catch(e){}
+const savePL=()=>{try{localStorage.setItem(PKEY,JSON.stringify(PL))}catch(e){}};
+function renderPL(sel){
+  $("planSel").innerHTML=PL.length?PL.map((q,i)=>`<option value="${i}">${esc(q.name)}</option>`).join(""):'<option value="">Noch keine Pläne gespeichert</option>';
+  if(sel!==undefined&&sel>=0)$("planSel").value=sel;
+  $("loadPlan").disabled=$("delPlan").disabled=!PL.length;
+}
+$("savePlan").onclick=()=>{
+  const nm=$("planName").value.trim()||(S.track+" · "+dur((+S.h||0)*60+(+S.m||0))+" h");
+  const data=JSON.parse(JSON.stringify(S)),i=PL.findIndex(q=>q.name===nm);
+  if(i>=0)PL[i].data=data;else PL.push({name:nm,data});
+  savePL();$("planName").value=nm;renderPL(PL.findIndex(q=>q.name===nm));flash($("savePlan"),i>=0?"Aktualisiert ✓":"Gespeichert ✓");
+};
+$("loadPlan").onclick=()=>{
+  const q=PL[+$("planSel").value];if(!q)return;
+  S=Object.assign({track:TRACKS[0],h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1"],assign:[]},JSON.parse(JSON.stringify(q.data)));
+  if(!TRACKS.includes(S.track))S.track=TRACKS[0];
+  $("planName").value=q.name;
+  $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
+  renderDrivers();renderPlan();flash($("loadPlan"),"Geladen ✓");
+};
+$("delPlan").onclick=()=>{
+  const i=+$("planSel").value,q=PL[i];
+  if(!q||!confirm("Plan „"+q.name+"“ löschen?"))return;
+  PL.splice(i,1);savePL();renderPL();
+};
+
+$("track").innerHTML=TRACKS.map(t=>`<option>${esc(t)}</option>`).join("");
+if(!TRACKS.includes(S.track))S.track=TRACKS[0];
+$("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
+
+$("track").onchange=e=>{S.track=e.target.value;renderPlan()};
+["h","m","stint","start","lap"].forEach(id=>$(id).oninput=e=>{S[id]=e.target.value;renderPlan()});
+$("addDrv").onclick=()=>{S.drivers.push("Fahrer "+(S.drivers.length+1));renderDrivers();renderPlan()};
+$("drivers").oninput=e=>{const i=e.target.dataset.d;if(i!==undefined){S.drivers[i]=e.target.value;renderPlan()}};
+$("drivers").onclick=e=>{
+  const i=e.target.dataset.x;if(i===undefined)return;
+  S.drivers.splice(+i,1);
+  S.assign=S.assign.map(v=>v===+i?-1:v>+i?v-1:v);
+  renderDrivers();renderPlan();
+};
+$("plan").onchange=e=>{const i=e.target.dataset.s;if(i!==undefined){S.assign[i]=+e.target.value;renderPlan()}};
+$("reset").onclick=()=>{S.assign=[];renderPlan()};
+$("print").onclick=()=>window.print();
+$("discord").onclick=openDiscord;
+$("close").onclick=()=>$("dlg").close();
+renderPL();
+renderDrivers();renderPlan();
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>

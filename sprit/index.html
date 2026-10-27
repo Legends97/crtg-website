@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRTG Sprit-Rechner</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.018) 22px 44px),var(--bg)}
+header{max-width:1100px;margin:auto;padding:26px 24px 14px}
+h1{margin:0;font-size:2.5rem;font-style:italic;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--vi),var(--cy));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.sub{color:var(--mute);margin-top:2px}.back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
+.stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--vi),var(--cy) 60%,transparent)}
+main{display:grid;grid-template-columns:320px 1fr;gap:22px;padding:8px 24px 48px;max-width:1100px;margin:auto;align-items:start}
+@media(max-width:860px){main{grid-template-columns:1fr;padding:8px 14px 40px}header{padding:20px 14px 10px}h1{font-size:2rem}}
+section{background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px;padding:18px}
+h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
+label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
+input{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+input:focus{outline:2px solid var(--cy);outline-offset:1px}
+.two{display:flex;gap:10px}.two>div{flex:1}
+.stats{display:flex;gap:12px 32px;flex-wrap:wrap;margin-bottom:18px}
+.stat b{display:block;font-size:1.9rem;line-height:1.1;color:var(--cy);font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:.85rem}
+.row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--vi);border-radius:12px;padding:9px 14px;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.row .n{width:40px;font-size:1.6rem;font-weight:800;font-style:italic;color:var(--vi);line-height:1}
+.row .c{flex:1 1 90px}.row .c small{display:block;color:var(--mute);font-size:.78rem}
+.row .c b{font-size:1.1rem}
+.hint{color:var(--mute);font-size:.9rem;margin-top:14px}
+.err{color:#ff8a8a;padding:10px 0}
+.empty{color:var(--mute);padding:14px 0}
+button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;margin-top:16px}
+button:hover{border-color:var(--cy)}
+.row.bad{border-left-color:#ff6b6b}.row.bad .n{color:#ff6b6b}.flag{flex-basis:100%;color:#ff8a8a;font-size:.85rem}
+@media print{@page{size:A4 portrait;margin:14mm}body{background:#fff;color:#111}.cfg,button,.stripe,.back{display:none!important}h1{background:none;color:#111;-webkit-text-fill-color:#111}main{display:block;padding:0}section{background:none;border:0;padding:0}.stat b{color:#111}.row{background:#fff;border-color:#bbb;border-left-color:#555;break-inside:avoid}.row .n{color:#111}}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<header>
+  <h1>Sprit-Rechner</h1>
+  <div class="sub">ChaosRacing – Team Germany</div>
+  <div class="stripe"></div>
+</header>
+<main>
+  <section class="cfg" aria-label="Eingaben">
+    <h2>Rennen</h2>
+    <button id="imp" type="button" style="margin:8px 0 0">Aus Stintplaner übernehmen</button>
+    <div class="two">
+      <div><label for="h">Stunden</label><input id="h" type="number" min="0" max="48"></div>
+      <div><label for="m">Minuten</label><input id="m" type="number" min="0" max="59"></div>
+    </div>
+    <label for="lap">Rundenzeit (m:ss.x)</label>
+    <input id="lap" placeholder="1:48.5">
+    <label for="stint">Stint-Zeit (Minuten)</label>
+    <input id="stint" type="number" min="0" placeholder="leer = automatisch nach Tank">
+    <h2 style="margin-top:22px">Auto</h2>
+    <label for="cons">Verbrauch pro Runde (Liter)</label>
+    <input id="cons" type="number" step="0.01" min="0">
+    <label for="tank">Tankgröße (Liter)</label>
+    <input id="tank" type="number" step="1" min="0">
+    <label for="res">Reserve (Runden)</label>
+    <input id="res" type="number" step="1" min="0">
+  </section>
+  <section aria-label="Ergebnis">
+    <div class="stats" id="stats"></div>
+    <div id="plan"></div>
+    <p class="hint" id="hint"></p>
+    <button type="button" onclick="window.print()">Drucken / PDF</button>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id),KEY="crtg-sprit-v1",KEYS=["h","m","lap","cons","tank","res","stint"];
+let S={h:3,m:0,lap:"1:48.5",cons:3.1,tank:120,res:1,stint:40};
+try{const x=JSON.parse(localStorage.getItem(KEY));if(x)S=Object.assign(S,x)}catch(e){}
+const lapSec=v=>{v=String(v).trim().replace(",",".");const m=v.match(/^(\d+):(\d+(?:\.\d+)?)$/);return m?+m[1]*60+ +m[2]:(/^\d+(\.\d+)?$/.test(v)?+v:0)};
+const hm=t=>Math.floor(t/60)+":"+String(Math.round(t%60)).padStart(2,"0");
+const L=n=>(Math.round(n*10)/10).toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});
+const stat=(b,l)=>`<div class="stat"><b>${b}</b><span>${l}</span></div>`;
+function calc(){
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  const Tm=(+S.h||0)*60+(+S.m||0),lap=lapSec(S.lap),c=+S.cons,tank=+S.tank,res=Math.max(0,+S.res||0),sm=+S.stint||0;
+  $("hint").textContent="";
+  if(!(Tm>0&&lap>0&&c>0&&tank>0)){$("stats").innerHTML="";$("plan").innerHTML='<p class="empty">Trage Renndauer, Rundenzeit, Verbrauch und Tankgröße ein.</p>';return}
+  const maxLaps=Math.floor(tank/c)-res;
+  if(maxLaps<1){$("stats").innerHTML="";$("plan").innerHTML='<p class="err">Der Tank reicht mit dieser Reserve nicht für eine ganze Runde.</p>';return}
+  const laps=Math.ceil(Tm*60/lap),list=[];
+  if(sm>0){
+    const cnt=Math.ceil(Tm/sm);
+    for(let i=0;i<cnt;i++){const s=i*sm,e=Math.min(Tm,(i+1)*sm);list.push({s,e,n:Math.ceil((e-s)*60/lap)})}
+  }else{
+    const cnt=Math.ceil(laps/maxLaps),base=Math.floor(laps/cnt),extra=laps%cnt;let done=0;
+    for(let i=0;i<cnt;i++){const n=base+(i<extra?1:0);list.push({s:done*lap/60,e:Math.min(Tm,(done+n)*lap/60),n});done+=n}
+  }
+  const bad=list.filter(x=>x.n>maxLaps).length;
+  $("stats").innerHTML=stat(list.length,"Stints")+stat(list.length-1,"Boxenstopps")+stat(laps,"Runden (ca.)")+stat(L((laps+res)*c)+" L","Sprit gesamt inkl. Reserve")+stat(maxLaps,"Max. Runden pro Tank");
+  $("plan").innerHTML=list.map((x,i)=>{
+    const b=x.n>maxLaps,fill=Math.min(tank,(x.n+res)*c);
+    return `<div class="row${b?" bad":""}"><span class="n">${i+1}</span><span class="c"><small>Zeit</small><b>${hm(x.s)} – ${hm(x.e)}</b></span><span class="c"><small>Runden (ca.)</small><b>${x.n}</b></span><span class="c"><small>Tankinhalt ${i?"nach dem Stopp":"beim Start"}</small><b>${L(fill)} L</b></span>${i?`<span class="c"><small>Nachtanken</small><b>${L(x.n*c)} L</b></span>`:""}${b?`<span class="flag">Tank reicht hier nicht: höchstens ${maxLaps} Runden pro Füllung. Plane einen zusätzlichen Spritstopp oder einen kürzeren Stint.</span>`:""}</div>`;
+  }).join("");
+  $("hint").textContent=(bad?bad+" Stint"+(bad>1?"s sind":" ist")+" für eine Tankfüllung zu lang. ":"")+"Richtwerte: „Nachtanken“ geht davon aus, dass du mit der Reserve in die Box kommst. Boxenzeit und Tankdauer sind nicht eingerechnet. Das Rennen endet meist eine Runde nach Ablauf der Zeit. Verbrauch im Training über mehrere Runden messen.";
+}
+function sync(){KEYS.forEach(k=>$(k).value=S[k])}
+KEYS.forEach(k=>{$(k).oninput=e=>{S[k]=e.target.value;calc()}});
+$("imp").onclick=()=>{
+  const b=$("imp"),old="Aus Stintplaner übernehmen";
+  try{
+    const p=JSON.parse(localStorage.getItem("crtg-stintplan-v1"));
+    if(!p)throw 0;
+    S.h=p.h;S.m=p.m;S.stint=p.stint;sync();calc();b.textContent="Übernommen ✓";
+  }catch(e){b.textContent="Kein Stintplan gespeichert"}
+  setTimeout(()=>b.textContent=old,2200);
+};
+sync();calc();
+if(location.hash==="#import")$("imp").onclick();
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>
