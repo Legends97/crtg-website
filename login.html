@@ -28,7 +28,7 @@ p{color:var(--mute);margin:0 0 22px}
 </main>
 <script src="nav.js"></script>
 <script>
-const E={unknown:"Du bist noch nicht freigeschaltet. Melde dich bei einem Admin.",inactive:"Dein Konto ist deaktiviert. Melde dich bei einem Admin.",state:"Die Anmeldung ist abgelaufen. Bitte versuche es noch einmal.",discord:"Discord hat die Anmeldung abgelehnt oder ist gerade nicht erreichbar."};
+const E={guild:"Du bist nicht Mitglied auf unserem Discord-Server.",inactive:"Dein Konto ist deaktiviert. Melde dich bei einem Admin.",state:"Die Anmeldung ist abgelaufen. Bitte versuche es noch einmal.",discord:"Discord hat die Anmeldung abgelehnt oder ist gerade nicht erreichbar."};
 document.getElementById("msg").textContent=E[new URLSearchParams(location.search).get("error")]||"";
 </script>
 </body>

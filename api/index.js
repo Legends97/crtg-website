@@ -76,12 +76,13 @@ async function ensureFree(field, val, exceptId) {
   if (r.rows[0]) throw new HttpErr(409, `${field === "discord_id" ? "Diese Discord-ID" : "Diese Steam-ID"} ist schon mit „${r.rows[0].display_name}“ verknüpft.`);
 }
 
-// Discord-Login (OAuth2, nur Scope "identify")
+// Discord-Login (OAuth2): jedes Mitglied des Discord-Servers DISCORD_GUILD_ID darf sich anmelden,
+// Admin-Rechte gibt es nur für die festen IDs in ADMIN_DISCORD_IDS.
 const redirectUri = req => (process.env.BASE_URL || "https://" + req.headers.host).replace(/\/$/, "") + "/api/auth/callback";
 function login(req, res) {
   const state = crypto.randomBytes(16).toString("hex");
   setCookie(res, "crtg_state", state, 600);
-  const p = new URLSearchParams({ client_id: process.env.DISCORD_CLIENT_ID, response_type: "code", redirect_uri: redirectUri(req), scope: "identify", state });
+  const p = new URLSearchParams({ client_id: process.env.DISCORD_CLIENT_ID, response_type: "code", redirect_uri: redirectUri(req), scope: "identify guilds", state });
   redirect(res, "https://discord.com/oauth2/authorize?" + p);
 }
 async function callback(req, res, url) {
@@ -93,13 +94,20 @@ async function callback(req, res, url) {
     body: new URLSearchParams({ client_id: process.env.DISCORD_CLIENT_ID, client_secret: process.env.DISCORD_CLIENT_SECRET, grant_type: "authorization_code", code, redirect_uri: redirectUri(req) }),
   });
   if (!tr.ok) return redirect(res, "/login.html?error=discord");
-  const ur = await fetch("https://discord.com/api/users/@me", { headers: { Authorization: "Bearer " + (await tr.json()).access_token } });
+  const { access_token } = await tr.json();
+  const auth = { headers: { Authorization: "Bearer " + access_token } };
+  const ur = await fetch("https://discord.com/api/users/@me", auth);
   if (!ur.ok) return redirect(res, "/login.html?error=discord");
   const d = await ur.json();           // Die Discord-ID kommt nur von Discord, nie aus einem Formular
-  let u = (await q("select * from users where discord_id=$1", [d.id])).rows[0];
+  const gr = await fetch("https://discord.com/api/users/@me/guilds", auth);
+  if (!gr.ok) return redirect(res, "/login.html?error=discord");
+  const guilds = await gr.json();
+  if (!guilds.some(g => g.id === process.env.DISCORD_GUILD_ID)) return redirect(res, "/login.html?error=guild");
   const admins = (process.env.ADMIN_DISCORD_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
-  if (!u && admins.includes(d.id)) u = (await q("insert into users(display_name,discord_id,role) values($1,$2,'admin') returning *", [d.global_name || d.username, d.id])).rows[0];
-  if (!u) return redirect(res, "/login.html?error=unknown");
+  const role = admins.includes(d.id) ? "admin" : "driver";
+  let u = (await q("select * from users where discord_id=$1", [d.id])).rows[0];
+  if (!u) u = (await q("insert into users(display_name,discord_id,role) values($1,$2,$3) returning *", [d.global_name || d.username, d.id, role])).rows[0];
+  else if (u.role !== role) u = (await q("update users set role=$1 where id=$2 returning *", [role, u.id])).rows[0];
   if (!u.active) return redirect(res, "/login.html?error=inactive");
   setCookie(res, "crtg_session", makeSession(u.id), 7 * 86400);
   redirect(res, "/");
