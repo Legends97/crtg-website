@@ -214,6 +214,11 @@ export default async function handler(req, res) {
     if (path === "/api/me") return user ? json(res, 200, pub(user)) : json(res, 401, { error: "Nicht angemeldet." });
     if (path === "/api/auth/steam") return steamLogin(req, res, user);
     if (path === "/api/auth/steam/callback") return await steamCallback(req, res, url, user);
+    if (path === "/api/drivers") {
+      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
+      const r = await q("select display_name,car_number from users where active order by car_number nulls last, lower(display_name)");
+      return json(res, 200, r.rows);
+    }
     const am = path.match(/^\/api\/admin\/users(?:\/(\d+))?$/);
     if (am) {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");
