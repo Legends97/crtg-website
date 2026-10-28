@@ -14,7 +14,8 @@ const init = () => (ready ||= q(`create table if not exists users (
   timezone text not null default 'Europe/Berlin',
   active boolean not null default true,
   created_at timestamptz not null default now()
-)`).catch(e => { ready = null; throw e; }));
+)`).then(() => q(`alter table users add column if not exists car_number integer`))
+  .catch(e => { ready = null; throw e; }));
 
 class HttpErr extends Error { constructor(status, message) { super(message); this.status = status; } }
 const json = (res, status, body) => {
@@ -49,7 +50,7 @@ async function currentUser(req) {
   const s = readSession(req);
   return s ? (await q("select * from users where id=$1 and active", [s.uid])).rows[0] || null : null;
 }
-const pub = u => ({ id: u.id, display_name: u.display_name, role: u.role, discord_id: u.discord_id, steam_id: u.steam_id });
+const pub = u => ({ id: u.id, display_name: u.display_name, role: u.role, discord_id: u.discord_id, steam_id: u.steam_id, car_number: u.car_number });
 
 // Eingaben prüfen und vereinheitlichen
 const normDiscord = v => {
@@ -63,17 +64,22 @@ const normSteam = v => {
   if (!m) throw new HttpErr(400, "Steam-ID: 17 Ziffern, beginnt mit 7656119 (mit oder ohne S).");
   return "S" + m[1];
 };
+const normNumber = v => {
+  v = String(v ?? "").trim(); if (!v) return null;
+  if (!/^\d{1,3}$/.test(v)) throw new HttpErr(400, "Startnummer: 1 bis 3 Ziffern (0–999).");
+  return +v;
+};
 function clean(o) {
   const name = String(o.display_name ?? "").trim();
   if (!name || name.length > 60) throw new HttpErr(400, "Anzeigename fehlt oder ist zu lang (max. 60 Zeichen).");
   const role = o.role ?? "driver";
   if (!["admin", "driver"].includes(role)) throw new HttpErr(400, "Ungültige Rolle.");
-  return { display_name: name, discord_id: normDiscord(o.discord_id), steam_id: normSteam(o.steam_id), role, active: o.active !== false };
+  return { display_name: name, discord_id: normDiscord(o.discord_id), steam_id: normSteam(o.steam_id), car_number: normNumber(o.car_number), role, active: o.active !== false };
 }
 async function ensureFree(field, val, exceptId) {
   if (!val) return;
   const r = await q(`select display_name from users where ${field}=$1 and ($2::int is null or id<>$2) limit 1`, [val, exceptId ?? null]);
-  if (r.rows[0]) throw new HttpErr(409, `${field === "discord_id" ? "Diese Discord-ID" : "Diese Steam-ID"} ist schon mit „${r.rows[0].display_name}“ verknüpft.`);
+  if (r.rows[0]) throw new HttpErr(409, `${field === "discord_id" ? "Diese Discord-ID" : field === "steam_id" ? "Diese Steam-ID" : "Diese Startnummer"} ist schon mit „${r.rows[0].display_name}“ vergeben.`);
 }
 
 // Discord-Login (OAuth2): jedes Mitglied des Discord-Servers DISCORD_GUILD_ID darf sich anmelden,
@@ -148,7 +154,7 @@ async function adminUsers(req, res, url, id) {
   const m = req.method, b = req.body || {};
   if (m === "GET" && id === undefined) {
     const s = (url.searchParams.get("q") || "").trim();
-    const users = (await q(`select id,display_name,discord_id,steam_id,role,active,created_at from users
+    const users = (await q(`select id,display_name,discord_id,steam_id,car_number,role,active,created_at from users
       where $1='' or display_name ilike '%'||$1||'%' or discord_id like '%'||$1||'%' or steam_id ilike '%'||$1||'%'
       order by active desc, lower(display_name)`, [s])).rows;
     const w = (await q("select count(*) filter (where discord_id is null) nd, count(*) filter (where steam_id is null) ns from users where active")).rows[0];
@@ -156,8 +162,8 @@ async function adminUsers(req, res, url, id) {
   }
   if (m === "POST" && id === undefined) {
     const v = clean(b);
-    await ensureFree("discord_id", v.discord_id); await ensureFree("steam_id", v.steam_id);
-    const r = await q("insert into users(display_name,discord_id,steam_id,role,active) values($1,$2,$3,$4,$5) returning *", [v.display_name, v.discord_id, v.steam_id, v.role, v.active]);
+    await ensureFree("discord_id", v.discord_id); await ensureFree("steam_id", v.steam_id); await ensureFree("car_number", v.car_number);
+    const r = await q("insert into users(display_name,discord_id,steam_id,car_number,role,active) values($1,$2,$3,$4,$5,$6) returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.role, v.active]);
     return json(res, 201, r.rows[0]);
   }
   if (m === "PATCH" && id !== undefined) {
@@ -168,8 +174,8 @@ async function adminUsers(req, res, url, id) {
       const n = (await q("select count(*) from users where role='admin' and active and id<>$1", [id])).rows[0].count;
       if (+n === 0) throw new HttpErr(409, "Es muss mindestens ein aktiver Admin bleiben.");
     }
-    await ensureFree("discord_id", v.discord_id, id); await ensureFree("steam_id", v.steam_id, id);
-    const r = await q("update users set display_name=$1,discord_id=$2,steam_id=$3,role=$4,active=$5 where id=$6 returning *", [v.display_name, v.discord_id, v.steam_id, v.role, v.active, id]);
+    await ensureFree("discord_id", v.discord_id, id); await ensureFree("steam_id", v.steam_id, id); await ensureFree("car_number", v.car_number, id);
+    const r = await q("update users set display_name=$1,discord_id=$2,steam_id=$3,car_number=$4,role=$5,active=$6 where id=$7 returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.role, v.active, id]);
     return json(res, 200, r.rows[0]);
   }
   throw new HttpErr(404, "Nicht gefunden.");
@@ -198,6 +204,13 @@ export default async function handler(req, res) {
     if (mutating && !/application\/json/.test(req.headers["content-type"] || "")) throw new HttpErr(415, "JSON erwartet.");
     if (path === "/api/auth/logout" && req.method === "POST") { setCookie(res, "crtg_session", "", 0); return json(res, 200, { ok: true }); }
     const user = await currentUser(req);
+    if (path === "/api/me" && req.method === "PATCH") {
+      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
+      const n = normNumber((req.body || {}).car_number);
+      await ensureFree("car_number", n, user.id);
+      const r = await q("update users set car_number=$1 where id=$2 returning *", [n, user.id]);
+      return json(res, 200, pub(r.rows[0]));
+    }
     if (path === "/api/me") return user ? json(res, 200, pub(user)) : json(res, 401, { error: "Nicht angemeldet." });
     if (path === "/api/auth/steam") return steamLogin(req, res, user);
     if (path === "/api/auth/steam/callback") return await steamCallback(req, res, url, user);

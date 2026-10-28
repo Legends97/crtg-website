@@ -40,13 +40,14 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
     <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
     <div class="warn" id="warn" role="status"></div>
     <div class="bar"><input id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="btn go" id="new" type="button">Fahrer anlegen</button></div>
-    <div class="tw"><table><thead><tr><th>Name</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+    <div class="tw"><table><thead><tr><th>Name</th><th>#</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
   </div>
 </main>
 <dialog id="dlg">
   <form id="f">
     <h2 id="ttl" style="margin:0">Fahrer</h2>
     <label for="fn">Anzeigename</label><input id="fn" required maxlength="60">
+    <label for="fnr">Startnummer</label><input id="fnr" inputmode="numeric" placeholder="z. B. 12">
     <label for="fd">Discord-ID</label><input id="fd" inputmode="numeric" placeholder="17 bis 19 Ziffern">
     <label for="fs">Steam-ID (SteamID64)</label><input id="fs" placeholder="76561198000000000">
     <div class="hint">Mit oder ohne S, sie wird automatisch auf S + 17 Ziffern gesetzt. Ein leeres Feld löst die Verknüpfung.</div>
@@ -78,6 +79,7 @@ async function load(){
     list.forEach(u=>{
       const tr=document.createElement("tr");if(!u.active)tr.className="off";
       cell(tr,u.display_name);
+      cell(tr,u.car_number!=null?"#"+u.car_number:"–","mono");
       cell(tr,u.discord_id||"fehlt",u.discord_id?"mono":"miss");
       cell(tr,u.steam_id||"fehlt",u.steam_id?"mono":"miss");
       const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Admin":"Fahrer";r.appendChild(tag);
@@ -97,7 +99,7 @@ async function load(){
 function openEdit(u){
   editId=u?u.id:null;$("err").textContent="";
   $("ttl").textContent=u?"Fahrer bearbeiten":"Fahrer anlegen";
-  $("fn").value=u?u.display_name:"";$("fd").value=u?.discord_id||"";$("fs").value=u?.steam_id||"";
+  $("fn").value=u?u.display_name:"";$("fnr").value=u?.car_number??"";$("fd").value=u?.discord_id||"";$("fs").value=u?.steam_id||"";
   $("fr").value=u?u.role:"driver";$("fa").checked=u?u.active:true;$("far").hidden=!u;
   $("dlg").showModal();
 }
@@ -107,7 +109,7 @@ $("cancel").onclick=()=>$("dlg").close();
 $("q").oninput=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
 $("f").onsubmit=async e=>{
   e.preventDefault();$("err").textContent="";
-  const body={display_name:$("fn").value,discord_id:$("fd").value,steam_id:$("fs").value,role:$("fr").value};
+  const body={display_name:$("fn").value,car_number:$("fnr").value,discord_id:$("fd").value,steam_id:$("fs").value,role:$("fr").value};
   try{
     if(editId){body.active=$("fa").checked;await api("/api/admin/users/"+editId,{method:"PATCH",body:JSON.stringify(body)})}
     else await api("/api/admin/users",{method:"POST",body:JSON.stringify(body)});
