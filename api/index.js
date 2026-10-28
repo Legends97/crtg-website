@@ -436,6 +436,15 @@ async function adminPatchEvent(req, res, id, user) {
   else if (fields.signup_closes_offset_minutes != null)
     fields.signup_closes_at = new Date((fields.start_at || cur.start_at).getTime() - fields.signup_closes_offset_minutes * 60000);
 
+  // start_at shifted without an explicit window/offset override in this request:
+  // re-derive the absolute window from the event's STORED offsets (if it has any).
+  if (fields.start_at !== undefined) {
+    if (b.signup_opens_at === undefined && b.signup_opens_offset_minutes === undefined && cur.signup_opens_offset_minutes != null)
+      fields.signup_opens_at = new Date(fields.start_at.getTime() - cur.signup_opens_offset_minutes * 60000);
+    if (b.signup_closes_at === undefined && b.signup_closes_offset_minutes === undefined && cur.signup_closes_offset_minutes != null)
+      fields.signup_closes_at = new Date(fields.start_at.getTime() - cur.signup_closes_offset_minutes * 60000);
+  }
+
   if (!Object.keys(fields).length) throw new HttpErr(400, "Keine Felder zum Ändern.");
 
   const cols = Object.keys(fields);
