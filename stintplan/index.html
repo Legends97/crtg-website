@@ -211,7 +211,8 @@ function renderPlan(){
   $("ends").innerHTML=`<span>Start ${clock(0)}</span><span>Ziel ${clock(total)}</span>`;
   $("plan").innerHTML=st.map((x,i)=>{
     const a=S.assign[i];
-    return `<div class="stint" style="--c:${col(a)}"><span class="n">${i+1}</span><span class="who"><span class="dot no-print"></span><select class="no-print" data-s="${i}" aria-label="Fahrer Stint ${i+1}">${S.drivers.map((_,j)=>`<option value="${j}"${j===a?" selected":""}>${esc(name(j))}</option>`).join("")}</select><span class="pr">${esc(name(a))}</span></span><span class="t">${clock(x.s)} – ${clock(x.e)}</span><span class="d">${Math.round(x.e-x.s)} min</span>${lap?`<span class="l">ca. ${Math.round((x.e-x.s)*60/lap)} Rd.</span>`:""}</div>`;
+    const cur=name(a),opts=[...new Set([...PLACEHOLDERS,...TEAM,cur])];
+    return `<div class="stint" style="--c:${col(a)}"><span class="n">${i+1}</span><span class="who"><span class="dot no-print"></span><select class="no-print" data-s="${i}" aria-label="Fahrer Stint ${i+1}">${opts.map(o=>`<option${o===cur?" selected":""}>${esc(o)}</option>`).join("")}</select><span class="pr">${esc(cur)}</span></span><span class="t">${clock(x.s)} – ${clock(x.e)}</span><span class="d">${Math.round(x.e-x.s)} min</span>${lap?`<span class="l">ca. ${Math.round((x.e-x.s)*60/lap)} Rd.</span>`:""}</div>`;
   }).join("");
   $("toth").textContent="Fahrzeit pro Fahrer";
   $("tot").innerHTML=sums().map((a,i)=>`<div class="chip" style="--c:${col(i)}"><span class="dot"></span><b>${esc(name(i))}</b><small>${a.n} Stint${a.n===1?"":"s"} · ${dur(a.t)} h</small><i style="width:${a.t/total*100}%"></i></div>`).join("");
@@ -367,7 +368,12 @@ $("drivers").onclick=e=>{
   S.assign=S.assign.map(v=>v===+i?-1:v>+i?v-1:v);
   renderDrivers();renderPlan();
 };
-$("plan").onchange=e=>{const i=e.target.dataset.s;if(i!==undefined){S.assign[i]=+e.target.value;renderPlan()}};
+$("plan").onchange=e=>{
+  const i=e.target.dataset.s;if(i===undefined)return;
+  const v=e.target.value;let j=S.drivers.indexOf(v);
+  if(j<0){S.drivers.push(v);j=S.drivers.length-1;renderDrivers()}
+  S.assign[i]=j;renderPlan();
+};
 $("reset").onclick=()=>{S.assign=[];renderPlan()};
 $("print").onclick=()=>window.print();
 $("discord").onclick=openDiscord;
