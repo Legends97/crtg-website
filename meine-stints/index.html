@@ -14,9 +14,13 @@ h1{margin:0;font-size:2.2rem;font-style:italic;font-weight:800;background:linear
 .sub{color:var(--mute);margin-top:2px}
 .stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
 main{max-width:860px;margin:auto;padding:8px 24px 48px}
-.event{margin-bottom:22px}
-.event h2{margin:0 0 8px;font-size:1.1rem;font-weight:700}
+.event{margin-bottom:28px}
+.event h2{margin:0 0 10px;font-size:1.1rem;font-weight:700}
 .event h2 .trk{color:var(--mute);font-weight:400;font-size:.9rem}
+.bar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}
+.seg{flex:1;display:flex;align-items:center;justify-content:center;background:var(--panel2);border-right:2px solid var(--bg);font-size:.72rem;color:var(--mute);overflow:hidden;white-space:nowrap;padding:0 4px;min-width:0}
+.seg:last-child{border-right:0}
+.seg.mine{background:var(--cy);color:#06131c;font-weight:700}
 .stint{display:flex;align-items:center;gap:16px;background:rgba(19,24,48,.88);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;margin-bottom:10px}
 .stint .n{width:36px;font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
 .stint .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:220px}
@@ -50,29 +54,42 @@ function tagOf(s,now){
 }
 function render(){
   const box=document.getElementById("list");
+  let myDiscordId=null;
   fetch("../api/me",{credentials:"same-origin"}).then(r=>{
     if(r.status===401)return null;
     if(!r.ok)return Promise.reject();
     return r.json();
   }).then(me=>{
     if(!me){box.innerHTML='<p class="empty">Bitte anmelden.</p>';return null;}
+    myDiscordId=me.discord_id;
     return fetch("../api/v1/drivers/"+me.discord_id+"/stints",{credentials:"same-origin"}).then(r=>r.ok?r.json():Promise.reject());
   }).then(data=>{
-    if(!data)return;
+    if(!data)return null;
     const stints=data.stints||[];
     if(!stints.length){
       box.innerHTML='<p class="empty">Keine kommenden Stints. <a class="back" href="../stintplan/">Zum Stintplaner →</a></p>';
-      return;
+      return null;
     }
-    const now=new Date();
     const groups=[], byId=new Map();
     stints.forEach(s=>{
       let g=byId.get(s.event.id);
       if(!g){g={event:s.event,stints:[]};byId.set(s.event.id,g);groups.push(g);}
       g.stints.push(s);
     });
-    box.innerHTML=groups.map((g,gi)=>{
+    return Promise.all(groups.map(g=>
+      fetch("../api/v1/events/"+g.event.id,{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null)
+    )).then(details=>({groups,details}));
+  }).then(res=>{
+    if(!res)return;
+    const now=new Date();
+    box.innerHTML=res.groups.map((g,gi)=>{
       const c=COLORS[gi%COLORS.length];
+      const full=res.details[gi];
+      const bar=full&&full.stints&&full.stints.length?'<div class="bar">'+full.stints.map(s=>{
+        const mine=s.assigned_user&&s.assigned_user.discord_id===myDiscordId;
+        const who=s.assigned_user?esc(s.assigned_user.display_name):"frei";
+        return '<div class="seg'+(mine?" mine":"")+'" title="'+esc(fmt(s.start_at))+' – '+esc(fmt(s.end_at))+' · '+who+'">'+who+'</div>';
+      }).join("")+'</div>':"";
       const rows=g.stints.map(s=>{
         const tag=tagOf(s,now);
         const info=[];
@@ -83,7 +100,7 @@ function render(){
           +'<span class="track">'+esc(info.join(" · "))+'</span>'
           +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");
-      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'+rows+'</div>';
+      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'+bar+rows+'</div>';
     }).join("");
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }
