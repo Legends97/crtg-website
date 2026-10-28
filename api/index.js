@@ -113,6 +113,36 @@ async function callback(req, res, url) {
   redirect(res, "/");
 }
 
+// Steam-Verknüpfung (OpenID 2.0, kein API-Key nötig): hängt die SteamID64 an den eingeloggten Nutzer
+function steamLogin(req, res, user) {
+  if (!user) return redirect(res, "/login.html");
+  const base = (process.env.BASE_URL || "https://" + req.headers.host).replace(/\/$/, "");
+  const p = new URLSearchParams({
+    "openid.ns": "http://specs.openid.net/auth/2.0",
+    "openid.mode": "checkid_setup",
+    "openid.return_to": base + "/api/auth/steam/callback",
+    "openid.realm": base,
+    "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
+    "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
+  });
+  redirect(res, "https://steamcommunity.com/openid/login?" + p);
+}
+async function steamCallback(req, res, url, user) {
+  if (!user) return redirect(res, "/login.html");
+  const p = new URLSearchParams(url.search);
+  p.set("openid.mode", "check_authentication");
+  const vr = await fetch("https://steamcommunity.com/openid/login", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: p,
+  });
+  const claimed = url.searchParams.get("openid.claimed_id") || "";
+  const m = claimed.match(/\/id\/(\d{17})$/);
+  if (!vr.ok || !/is_valid\s*:\s*true/.test(await vr.text()) || !m) return redirect(res, "/?error=steam");
+  const steamId = normSteam(m[1]);
+  await ensureFree("steam_id", steamId, user.id);
+  await q("update users set steam_id=$1 where id=$2", [steamId, user.id]);
+  redirect(res, "/");
+}
+
 // Admin: Fahrer verwalten
 async function adminUsers(req, res, url, id) {
   const m = req.method, b = req.body || {};
@@ -169,6 +199,8 @@ export default async function handler(req, res) {
     if (path === "/api/auth/logout" && req.method === "POST") { setCookie(res, "crtg_session", "", 0); return json(res, 200, { ok: true }); }
     const user = await currentUser(req);
     if (path === "/api/me") return user ? json(res, 200, pub(user)) : json(res, 401, { error: "Nicht angemeldet." });
+    if (path === "/api/auth/steam") return steamLogin(req, res, user);
+    if (path === "/api/auth/steam/callback") return await steamCallback(req, res, url, user);
     const am = path.match(/^\/api\/admin\/users(?:\/(\d+))?$/);
     if (am) {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");

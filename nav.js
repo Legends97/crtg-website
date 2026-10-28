@@ -36,11 +36,12 @@
     document.documentElement.classList.add("ready");
     var box=document.createElement("div");box.className="acct";
     if(u.role==="admin")nav.querySelector(".tabs").insertAdjacentHTML("beforeend",tab(admin));
-    box.innerHTML='<span class="who"></span><button type="button" class="out">Abmelden</button>';
+    box.innerHTML=(u.steam_id?"":'<a class="login" href="'+base+'api/auth/steam">Steam verknüpfen</a>')+'<span class="who"></span><button type="button" class="out">Abmelden</button>';
     box.querySelector(".who").textContent=u.display_name;
     box.querySelector(".out").onclick=function(){
       fetch(base+"api/auth/logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){location.href=base});
     };
     nav.appendChild(box);
+    if(new URLSearchParams(location.search).get("error")==="steam"){alert("Diese Steam-ID ist schon mit einem anderen Konto verknüpft.");history.replaceState(null,"",location.pathname);}
   });
 })();
