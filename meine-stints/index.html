@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meine kommenden Stints</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e1b;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
+header{max-width:860px;margin:auto;padding:26px 24px 14px}
+h1{margin:0;font-size:2.2rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.sub{color:var(--mute);margin-top:2px}
+.stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
+main{max-width:860px;margin:auto;padding:8px 24px 48px}
+.stint{display:flex;align-items:center;gap:16px;background:rgba(19,24,48,.88);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.stint .n{width:36px;font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
+.stint .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:140px}
+.stint .track{flex:1;color:var(--mute);min-width:0}
+.tag{font-size:.75rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mute);white-space:nowrap}
+.tag.now{color:var(--cy);border-color:var(--cy)}
+.empty{color:var(--mute);padding:30px 0}
+.back{color:var(--cy);text-decoration:none}
+.back:hover{text-decoration:underline}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<header>
+  <h1>Meine kommenden Stints</h1>
+  <div class="sub">ChaosRacing – Team Germany</div>
+  <div class="stripe"></div>
+</header>
+<main>
+  <div id="list"><p class="empty">Lädt …</p></div>
+</main>
+<script>
+const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
+const pad=n=>String(n).padStart(2,"0");
+const dur=min=>Math.floor(min/60)+":"+pad(Math.round(min%60));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function stints(S){
+  const total=(+S.h||0)*60+(+S.m||0),len=+S.stint||0;
+  if(total<=0||len<=0)return [];
+  const n=Math.ceil(total/len),a=[];
+  for(let i=0;i<n;i++)a.push({s:i*len,e:Math.min(total,(i+1)*len)});
+  return a;
+}
+function clock(S,off){
+  if(!S.start)return dur(off);
+  const [hh,mm]=S.start.split(":").map(Number),t=(hh*60+mm+off)%1440;
+  return pad(Math.floor(t/60))+":"+pad(t%60);
+}
+function nowOffset(S){
+  if(!S.start)return null;
+  const [hh,mm]=S.start.split(":").map(Number);
+  const now=new Date(),start=hh*60+mm,cur=now.getHours()*60+now.getMinutes();
+  let off=cur-start; if(off<0)off+=1440;
+  return off;
+}
+function render(){
+  const box=document.getElementById("list");
+  Promise.all([
+    fetch("../api/plan",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null),
+    fetch("../api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null),
+  ]).then(([S,u])=>{
+    if(!u){box.innerHTML='<p class="empty">Bitte anmelden.</p>';return;}
+    if(!S||!Array.isArray(S.drivers)||!S.drivers.length){
+      box.innerHTML='<p class="empty">Kein Stintplan gespeichert. <a class="back" href="../stintplan/">Jetzt einen Plan anlegen →</a></p>';
+      return;
+    }
+    const label=u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name;
+    const st=stints(S).map((x,i)=>({...x,i}));
+    const mine=st.filter(x=>{
+      const d=S.drivers[S.assign[x.i]]||"";
+      return d===label||d===u.display_name;
+    });
+    if(!mine.length){
+      box.innerHTML='<p class="empty">Du bist in „'+esc(S.track||"diesem Plan")+'" aktuell keinem Stint zugeteilt.</p>';
+      return;
+    }
+    const off=nowOffset(S);
+    box.innerHTML=mine.map(x=>{
+      const past=off!=null&&x.e<=off, now=off!=null&&x.s<=off&&off<x.e;
+      const c=COLORS[S.assign[x.i]%COLORS.length];
+      const tag=now?'<span class="tag now">läuft</span>':past?'<span class="tag">vorbei</span>':'<span class="tag">kommend</span>';
+      return '<div class="stint" style="--c:'+c+'"><span class="n">'+(x.i+1)+'</span><span class="t">'+clock(S,x.s)+' – '+clock(S,x.e)+'</span><span class="track">'+esc(S.track||"")+'</span>'+tag+'</div>';
+    }).join("");
+  }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
+}
+render();
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>

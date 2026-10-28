@@ -78,6 +78,10 @@ section{background:none;border:0;padding:0}
 .tot{display:block}.chip{background:#fff;border:1px solid #bbb;border-radius:8px;margin-bottom:6px;break-inside:avoid}
 .chip small{color:#444}
 }
+body.ro .cfg{display:none}
+body.ro main{grid-template-columns:1fr}
+body.ro .no-print{display:none}
+body.ro .pr{display:inline}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
@@ -141,16 +145,14 @@ section{background:none;border:0;padding:0}
 const TRACKS=["Barcelona","Brands Hatch","Circuit of the Americas","Donington Park","Hungaroring","Imola","Indianapolis","Kyalami","Laguna Seca","Misano","Monza","Mount Panorama (Bathurst)","Nürburgring","Nürburgring Nordschleife 24H","Oulton Park","Paul Ricard","Red Bull Ring","Silverstone","Snetterton","Spa-Francorchamps","Suzuka","Valencia","Watkins Glen","Zandvoort","Zolder"];
 const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
 const EMO=["🟦","🟪","🟧","🟩","🟥","🟨","🟫","⬜","⬛"];
-const KEY="crtg-stintplan-v1";
 const $=id=>document.getElementById(id);
 let S={track:"Spa-Francorchamps",h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1","Fahrer 2","Fahrer 3"],assign:[]};
-try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.drivers))S=Object.assign(S,x)}catch(e){}
-let TEAM=[];
-fetch("/api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).then(list=>{
-  TEAM=list.map(u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name);
-  renderDrivers();
-}).catch(()=>{});
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let TEAM=[],PL=[],canEdit=false,saveTimer;
+const save=()=>{
+  if(!canEdit)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>fetch("/api/admin/plan",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({track:S.track,h:S.h,m:S.m,stint:S.stint,start:S.start,lap:S.lap,drivers:S.drivers,assign:S.assign})}),400);
+};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
 const dur=min=>Math.floor(min/60)+":"+pad(Math.round(min%60));
@@ -326,37 +328,39 @@ function renderImg(){
     }else cv.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(()=>flash(e.target,"Kopiert ✓"),()=>flash(e.target,"Nicht möglich")));
   };
 }
-const PKEY="crtg-stintplan-plans";
-let PL=[];try{PL=JSON.parse(localStorage.getItem(PKEY))||[]}catch(e){}
-const savePL=()=>{try{localStorage.setItem(PKEY,JSON.stringify(PL))}catch(e){}};
+async function loadPL(sel){
+  PL=await fetch("/api/admin/plans",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+  renderPL(sel);
+}
 function renderPL(sel){
-  $("planSel").innerHTML=PL.length?PL.map((q,i)=>`<option value="${i}">${esc(q.name)}</option>`).join(""):'<option value="">Noch keine Pläne gespeichert</option>';
-  if(sel!==undefined&&sel>=0)$("planSel").value=sel;
+  $("planSel").innerHTML=PL.length?PL.map(q=>`<option value="${q.id}">${esc(q.name)}</option>`).join(""):'<option value="">Noch keine Pläne gespeichert</option>';
+  if(sel!==undefined)$("planSel").value=sel;
   $("loadPlan").disabled=$("delPlan").disabled=!PL.length;
 }
 $("savePlan").onclick=()=>{
   const nm=$("planName").value.trim()||(S.track+" · "+dur((+S.h||0)*60+(+S.m||0))+" h");
-  const data=JSON.parse(JSON.stringify(S)),i=PL.findIndex(q=>q.name===nm);
-  if(i>=0)PL[i].data=data;else PL.push({name:nm,data});
-  savePL();$("planName").value=nm;renderPL(PL.findIndex(q=>q.name===nm));flash($("savePlan"),i>=0?"Aktualisiert ✓":"Gespeichert ✓");
+  fetch("/api/admin/plans",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:nm})})
+    .then(r=>r.json().then(d=>({ok:r.ok,d})))
+    .then(({ok,d})=>{if(!ok)return toast(d.error||"Fehler");$("planName").value=nm;loadPL(d.id);flash($("savePlan"),"Gespeichert ✓")});
 };
 $("loadPlan").onclick=()=>{
-  const q=PL[+$("planSel").value];if(!q)return;
-  S=Object.assign({track:TRACKS[0],h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1"],assign:[]},JSON.parse(JSON.stringify(q.data)));
-  if(!TRACKS.includes(S.track))S.track=TRACKS[0];
-  $("planName").value=q.name;
-  $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
-  renderDrivers();renderPlan();flash($("loadPlan"),"Geladen ✓");
+  const id=$("planSel").value;if(!id)return;
+  fetch("/api/admin/plans/"+id+"/load",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"})
+    .then(r=>r.json().then(d=>({ok:r.ok,d})))
+    .then(({ok,d})=>{
+      if(!ok)return toast(d.error||"Fehler");
+      S=d;if(!TRACKS.includes(S.track))S.track=TRACKS[0];
+      $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
+      renderDrivers();renderPlan();flash($("loadPlan"),"Geladen ✓");
+    });
 };
 $("delPlan").onclick=()=>{
-  const i=+$("planSel").value,q=PL[i];
+  const id=$("planSel").value,q=PL.find(p=>p.id==id);
   if(!q||!confirm("Plan „"+q.name+"“ löschen?"))return;
-  PL.splice(i,1);savePL();renderPL();
+  fetch("/api/admin/plans/"+id,{method:"DELETE",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).then(()=>loadPL());
 };
 
 $("track").innerHTML=TRACKS.map(t=>`<option>${esc(t)}</option>`).join("");
-if(!TRACKS.includes(S.track))S.track=TRACKS[0];
-$("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
 
 $("track").onchange=e=>{S.track=e.target.value;renderPlan()};
 ["h","m","stint","start","lap"].forEach(id=>$(id).oninput=e=>{S[id]=e.target.value;renderPlan()});
@@ -378,8 +382,19 @@ $("reset").onclick=()=>{S.assign=[];renderPlan()};
 $("print").onclick=()=>window.print();
 $("discord").onclick=openDiscord;
 $("close").onclick=()=>$("dlg").close();
-renderPL();
-renderDrivers();renderPlan();
+
+(async function init(){
+  const me=await fetch("/api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  canEdit=!!me&&me.role==="admin";
+  if(!canEdit){document.body.classList.add("ro");$("reset").style.display="none"}
+  const plan=await fetch("/api/plan",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  if(plan)S=plan;
+  if(!TRACKS.includes(S.track))S.track=TRACKS[0];
+  $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
+  TEAM=await fetch("/api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).then(list=>list.map(u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name)).catch(()=>[]);
+  if(canEdit)await loadPL();
+  renderDrivers();renderPlan();
+})();
 </script>
 <script src="../nav.js"></script>
 </body>
