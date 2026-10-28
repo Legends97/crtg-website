@@ -188,9 +188,10 @@ function sums(){
   return r;
 }
 
+const PLACEHOLDERS=["Fahrer 1","Fahrer 2","Fahrer 3"];
 function renderDrivers(){
   $("drivers").innerHTML=S.drivers.map((d,i)=>{
-    const opts=[...new Set([d,...TEAM])].map(o=>`<option${o===d?" selected":""}>${esc(o)}</option>`).join("");
+    const opts=[...new Set([...PLACEHOLDERS,...TEAM,d])].map(o=>`<option${o===d?" selected":""}>${esc(o)}</option>`).join("");
     return `<div class="drv" style="--c:${col(i)}"><span class="dot"></span><select data-d="${i}" aria-label="Fahrer ${i+1}">${opts}</select><button type="button" data-x="${i}" aria-label="Fahrer ${i+1} entfernen">Entfernen</button></div>`;
   }).join("");
 }
