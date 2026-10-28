@@ -598,6 +598,146 @@ async function unclaimStint(res, eventId, number, user) {
   return json(res, 200, r.rows[0]);
 }
 
+// --- Discord-Bot-API (/api/v1/*) ---------------------------------------
+// Timestamps gehen immer explizit über .toISOString() raus (UTC, "Z"), nie lokal formatiert.
+const eventJson = e => ({
+  ...e,
+  start_at: e.start_at.toISOString(),
+  signup_opens_at: e.signup_opens_at ? e.signup_opens_at.toISOString() : null,
+  signup_closes_at: e.signup_closes_at ? e.signup_closes_at.toISOString() : null,
+  created_at: e.created_at ? e.created_at.toISOString() : null,
+  updated_at: e.updated_at ? e.updated_at.toISOString() : null,
+});
+
+async function v1ListEvents(res, url) {
+  const conds = ["status<>'draft'"], params = [];
+  const from = url.searchParams.get("from"), to = url.searchParams.get("to");
+  if (from) { const d = new Date(from); if (isNaN(d)) throw new HttpErr(400, "from: ungültiges Datum."); params.push(d); conds.push(`start_at >= $${params.length}`); }
+  if (to) { const d = new Date(to); if (isNaN(d)) throw new HttpErr(400, "to: ungültiges Datum."); params.push(d); conds.push(`start_at <= $${params.length}`); }
+  const r = await q(`select * from events where ${conds.join(" and ")} order by start_at`, params);
+  return json(res, 200, { events: r.rows.map(eventJson) });
+}
+
+async function v1EventDetail(res, id) {
+  const event = (await q("select * from events where id=$1 and status<>'draft'", [id])).rows[0];
+  if (!event) throw new HttpErr(404, "Event nicht gefunden.");
+  const stints = (await q(`select s.number, s.start_at, s.end_at, s.fuel_liters, s.pit_stops,
+      u.display_name driver_name, u.discord_id driver_discord_id
+    from stints s left join users u on u.id = s.assigned_user_id
+    where s.event_id=$1 order by s.number`, [id])).rows;
+  return json(res, 200, {
+    ...eventJson(event),
+    stints: stints.map(s => ({
+      number: s.number,
+      start_at: s.start_at.toISOString(),
+      end_at: s.end_at.toISOString(),
+      fuel_liters: s.fuel_liters,
+      pit_stops: s.pit_stops,
+      assigned_user: s.driver_name ? { display_name: s.driver_name, discord_id: s.driver_discord_id } : null,
+    })),
+  });
+}
+
+async function v1DriverStints(res, discordId, auth) {
+  const target = (await q("select id, discord_id from users where discord_id=$1", [discordId])).rows[0];
+  if (!target) throw new HttpErr(404, "Fahrer nicht gefunden.");
+  if (!auth.bot && auth.user.discord_id !== discordId && auth.user.role !== "admin")
+    throw new HttpErr(403, "Kein Zugriff auf die Stints dieses Fahrers.");
+  const r = await q(`select s.number, s.start_at, s.end_at, s.fuel_liters, s.pit_stops,
+      e.id event_id, e.name event_name, e.track event_track
+    from stints s join events e on e.id=s.event_id
+    where s.assigned_user_id=$1 and s.end_at > now()
+    order by s.start_at`, [target.id]);
+  return json(res, 200, { stints: r.rows.map(s => ({
+    number: s.number,
+    start_at: s.start_at.toISOString(),
+    end_at: s.end_at.toISOString(),
+    fuel_liters: s.fuel_liters,
+    pit_stops: s.pit_stops,
+    event: { id: s.event_id, name: s.event_name, track: s.event_track },
+  })) });
+}
+
+// Bearer-only: `authEither` erlaubt auch Session-Cookies, deshalb hier explizit zusätzlich prüfen.
+async function requireBot(req) {
+  const auth = await authEither(req);
+  if (!auth.bot) throw new HttpErr(403, "Diese Route ist nur für den Discord-Bot (Bot-Token).");
+  return auth;
+}
+
+async function v1RemindersDue(res) {
+  const rows = (await q(`select r.*, u.display_name driver_name, u.discord_id driver_discord_id
+    from reminders r join users u on u.id=r.user_id
+    where r.status='pending' and r.due_at<=now() order by r.due_at limit 50`)).rows;
+  const settings = (await q(`select guild_id, default_voice_channel_id from settings where id=1`)).rows[0];
+
+  const eventCache = new Map();   // event_id -> { event, blocks }
+  const userCache = new Map();    // user_id -> display_name
+  async function driverName(userId) {
+    if (userId == null) return null;
+    if (!userCache.has(userId)) {
+      const u = (await q("select display_name from users where id=$1", [userId])).rows[0];
+      userCache.set(userId, u ? u.display_name : null);
+    }
+    return userCache.get(userId);
+  }
+
+  const reminders = [];
+  for (const rem of rows) {
+    let ctx = eventCache.get(rem.event_id);
+    if (!ctx) {
+      const event = (await q("select * from events where id=$1", [rem.event_id])).rows[0];
+      const stints = (await q(`select number, start_at, end_at, assigned_user_id, fuel_liters, pit_stops
+        from stints where event_id=$1 order by number`, [rem.event_id])).rows;
+      ctx = { event, blocks: computeBlocks(stints) };
+      eventCache.set(rem.event_id, ctx);
+    }
+    const { event, blocks } = ctx;
+    const block = blocks.find(b => b.first_stint === rem.first_stint_number && b.last_stint === rem.last_stint_number);
+    if (!block) continue; // Plan hat sich seit dem Erzeugen des Reminders verändert -> kein passender Block mehr
+
+    reminders.push({
+      id: rem.id,
+      lead_time_minutes: rem.lead_time_minutes,
+      due_at: rem.due_at.toISOString(),
+      driver: { display_name: rem.driver_name, discord_id: rem.driver_discord_id },
+      event: {
+        name: event.name, track: event.track, car_class: event.car_class,
+        start_at: event.start_at.toISOString(),
+        guild_id: event.guild_id ?? settings.guild_id ?? null,
+        voice_channel_id: event.voice_channel_id ?? settings.default_voice_channel_id ?? null,
+      },
+      block: {
+        first_stint: block.first_stint,
+        last_stint: block.last_stint,
+        stint_count: block.stint_count,
+        start_at: block.start_at.toISOString(),
+        end_at: block.end_at.toISOString(),
+        duration_minutes: Math.round((block.end_at - block.start_at) / 60000),
+        fuel_liters: block.fuel_liters,
+        pit_stops: block.pit_stops,
+        driver_before: await driverName(block.driver_before),
+        driver_after: await driverName(block.driver_after),
+      },
+    });
+  }
+  return json(res, 200, { reminders });
+}
+
+async function v1ReminderSent(req, res, id) {
+  const b = req.body || {};
+  const cur = (await q("select id from reminders where id=$1", [id])).rows[0];
+  if (!cur) throw new HttpErr(404, "Reminder nicht gefunden.");
+  if (b.status === "sent") {
+    await q("update reminders set status='sent', sent_at=now(), discord_message_id=$1 where id=$2", [b.discord_message_id ?? null, id]);
+  } else if (b.status === "failed") {
+    await q("update reminders set status='failed', error_text=$1 where id=$2", [b.error ?? null, id]);
+  } else {
+    throw new HttpErr(400, "status muss 'sent' oder 'failed' sein.");
+  }
+  return json(res, 200, { ok: true });
+}
+
 export default async function handler(req, res) {
   try {
     const url = new URL(req.url, "http://x"), path = url.pathname.replace(/\/+$/, "");
@@ -699,6 +839,30 @@ export default async function handler(req, res) {
       if (req.method === "POST") return await claimStint(res, eventId, number, user);
       if (req.method === "DELETE") return await unclaimStint(res, eventId, number, user);
       throw new HttpErr(404, "Nicht gefunden.");
+    }
+
+    if (path === "/api/v1/events" && req.method === "GET") {
+      await authEither(req);
+      return await v1ListEvents(res, url);
+    }
+    const v1EventOne = path.match(/^\/api\/v1\/events\/(\d+)$/);
+    if (v1EventOne && req.method === "GET") {
+      await authEither(req);
+      return await v1EventDetail(res, +v1EventOne[1]);
+    }
+    const v1DriverM = path.match(/^\/api\/v1\/drivers\/(\d+)\/stints$/);
+    if (v1DriverM && req.method === "GET") {
+      const auth = await authEither(req);
+      return await v1DriverStints(res, v1DriverM[1], auth);
+    }
+    if (path === "/api/v1/reminders/due" && req.method === "GET") {
+      await requireBot(req);
+      return await v1RemindersDue(res);
+    }
+    const v1RemSent = path.match(/^\/api\/v1\/reminders\/(\d+)\/sent$/);
+    if (v1RemSent && req.method === "POST") {
+      await requireBot(req);
+      return await v1ReminderSent(req, res, +v1RemSent[1]);
     }
 
     throw new HttpErr(404, "Nicht gefunden.");
