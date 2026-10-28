@@ -1,6 +1,9 @@
 import pg from "pg";
 import crypto from "node:crypto";
 
+// Feste Admin-IDs, direkt im Code statt als Env Var
+const ADMIN_DISCORD_IDS = ["755740275627786270", "489500699676377088"];
+
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL, max: 1 });
 const q = (t, p) => pool.query(t, p);
 
@@ -109,8 +112,7 @@ async function callback(req, res, url) {
   if (!gr.ok) return redirect(res, "/login.html?error=discord");
   const guilds = await gr.json();
   if (!guilds.some(g => g.id === process.env.DISCORD_GUILD_ID)) return redirect(res, "/login.html?error=guild");
-  const admins = (process.env.ADMIN_DISCORD_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
-  const role = admins.includes(d.id) ? "admin" : "driver";
+  const role = ADMIN_DISCORD_IDS.includes(d.id) ? "admin" : "driver";
   let u = (await q("select * from users where discord_id=$1", [d.id])).rows[0];
   if (!u) u = (await q("insert into users(display_name,discord_id,role) values($1,$2,$3) returning *", [d.global_name || d.username, d.id, role])).rows[0];
   else if (u.role !== role) u = (await q("update users set role=$1 where id=$2 returning *", [role, u.id])).rows[0];
@@ -193,7 +195,6 @@ export default async function handler(req, res) {
         SESSION_SECRET: (process.env.SESSION_SECRET || "").length >= 32,
         DISCORD_CLIENT_ID: has("DISCORD_CLIENT_ID"),
         DISCORD_CLIENT_SECRET: has("DISCORD_CLIENT_SECRET"),
-        ADMIN_DISCORD_IDS: has("ADMIN_DISCORD_IDS"),
       } });
     }
     if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) throw new HttpErr(500, "SESSION_SECRET fehlt oder ist kürzer als 32 Zeichen.");
