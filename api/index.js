@@ -107,6 +107,20 @@ const init = () => (ready ||= q(`create table if not exists users (
   detail jsonb,
   created_at timestamptz not null default now()
 )`))
+  .then(() => q(`create table if not exists notifications (
+  id serial primary key,
+  type text not null check (type in ('event_published','stint_confirmed','stint_removed')),
+  user_id int not null references users(id),
+  event_id int references events(id) on delete cascade,
+  payload jsonb not null default '{}',
+  due_at timestamptz not null default now(),
+  status text not null default 'pending' check (status in ('pending','sent','failed','cancelled')),
+  sent_at timestamptz,
+  discord_message_id text,
+  error_text text,
+  created_at timestamptz not null default now()
+)`))
+  .then(() => q(`create index if not exists notifications_due_idx on notifications(status, due_at)`))
   .catch(e => { ready = null; throw e; }));
 
 class HttpErr extends Error { constructor(status, message) { super(message); this.status = status; } }
@@ -196,7 +210,8 @@ async function ensureFree(field, val, exceptId) {
 
 // Discord-Login (OAuth2): jedes Mitglied des Discord-Servers DISCORD_GUILD_ID darf sich anmelden,
 // Admin-Rechte gibt es nur für die festen IDs in ADMIN_DISCORD_IDS.
-const redirectUri = req => (process.env.BASE_URL || "https://" + req.headers.host).replace(/\/$/, "") + "/api/auth/callback";
+const baseUrl = req => (process.env.BASE_URL || "https://" + req.headers.host).replace(/\/$/, "");
+const redirectUri = req => baseUrl(req) + "/api/auth/callback";
 function login(req, res) {
   const state = crypto.randomBytes(16).toString("hex");
   setCookie(res, "crtg_state", state, 600);
@@ -440,13 +455,25 @@ async function adminPatchEvent(req, res, id, user) {
   return json(res, 200, event);
 }
 
-async function adminPublish(res, id) {
+// Discord-Bot-Benachrichtigungen (sofort fällig, nicht zeitverzögert wie `reminders`):
+// 'event_published' (Broadcast an alle aktiven Nutzer), 'stint_confirmed'/'stint_removed' (pro Fahrer, bei Zu-/Abweisung nach dem Festschreiben).
+async function insertNotification(type, userId, eventId, payload) {
+  await q(`insert into notifications(type,user_id,event_id,payload) values($1,$2,$3,$4)`,
+    [type, userId, eventId, JSON.stringify(payload)]);
+}
+
+async function adminPublish(req, res, id) {
   const cur = (await q("select * from events where id=$1", [id])).rows[0];
   if (!cur) throw new HttpErr(404, "Event nicht gefunden.");
   if (cur.status !== "draft") throw new HttpErr(409, "Nur Events im Status 'draft' können veröffentlicht werden.");
   if (!cur.start_at || !cur.signup_opens_at || !cur.signup_closes_at) throw new HttpErr(400, "Event hat kein vollständiges Anmeldefenster.");
   const r = await q(`update events set status='signup', updated_at=now() where id=$1 returning *`, [id]);
-  return json(res, 200, r.rows[0]);
+  const event = r.rows[0];
+  const eventPayload = { name: event.name, track: event.track, car_class: event.car_class, start_at: event.start_at.toISOString() };
+  const signup_url = baseUrl(req) + "/stintplan/?event=" + id;
+  const users = (await q("select id from users where active")).rows;
+  for (const u of users) await insertNotification("event_published", u.id, id, { event: eventPayload, signup_url });
+  return json(res, 200, event);
 }
 
 async function adminDistribute(res, id) {
@@ -459,13 +486,26 @@ async function adminDistribute(res, id) {
   return json(res, 200, result);
 }
 
-async function adminLock(res, id, user) {
+async function adminLock(req, res, id, user) {
   const cur = (await q("select * from events where id=$1", [id])).rows[0];
   if (!cur) throw new HttpErr(404, "Event nicht gefunden.");
   if (cur.status === "locked") throw new HttpErr(409, "Event ist schon gesperrt.");
   await q(`update events set status='locked', updated_at=now() where id=$1`, [id]);
   await recomputeReminders(q, id);
   await q(`insert into audit_log(user_id,action,target) values($1,'lock',$2)`, [user.id, "event:" + id]);
+
+  const eventPayload = { name: cur.name, track: cur.track, car_class: cur.car_class, start_at: cur.start_at.toISOString() };
+  const my_stints_url = baseUrl(req) + "/meine-stints/";
+  const stints = (await q("select number,start_at,end_at,assigned_user_id from stints where event_id=$1 order by number", [id])).rows;
+  const byUser = new Map();
+  for (const s of stints) {
+    if (s.assigned_user_id == null) continue;
+    if (!byUser.has(s.assigned_user_id)) byUser.set(s.assigned_user_id, []);
+    byUser.get(s.assigned_user_id).push({ number: s.number, start_at: s.start_at.toISOString(), end_at: s.end_at.toISOString() });
+  }
+  for (const [uid, myStints] of byUser)
+    await insertNotification("stint_confirmed", uid, id, { event: eventPayload, stints: myStints, my_stints_url });
+
   return json(res, 200, { ok: true });
 }
 
@@ -498,6 +538,7 @@ async function adminPatchStint(req, res, eventId, number, user) {
       throw new HttpErr(409, "Überlappt mit einem anderen Stint dieses Fahrers.");
   }
 
+  const oldUserId = stint.assigned_user_id;
   const r = await q(`update stints set assigned_user_id=$1, assignment_source=$2, assigned_at=$3 where event_id=$4 and number=$5 returning *`,
     [assignedUserId, assignedUserId != null ? "admin" : null, assignedUserId != null ? new Date() : null, eventId, number]);
 
@@ -505,6 +546,17 @@ async function adminPatchStint(req, res, eventId, number, user) {
     await q(`insert into audit_log(user_id,action,target,detail) values($1,'event_patch',$2,$3)`,
       [user.id, "event:" + eventId + ":stint:" + number, JSON.stringify({ assigned_user_id: assignedUserId })]);
     await recomputeReminders(q, eventId);
+
+    if (oldUserId !== assignedUserId) {
+      const eventPayload = { name: event.name, track: event.track, car_class: event.car_class, start_at: event.start_at.toISOString() };
+      if (oldUserId != null)
+        await insertNotification("stint_removed", oldUserId, eventId, { event: eventPayload, removed_by: { display_name: user.display_name } });
+      if (assignedUserId != null) {
+        const myStints = (await q("select number,start_at,end_at from stints where event_id=$1 and assigned_user_id=$2 order by number", [eventId, assignedUserId])).rows
+          .map(s => ({ number: s.number, start_at: s.start_at.toISOString(), end_at: s.end_at.toISOString() }));
+        await insertNotification("stint_confirmed", assignedUserId, eventId, { event: eventPayload, stints: myStints, my_stints_url: baseUrl(req) + "/meine-stints/" });
+      }
+    }
   }
   return json(res, 200, r.rows[0]);
 }
@@ -725,6 +777,34 @@ async function v1ReminderSent(req, res, id) {
   return json(res, 200, { ok: true });
 }
 
+async function v1NotificationsDue(res) {
+  const rows = (await q(`select n.*, u.display_name driver_name, u.discord_id driver_discord_id
+    from notifications n join users u on u.id=n.user_id
+    where n.status='pending' and n.due_at<=now() order by n.due_at limit 50`)).rows;
+  return json(res, 200, { notifications: rows.map(n => ({
+    id: n.id,
+    type: n.type,
+    due_at: n.due_at.toISOString(),
+    driver: { display_name: n.driver_name, discord_id: n.driver_discord_id },
+    event_id: n.event_id,
+    ...n.payload,
+  })) });
+}
+
+async function v1NotificationSent(req, res, id) {
+  const b = req.body || {};
+  const cur = (await q("select id from notifications where id=$1", [id])).rows[0];
+  if (!cur) throw new HttpErr(404, "Notification nicht gefunden.");
+  if (b.status === "sent") {
+    await q("update notifications set status='sent', sent_at=now(), discord_message_id=$1 where id=$2", [b.discord_message_id ?? null, id]);
+  } else if (b.status === "failed") {
+    await q("update notifications set status='failed', error_text=$1 where id=$2", [b.error ?? null, id]);
+  } else {
+    throw new HttpErr(400, "status muss 'sent' oder 'failed' sein.");
+  }
+  return json(res, 200, { ok: true });
+}
+
 export default async function handler(req, res) {
   try {
     const url = new URL(req.url, "http://x"), path = url.pathname.replace(/\/+$/, "");
@@ -777,9 +857,9 @@ export default async function handler(req, res) {
     if (evAction && req.method === "POST") {
       requireAdmin(user);
       const id = +evAction[1];
-      if (evAction[2] === "publish") return await adminPublish(res, id);
+      if (evAction[2] === "publish") return await adminPublish(req, res, id);
       if (evAction[2] === "distribute") return await adminDistribute(res, id);
-      return await adminLock(res, id, user);
+      return await adminLock(req, res, id, user);
     }
     const evStint = path.match(/^\/api\/admin\/events\/(\d+)\/stints\/(\d+)$/);
     if (evStint && req.method === "PATCH") {
@@ -836,6 +916,15 @@ export default async function handler(req, res) {
     if (v1RemSent && req.method === "POST") {
       await requireBot(req);
       return await v1ReminderSent(req, res, +v1RemSent[1]);
+    }
+    if (path === "/api/v1/notifications/due" && req.method === "GET") {
+      await requireBot(req);
+      return await v1NotificationsDue(res);
+    }
+    const v1NotifSent = path.match(/^\/api\/v1\/notifications\/(\d+)\/sent$/);
+    if (v1NotifSent && req.method === "POST") {
+      await requireBot(req);
+      return await v1NotificationSent(req, res, +v1NotifSent[1]);
     }
 
     throw new HttpErr(404, "Nicht gefunden.");

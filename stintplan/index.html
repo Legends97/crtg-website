@@ -440,7 +440,8 @@ $("evSel").onchange=e=>load(+e.target.value);
     USERS=await api("/api/admin/users").then(d=>d.users.filter(u=>u.active)).catch(()=>[]);
     fillForm(null);
   }
-  await load();
+  const wantEvent=+new URLSearchParams(location.search).get("event");
+  await load(Number.isInteger(wantEvent)&&wantEvent>0?wantEvent:undefined);
   // Raster mit refreshen, damit anklickbare/gesperrte Zellen nicht veralten, wenn das
   // Anmeldefenster während einer offenen Seite schließt – aber nicht, während ein Admin
   // gerade ein Zuweisungs-<select> offen hat (sonst reißt der Tick ihm die Auswahl weg).
