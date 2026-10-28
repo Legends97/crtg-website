@@ -36,6 +36,76 @@ const init = () => (ready ||= q(`create table if not exists users (
   updated_at timestamptz not null default now()
 )`))
   .then(() => q(`insert into stint_plans(is_current) select true where not exists (select 1 from stint_plans where is_current)`))
+  .then(() => q(`create table if not exists events (
+  id serial primary key,
+  name text not null,
+  track text not null default 'Spa-Francorchamps',
+  car_class text not null default '',
+  start_at timestamptz not null,
+  duration_minutes int not null check (duration_minutes > 0 and duration_minutes % 60 = 0),
+  signup_opens_at timestamptz not null,
+  signup_closes_at timestamptz not null,
+  signup_opens_offset_minutes int,
+  signup_closes_offset_minutes int,
+  status text not null default 'draft' check (status in ('draft','signup','assigning','locked','done','cancelled')),
+  reminder_lead_times int[] not null default '{1440,120,20}',
+  guild_id text,
+  voice_channel_id text,
+  lap_seconds numeric,
+  fuel_cons_per_lap numeric,
+  tank_liters numeric,
+  fuel_reserve_laps int not null default 1,
+  created_by int references users(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+)`))
+  .then(() => q(`create table if not exists stints (
+  id serial primary key,
+  event_id int not null references events(id) on delete cascade,
+  number int not null,
+  start_at timestamptz not null,
+  end_at timestamptz not null,
+  duration_minutes int not null default 60,
+  fuel_liters numeric,
+  pit_stops int not null default 0,
+  assigned_user_id int references users(id),
+  assignment_source text check (assignment_source in ('self','admin','auto')),
+  assigned_at timestamptz,
+  unique(event_id, number)
+)`))
+  .then(() => q(`create index if not exists stints_user_idx on stints(assigned_user_id)`))
+  .then(() => q(`create table if not exists reminders (
+  id serial primary key,
+  event_id int not null references events(id) on delete cascade,
+  user_id int not null references users(id),
+  first_stint_number int not null,
+  last_stint_number int not null,
+  lead_time_minutes int not null,
+  due_at timestamptz not null,
+  status text not null default 'pending' check (status in ('pending','sent','failed','cancelled')),
+  sent_at timestamptz,
+  discord_message_id text,
+  error_text text,
+  created_at timestamptz not null default now()
+)`))
+  .then(() => q(`create index if not exists reminders_due_idx on reminders(status, due_at)`))
+  .then(() => q(`create unique index if not exists reminders_pending_uidx on reminders(event_id, user_id, lead_time_minutes, first_stint_number) where status = 'pending'`))
+  .then(() => q(`create table if not exists settings (
+  id int primary key default 1 check (id = 1),
+  guild_id text,
+  default_voice_channel_id text,
+  bot_token_hash text,
+  bot_token_created_at timestamptz
+)`))
+  .then(() => q(`insert into settings(id) values (1) on conflict do nothing`))
+  .then(() => q(`create table if not exists audit_log (
+  id serial primary key,
+  user_id int references users(id),
+  action text not null,
+  target text not null,
+  detail jsonb,
+  created_at timestamptz not null default now()
+)`))
   .catch(e => { ready = null; throw e; }));
 
 class HttpErr extends Error { constructor(status, message) { super(message); this.status = status; } }
