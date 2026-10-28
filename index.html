@@ -77,9 +77,7 @@ footer{text-align:center;color:var(--mute);font-size:.85rem;padding:6px 18px 22p
 <script src="nav.js"></script>
 <script>
 const pad=n=>String(n).padStart(2,"0"),rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
-const p=rd("crtg-stintplan-v1"),q=rd("crtg-sprit-v1");
-if(p&&p.track){const t=(+p.h||0)*60+(+p.m||0),n=+p.stint>0?Math.ceil(t/+p.stint):0;
-  document.getElementById("last1").textContent="Zuletzt: "+p.track+" · "+Math.floor(t/60)+":"+pad(t%60)+" h"+(n?" · "+n+" Stints":"")}
+const q=rd("crtg-sprit-v1");
 if(q&&q.cons){document.getElementById("last2").textContent="Zuletzt: "+(+q.stint>0?q.stint+" min Stints":"Stints nach Tank")+" · "+q.cons+" L/Runde · Tank "+q.tank+" L"}
 </script>
 </body>

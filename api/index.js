@@ -37,7 +37,6 @@ const init = () => (ready ||= q(`create table if not exists users (
   is_current boolean not null default false,
   updated_at timestamptz not null default now()
 )`))
-  .then(() => q(`insert into stint_plans(is_current) select true where not exists (select 1 from stint_plans where is_current)`))
   .then(() => q(`create table if not exists events (
   id serial primary key,
   name text not null,
@@ -193,53 +192,6 @@ async function ensureFree(field, val, exceptId) {
   if (!val) return;
   const r = await q(`select display_name from users where ${field}=$1 and ($2::int is null or id<>$2) limit 1`, [val, exceptId ?? null]);
   if (r.rows[0]) throw new HttpErr(409, `${field === "discord_id" ? "Diese Discord-ID" : field === "steam_id" ? "Diese Steam-ID" : "Diese Startnummer"} ist schon mit „${r.rows[0].display_name}“ vergeben.`);
-}
-
-// Stintplan: genau ein Plan ist is_current=true (der live-Plan, den Fahrer lesen), benannte Pläne sind die Bibliothek
-const planPub = p => ({ track: p.track, h: p.h, m: p.m, stint: p.stint, start: p.start, lap: p.lap, drivers: p.drivers, assign: p.assign });
-const currentPlan = async () => (await q("select * from stint_plans where is_current limit 1")).rows[0];
-function normPlan(o) {
-  const drivers = Array.isArray(o.drivers) ? o.drivers.map(String).slice(0, 50) : [];
-  const assign = Array.isArray(o.assign) ? o.assign.map(x => Number.isInteger(x) ? x : -1).slice(0, 500) : [];
-  return {
-    track: String(o.track ?? "").trim().slice(0, 80) || "Spa-Francorchamps",
-    h: Math.max(0, Math.min(48, +o.h || 0)),
-    m: Math.max(0, Math.min(59, +o.m || 0)),
-    stint: Math.max(1, Math.min(600, +o.stint || 40)),
-    start: String(o.start ?? "").trim().slice(0, 5),
-    lap: String(o.lap ?? "").trim().slice(0, 20),
-    drivers, assign,
-  };
-}
-async function saveCurrentPlan(v) {
-  const r = await q(`update stint_plans set track=$1,h=$2,m=$3,stint=$4,start=$5,lap=$6,drivers=$7,assign=$8,updated_at=now() where is_current=true returning *`,
-    [v.track, v.h, v.m, v.stint, v.start, v.lap, JSON.stringify(v.drivers), JSON.stringify(v.assign)]);
-  return r.rows[0];
-}
-async function adminPlans(req, res, url, id, action) {
-  const m = req.method, b = req.body || {};
-  if (m === "GET" && id === undefined) {
-    const r = await q("select id,name,track,updated_at from stint_plans where is_current=false order by updated_at desc");
-    return json(res, 200, r.rows);
-  }
-  if (m === "POST" && id === undefined) {
-    const name = String(b.name ?? "").trim().slice(0, 60);
-    if (!name) throw new HttpErr(400, "Name fehlt.");
-    const cur = await currentPlan();
-    const r = await q(`insert into stint_plans(name,track,h,m,stint,start,lap,drivers,assign,is_current) values($1,$2,$3,$4,$5,$6,$7,$8,$9,false) returning id,name,track,updated_at`,
-      [name, cur.track, cur.h, cur.m, cur.stint, cur.start, cur.lap, JSON.stringify(cur.drivers), JSON.stringify(cur.assign)]);
-    return json(res, 201, r.rows[0]);
-  }
-  if (m === "POST" && id !== undefined && action === "load") {
-    const snap = (await q("select * from stint_plans where id=$1 and is_current=false", [id])).rows[0];
-    if (!snap) throw new HttpErr(404, "Plan nicht gefunden.");
-    return json(res, 200, planPub(await saveCurrentPlan(snap)));
-  }
-  if (m === "DELETE" && id !== undefined) {
-    await q("delete from stint_plans where id=$1 and is_current=false", [id]);
-    return json(res, 200, { ok: true });
-  }
-  throw new HttpErr(404, "Nicht gefunden.");
 }
 
 // Discord-Login (OAuth2): jedes Mitglied des Discord-Servers DISCORD_GUILD_ID darf sich anmelden,
@@ -804,21 +756,6 @@ export default async function handler(req, res) {
       requireAdmin(user);
       return await adminUsers(req, res, url, am[1] === undefined ? undefined : +am[1]);
     }
-    if (path === "/api/plan") {
-      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      return json(res, 200, planPub(await currentPlan()));
-    }
-    if (path === "/api/admin/plan" && req.method === "PATCH") {
-      requireAdmin(user);
-      const v = normPlan({ ...(await currentPlan()), ...(req.body || {}) });
-      return json(res, 200, planPub(await saveCurrentPlan(v)));
-    }
-    const pm = path.match(/^\/api\/admin\/plans(?:\/(\d+)(?:\/(load))?)?$/);
-    if (pm) {
-      requireAdmin(user);
-      return await adminPlans(req, res, url, pm[1] === undefined ? undefined : +pm[1], pm[2]);
-    }
-
     if (path === "/api/admin/events") {
       requireAdmin(user);
       if (req.method === "GET") return await adminListEvents(res);
