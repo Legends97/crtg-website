@@ -16,11 +16,13 @@ export function computeBlocks(stints) {  // stints sortiert nach number, Felder:
     if (s.assigned_user_id == null) { cur = null; continue; }
     if (cur && cur.user_id === s.assigned_user_id && s.number === cur.last_stint + 1) {
       cur.last_stint = s.number; cur.end_at = s.end_at; cur.stint_count++;
-      cur.fuel_liters += s.fuel_liters || 0; cur.pit_stops += s.pit_stops || 0;
+      // fuel_liters comes back from pg as a STRING for `numeric` columns; Number(...)
+      // it on both sides or "20.5" + "15.5" silently string-concatenates to "20.515.5".
+      cur.fuel_liters += Number(s.fuel_liters) || 0; cur.pit_stops += s.pit_stops || 0;
     } else {
       cur = { user_id: s.assigned_user_id, first_stint: s.number, last_stint: s.number,
               start_at: s.start_at, end_at: s.end_at, stint_count: 1,
-              fuel_liters: s.fuel_liters || 0, pit_stops: s.pit_stops || 0 };
+              fuel_liters: Number(s.fuel_liters) || 0, pit_stops: s.pit_stops || 0 };
       blocks.push(cur);
     }
   }

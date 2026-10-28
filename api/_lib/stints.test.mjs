@@ -59,6 +59,20 @@ await test("computeBlocks: driver change mid-sequence splits into two blocks", (
   ]);
 });
 
+await test("computeBlocks: fuel_liters as STRINGS (real pg numeric columns) sums numerically, not by concatenation", () => {
+  // pg returns `numeric` columns as strings. Regression test for a bug where
+  // cur.fuel_liters += s.fuel_liters (both strings) did "20.5" + "15.5" ->
+  // "20.515.5" instead of 36.
+  const t0 = new Date(0), t1 = new Date(60000), t2 = new Date(120000);
+  const stints = [
+    { number: 1, start_at: t0, end_at: t1, assigned_user_id: 7, fuel_liters: "20.5", pit_stops: 0 },
+    { number: 2, start_at: t1, end_at: t2, assigned_user_id: 7, fuel_liters: "15.5", pit_stops: 0 },
+  ];
+  const blocks = computeBlocks(stints);
+  assert.strictEqual(blocks.length, 1);
+  assert.strictEqual(blocks[0].fuel_liters, 36);
+});
+
 // ---------------------------------------------------------------------------
 // computeStintFuel (+ lapSeconds)
 // ---------------------------------------------------------------------------
