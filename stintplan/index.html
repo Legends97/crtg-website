@@ -110,7 +110,6 @@ section{background:none;border:0;padding:0}
     <h2 style="margin-top:24px">Fahrer</h2>
     <div id="drivers" style="margin-top:10px"></div>
     <button id="addDrv" type="button">Fahrer hinzufügen</button>
-    <button id="loadTeam" type="button">Team-Fahrer laden</button>
   </section>
 
   <section aria-label="Stintplan">
@@ -144,18 +143,13 @@ const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b980
 const EMO=["🟦","🟪","🟧","🟩","🟥","🟨","🟫","⬜","⬛"];
 const KEY="crtg-stintplan-v1";
 const $=id=>document.getElementById(id);
-const DEFAULT_DRIVERS=["Fahrer 1","Fahrer 2","Fahrer 3"];
-let S={track:"Spa-Francorchamps",h:3,m:0,stint:40,start:"",lap:"",drivers:DEFAULT_DRIVERS.slice(),assign:[]};
-let hadSavedPlan=false;
-try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.drivers)){S=Object.assign(S,x);hadSavedPlan=true}}catch(e){}
-function teamNames(list){return list.map(u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name)}
-function loadTeam(){
-  fetch("/api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).then(list=>{
-    if(!list.length)return;
-    S.drivers=teamNames(list);S.assign=[];save();renderDrivers();renderPlan();
-  }).catch(()=>{});
-}
-if(!hadSavedPlan)loadTeam();
+let S={track:"Spa-Francorchamps",h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1","Fahrer 2","Fahrer 3"],assign:[]};
+try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.drivers))S=Object.assign(S,x)}catch(e){}
+let TEAM=[];
+fetch("/api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).then(list=>{
+  TEAM=list.map(u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name);
+  renderDrivers();
+}).catch(()=>{});
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
@@ -195,7 +189,10 @@ function sums(){
 }
 
 function renderDrivers(){
-  $("drivers").innerHTML=S.drivers.map((d,i)=>`<div class="drv" style="--c:${col(i)}"><span class="dot"></span><input data-d="${i}" value="${esc(d)}" aria-label="Fahrer ${i+1}"><button type="button" data-x="${i}" aria-label="Fahrer ${i+1} entfernen">Entfernen</button></div>`).join("");
+  $("drivers").innerHTML=S.drivers.map((d,i)=>{
+    const opts=[...new Set([d,...TEAM])].map(o=>`<option${o===d?" selected":""}>${esc(o)}</option>`).join("");
+    return `<div class="drv" style="--c:${col(i)}"><span class="dot"></span><select data-d="${i}" aria-label="Fahrer ${i+1}">${opts}</select><button type="button" data-x="${i}" aria-label="Fahrer ${i+1} entfernen">Entfernen</button></div>`;
+  }).join("");
 }
 function renderPlan(){
   const st=stints();fill(st.length);
@@ -362,8 +359,7 @@ $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.st
 $("track").onchange=e=>{S.track=e.target.value;renderPlan()};
 ["h","m","stint","start","lap"].forEach(id=>$(id).oninput=e=>{S[id]=e.target.value;renderPlan()});
 $("addDrv").onclick=()=>{S.drivers.push("Fahrer "+(S.drivers.length+1));renderDrivers();renderPlan()};
-$("loadTeam").onclick=loadTeam;
-$("drivers").oninput=e=>{const i=e.target.dataset.d;if(i!==undefined){S.drivers[i]=e.target.value;renderPlan()}};
+$("drivers").onchange=e=>{const i=e.target.dataset.d;if(i!==undefined){S.drivers[i]=e.target.value;renderPlan()}};
 $("drivers").onclick=e=>{
   const i=e.target.dataset.x;if(i===undefined)return;
   S.drivers.splice(+i,1);
