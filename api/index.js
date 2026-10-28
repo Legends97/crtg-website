@@ -370,6 +370,14 @@ async function syncStints(event) {
   await q(`delete from stints where event_id=$1 and number>$2`, [event.id, n]);
 }
 
+// reminder_lead_times: Array positiver Ganzzahlen (Minuten) oder undefined/null (unverändert/Default).
+function parseReminderLeadTimes(v) {
+  if (v === undefined || v === null) return null;
+  if (!Array.isArray(v) || !v.length || !v.every(n => Number.isInteger(n) && n > 0))
+    throw new HttpErr(400, "reminder_lead_times muss ein Array positiver Ganzzahlen (Minuten) sein.");
+  return v;
+}
+
 async function adminListEvents(res) {
   const r = await q(`select e.*, coalesce(s.total,0)::int total, coalesce(s.assigned,0)::int assigned
     from events e
@@ -396,12 +404,16 @@ async function adminCreateEvent(req, res, user) {
   const signup_closes_at = b.signup_closes_at ? new Date(b.signup_closes_at) : (closesOff != null ? new Date(start_at.getTime() - closesOff * 60000) : null);
   if (!signup_opens_at || isNaN(signup_opens_at) || !signup_closes_at || isNaN(signup_closes_at))
     throw new HttpErr(400, "Anmeldefenster fehlt: signup_opens_at/signup_closes_at oder die passenden Offset-Minuten angeben.");
+  const reminder_lead_times = parseReminderLeadTimes(b.reminder_lead_times);
+  const guild_id = b.guild_id == null || b.guild_id === "" ? null : String(b.guild_id).trim();
+  const voice_channel_id = b.voice_channel_id == null || b.voice_channel_id === "" ? null : String(b.voice_channel_id).trim();
 
-  const r = await q(`insert into events(name,track,car_class,start_at,duration_minutes,signup_opens_at,signup_closes_at,
-      signup_opens_offset_minutes,signup_closes_offset_minutes,lap_seconds,fuel_cons_per_lap,tank_liters,fuel_reserve_laps,created_by)
-    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *`,
-    [name, track, car_class, start_at, duration_minutes, signup_opens_at, signup_closes_at, opensOff, closesOff,
-      fuel.lap_seconds, fuel.fuel_cons_per_lap, fuel.tank_liters, fuel.fuel_reserve_laps, user.id]);
+  const cols = ["name", "track", "car_class", "start_at", "duration_minutes", "signup_opens_at", "signup_closes_at",
+    "signup_opens_offset_minutes", "signup_closes_offset_minutes", "lap_seconds", "fuel_cons_per_lap", "tank_liters", "fuel_reserve_laps", "created_by", "guild_id", "voice_channel_id"];
+  const vals = [name, track, car_class, start_at, duration_minutes, signup_opens_at, signup_closes_at, opensOff, closesOff,
+    fuel.lap_seconds, fuel.fuel_cons_per_lap, fuel.tank_liters, fuel.fuel_reserve_laps, user.id, guild_id, voice_channel_id];
+  if (reminder_lead_times) { cols.push("reminder_lead_times"); vals.push(reminder_lead_times); }
+  const r = await q(`insert into events(${cols.join(",")}) values(${cols.map((_, i) => "$" + (i + 1)).join(",")}) returning *`, vals);
   const event = r.rows[0];
   await syncStints(event);
   return json(res, 201, event);
@@ -427,6 +439,9 @@ async function adminPatchEvent(req, res, id, user) {
   if (b.fuel_cons_per_lap !== undefined) fields.fuel_cons_per_lap = b.fuel_cons_per_lap == null || b.fuel_cons_per_lap === "" ? null : +b.fuel_cons_per_lap;
   if (b.tank_liters !== undefined) fields.tank_liters = b.tank_liters == null || b.tank_liters === "" ? null : +b.tank_liters;
   if (b.fuel_reserve_laps !== undefined) fields.fuel_reserve_laps = +b.fuel_reserve_laps;
+  if (b.reminder_lead_times !== undefined) fields.reminder_lead_times = parseReminderLeadTimes(b.reminder_lead_times) ?? cur.reminder_lead_times;
+  if (b.guild_id !== undefined) fields.guild_id = b.guild_id == null || b.guild_id === "" ? null : String(b.guild_id).trim();
+  if (b.voice_channel_id !== undefined) fields.voice_channel_id = b.voice_channel_id == null || b.voice_channel_id === "" ? null : String(b.voice_channel_id).trim();
   if (b.signup_opens_offset_minutes !== undefined) fields.signup_opens_offset_minutes = b.signup_opens_offset_minutes == null ? null : +b.signup_opens_offset_minutes;
   if (b.signup_closes_offset_minutes !== undefined) fields.signup_closes_offset_minutes = b.signup_closes_offset_minutes == null ? null : +b.signup_closes_offset_minutes;
   if (b.signup_opens_at !== undefined) fields.signup_opens_at = new Date(b.signup_opens_at);
@@ -618,14 +633,17 @@ async function v1ListEvents(res, url) {
   return json(res, 200, { events: r.rows.map(eventJson) });
 }
 
-async function v1EventDetail(res, id) {
-  const event = (await q("select * from events where id=$1 and status<>'draft'", [id])).rows[0];
+// Gemeinsame Event+Stints-Detailabfrage für /api/v1/events/:id und /api/admin/events/:id.
+// allowDraft=false (Fahrer/Bot-Vertrag): draft-Events bleiben unsichtbar.
+// allowDraft=true (Admin): auch draft, damit die Zuweisungen eines Entwurfs sichtbar sind.
+async function eventDetail(id, allowDraft) {
+  const event = (await q(`select * from events where id=$1${allowDraft ? "" : " and status<>'draft'"}`, [id])).rows[0];
   if (!event) throw new HttpErr(404, "Event nicht gefunden.");
   const stints = (await q(`select s.number, s.start_at, s.end_at, s.fuel_liters, s.pit_stops,
       u.display_name driver_name, u.discord_id driver_discord_id
     from stints s left join users u on u.id = s.assigned_user_id
     where s.event_id=$1 order by s.number`, [id])).rows;
-  return json(res, 200, {
+  return {
     ...eventJson(event),
     stints: stints.map(s => ({
       number: s.number,
@@ -635,7 +653,13 @@ async function v1EventDetail(res, id) {
       pit_stops: s.pit_stops,
       assigned_user: s.driver_name ? { display_name: s.driver_name, discord_id: s.driver_discord_id } : null,
     })),
-  });
+  };
+}
+async function v1EventDetail(res, id) {
+  return json(res, 200, await eventDetail(id, false));
+}
+async function adminEventDetail(res, id) {
+  return json(res, 200, await eventDetail(id, true));
 }
 
 async function v1DriverStints(res, discordId, auth) {
@@ -818,6 +842,7 @@ export default async function handler(req, res) {
     if (evOne) {
       requireAdmin(user);
       const id = +evOne[1];
+      if (req.method === "GET") return await adminEventDetail(res, id);
       if (req.method === "PATCH") return await adminPatchEvent(req, res, id, user);
       if (req.method === "DELETE") return await adminDeleteEvent(res, id);
       throw new HttpErr(404, "Nicht gefunden.");

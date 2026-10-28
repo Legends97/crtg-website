@@ -115,6 +115,13 @@ section{background:none;border:0;padding:0}
     </div>
     <label for="fRes">Reserve (Runden)</label>
     <input id="fRes" type="number" step="1" min="0" placeholder="1">
+    <h2 style="margin-top:22px">Erinnerungen &amp; Discord</h2>
+    <label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label>
+    <input id="fLead" placeholder="1440,120,20">
+    <div class="two">
+      <div><label for="fGuild">Server-ID (optional)</label><input id="fGuild" placeholder="Server-Standard"></div>
+      <div><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
+    </div>
     <div class="actions">
       <button class="go" id="fSave" type="button">Speichern</button>
     </div>
@@ -206,11 +213,11 @@ function renderGrid(){
   const el=$("grid");
   if(!el)return;
   const now=Date.now(),list=stints(),ph=phaseOf(EV,new Date());
-  const canClaim=ph==="signup_open",canRelease=EV.status!=="locked",draft=EV.status==="draft";
+  const canClaim=ph==="signup_open",canRelease=EV.status!=="locked";
   el.innerHTML=list.map(s=>{
     const past=new Date(s.end_at).getTime()<=now,mine=isMine(s);
     const cls=["cell",mine?"mine":s.assigned_user?"other":"free",past?"past":""];
-    const hit=ADMIN?!draft:(!past&&(mine?canRelease:!s.assigned_user&&canClaim));
+    const hit=ADMIN||(!past&&(mine?canRelease:!s.assigned_user&&canClaim));
     if(hit)cls.push("hit");
     const who=mine?"Du":s.assigned_user?esc(s.assigned_user.display_name):"frei";
     const sel=ADMIN&&openCell===s.number
@@ -256,7 +263,6 @@ function renderView(){
   if($("doPub"))$("doPub").onclick=()=>act("publish","Event veröffentlichen? Danach ist die Anmeldung sichtbar.");
   if($("doDist"))$("doDist").onclick=()=>act("distribute","Freie Stints automatisch auf Fahrer ohne Stint verteilen?");
   if($("doLock"))$("doLock").onclick=()=>act("lock","Plan festschreiben? Danach werden die Discord-Erinnerungen erzeugt.");
-  if(EV.status==="draft")$("gridHint").textContent="Entwurf: Das Raster zeigt die geplanten Zeiten. Zuweisen ist erst nach dem Veröffentlichen möglich.";
 }
 
 async function act(what,ask){
@@ -291,7 +297,6 @@ $("view").onclick=e=>{
   const n=+cell.dataset.n,s=stints().find(x=>x.number===n);
   if(!s)return;
   if(ADMIN){
-    if(EV.status==="draft")return toast("Entwurf: Zuweisen ist erst nach dem Veröffentlichen möglich.");
     openCell=openCell===n?null:n;renderGrid();return;
   }
   if(new Date(s.end_at)<=new Date())return;
@@ -318,8 +323,11 @@ function fillForm(e){
   $("fCons").value=e&&e.fuel_cons_per_lap!=null?e.fuel_cons_per_lap:"";
   $("fTank").value=e&&e.tank_liters!=null?e.tank_liters:"";
   $("fRes").value=e&&e.fuel_reserve_laps!=null?e.fuel_reserve_laps:"";
+  $("fLead").value=e&&e.reminder_lead_times?e.reminder_lead_times.join(","):"";
+  $("fGuild").value=e&&e.guild_id?e.guild_id:"";
+  $("fVoice").value=e&&e.voice_channel_id?e.voice_channel_id:"";
   $("fSave").textContent=editId?"Änderungen speichern":"Event anlegen";
-  $("fHint").textContent=editId?"Bearbeitet: „"+e.name+"“. Erinnerungsstufen und Discord-Kanal setzt die Server-Konfiguration.":"Neues Event. Nach dem Anlegen entstehen die Stunden-Stints automatisch.";
+  $("fHint").textContent=editId?"Bearbeitet: „"+e.name+"“.":"Neues Event. Nach dem Anlegen entstehen die Stunden-Stints automatisch.";
   preview();
 }
 function preview(){
@@ -352,6 +360,15 @@ function formBody(){
       b["signup_"+k+"_offset_minutes"]=Math.round(v*1440);
     }
   });
+  const lead=$("fLead").value.trim();
+  if(lead){
+    const arr=lead.split(",").map(s=>parseInt(s.trim(),10));
+    if(!arr.length||arr.some(n=>!Number.isInteger(n)||n<=0))
+      throw new Error("Erinnerungsstufen: kommagetrennte Liste positiver Minuten-Werte angeben (z. B. 1440,120,20).");
+    b.reminder_lead_times=arr;
+  }
+  b.guild_id=$("fGuild").value.trim()||null;
+  b.voice_channel_id=$("fVoice").value.trim()||null;
   return b;
 }
 $("fSave").onclick=async()=>{
@@ -380,8 +397,11 @@ async function load(selectId){
     :'<option value="">Noch kein Event angelegt</option>';
   openCell=null;
   DETAIL=null;
-  if(EV&&EV.status!=="draft"){
-    try{DETAIL=await api("/api/v1/events/"+EV.id)}catch(e){toast(e.message)}
+  // Admin sieht Zuweisungen über jedem Status (inkl. draft) via die Admin-Detailroute;
+  // Fahrer bleiben auf dem draft-ausschließenden /api/v1/-Vertrag.
+  const detailUrl=ADMIN?(EV&&"/api/admin/events/"+EV.id):(EV&&EV.status!=="draft"&&"/api/v1/events/"+EV.id);
+  if(detailUrl){
+    try{DETAIL=await api(detailUrl)}catch(e){toast(e.message)}
   }
   renderView();
 }
