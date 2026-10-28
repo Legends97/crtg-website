@@ -4,6 +4,7 @@
   var items=[
     ["","Start","M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
     ["stintplan/","Stintplaner","M3 5h10v4H3zM8 11h13v4H8zM3 17h8v3H3z"],
+    ["meine-stints/","Meine Stints","M12 2a10 10 0 1 0 .001 0zM13 7h-2v6l5 3 1-1.7-4-2.4z"],
     ["sprit/","Sprit-Rechner","M12 2.5S5 10.2 5 15a7 7 0 0 0 14 0c0-4.8-7-12.5-7-12.5z"]
   ];
   var admin=["admin/","Admin","M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"];
