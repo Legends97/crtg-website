@@ -2,7 +2,10 @@ import pg from "pg";
 import crypto from "node:crypto";
 
 // Feste Admin-IDs, direkt im Code statt als Env Var
-const ADMIN_DISCORD_IDS = ["755740275627786270", "489500699676377088"];
+const ADMIN_DISCORD_IDS = [
+  "755740275627786270", // Benni
+  "489500699676377088", // Legends
+];
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL, max: 1 });
 const q = (t, p) => pool.query(t, p);
