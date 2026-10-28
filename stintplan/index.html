@@ -49,6 +49,7 @@ button.go{background:linear-gradient(90deg,#0f8fb0,#6a45d6);border-color:transpa
 .cell.other{--c:var(--vi)}
 .cell.past{opacity:.5}
 .cell.hit{cursor:pointer}.cell.hit:hover{border-color:var(--cy)}
+.cell.hit:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
 .legend{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--mute);font-size:.85rem;margin-top:14px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
@@ -225,7 +226,8 @@ function renderGrid(){
         +USERS.map(u=>'<option value="'+u.id+'"'+(u.id===userIdOf(s)?" selected":"")+">"+esc(userLabel(u))+"</option>").join("")+"</select>"
       :"";
     const fuel=s.fuel_liters!=null?'<div class="fu">'+esc(String(s.fuel_liters).replace(".",","))+" L"+(s.pit_stops?" · "+s.pit_stops+" Stopp"+(s.pit_stops===1?"":"s"):"")+"</div>":"";
-    return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"><div class="n">'+s.number+'</div><div class="t">'
+    const hitAttrs=hit?' role="button" tabindex="0"':"";
+    return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"'+hitAttrs+'><div class="n">'+s.number+'</div><div class="t">'
       +esc(T(s.start_at))+" – "+esc(T(s.end_at))+'</div><div class="who">'+who+"</div>"+fuel+sel+"</div>";
   }).join("");
 }
@@ -290,9 +292,9 @@ async function assign(n,userId){
   }catch(e){toast(e.message)}
 }
 
-$("view").onclick=e=>{
-  if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
-  const cell=e.target.closest(".cell");
+// Gemeinsame Logik für Klick UND Tastatur (Enter/Leertaste) auf eine Zelle –
+// nur eine Stelle, die claim/release/assign auslöst.
+function activateCell(cell){
   if(!cell||!EV)return;
   const n=+cell.dataset.n,s=stints().find(x=>x.number===n);
   if(!s)return;
@@ -304,6 +306,18 @@ $("view").onclick=e=>{
   if(s.assigned_user)return toast("Diese Stunde hat schon "+s.assigned_user.display_name+".");
   if(phaseOf(EV,new Date())!=="signup_open")return toast("Eintragen ist nur während des Anmeldefensters möglich.");
   claim(n);
+}
+$("view").onclick=e=>{
+  if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
+  activateCell(e.target.closest(".cell"));
+};
+$("view").onkeydown=e=>{
+  if(e.key!=="Enter"&&e.key!==" "&&e.key!=="Spacebar")return;
+  if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
+  const cell=e.target.closest(".cell");
+  if(!cell||!cell.classList.contains("hit"))return;
+  e.preventDefault();
+  activateCell(cell);
 };
 $("view").onchange=e=>{const n=e.target.dataset.as;if(n!==undefined)assign(+n,e.target.value)};
 
@@ -345,10 +359,15 @@ function formBody(){
   if(!start)throw new Error("Startzeit fehlt.");
   const h=+$("fHours").value;
   if(!Number.isInteger(h)||h<1)throw new Error("Dauer in ganzen Stunden angeben (mindestens 1).");
+  const lap=$("fLap").value.trim();
+  // Muss zu api/_lib/fuel.js lapSeconds() passen (m:ss.x ODER reine Sekunden), sonst
+  // parst der Server es stillschweigend zu 0 und computeStintFuel() liefert NaN.
+  if(lap&&!/^(\d+:)?\d+([.,]\d+)?$/.test(lap))
+    throw new Error("Rundenzeit ungültig – Format m:ss.x (z. B. 1:48.5) oder Sekunden als Zahl.");
   const b={
     name:$("fName").value.trim(),track:$("fTrack").value,car_class:$("fClass").value.trim(),
     start_at:new Date(start).toISOString(),duration_minutes:h*60,
-    lap_seconds:$("fLap").value.trim(),fuel_cons_per_lap:$("fCons").value,tank_liters:$("fTank").value,
+    lap_seconds:lap,fuel_cons_per_lap:$("fCons").value,tank_liters:$("fTank").value,
     fuel_reserve_laps:$("fRes").value===""?1:+$("fRes").value,
   };
   [["opens","fOpenD","fOpenAt","Öffnen"],["closes","fCloseD","fCloseAt","Schließen"]].forEach(([k,dId,atId,lab])=>{
