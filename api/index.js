@@ -53,6 +53,10 @@ const setCookie = (res, name, value, maxAge) => {
   const c = `${name}=${encodeURIComponent(value)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
   res.setHeader("Set-Cookie", [].concat(res.getHeader("Set-Cookie") || [], c));
 };
+const requireAdmin = user => {
+  if (!user) throw new HttpErr(401, "Nicht angemeldet.");
+  if (user.role !== "admin") throw new HttpErr(403, "Nur für Admins.");
+};
 
 // Sitzung: signiertes Cookie (HMAC), 7 Tage gültig
 const sign = v => crypto.createHmac("sha256", process.env.SESSION_SECRET).update(v).digest("base64url");
@@ -287,8 +291,7 @@ export default async function handler(req, res) {
     }
     const am = path.match(/^\/api\/admin\/users(?:\/(\d+))?$/);
     if (am) {
-      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      if (user.role !== "admin") throw new HttpErr(403, "Nur für Admins.");
+      requireAdmin(user);
       return await adminUsers(req, res, url, am[1] === undefined ? undefined : +am[1]);
     }
     if (path === "/api/plan") {
@@ -296,15 +299,13 @@ export default async function handler(req, res) {
       return json(res, 200, planPub(await currentPlan()));
     }
     if (path === "/api/admin/plan" && req.method === "PATCH") {
-      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      if (user.role !== "admin") throw new HttpErr(403, "Nur für Admins.");
+      requireAdmin(user);
       const v = normPlan({ ...(await currentPlan()), ...(req.body || {}) });
       return json(res, 200, planPub(await saveCurrentPlan(v)));
     }
     const pm = path.match(/^\/api\/admin\/plans(?:\/(\d+)(?:\/(load))?)?$/);
     if (pm) {
-      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      if (user.role !== "admin") throw new HttpErr(403, "Nur für Admins.");
+      requireAdmin(user);
       return await adminPlans(req, res, url, pm[1] === undefined ? undefined : +pm[1], pm[2]);
     }
     throw new HttpErr(404, "Nicht gefunden.");
