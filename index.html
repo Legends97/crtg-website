@@ -50,7 +50,6 @@ footer{text-align:center;color:var(--mute);font-size:.85rem;padding:6px 18px 22p
       <h2>Stintplaner</h2>
       <p>Strecke, Renndauer und Fahrer wählen. Der Plan lässt sich für Discord exportieren und drucken.</p>
       <div class="mini" aria-hidden="true"><i style="--w:3;--c:#2bd0ff"></i><i style="--w:3;--c:#9b6bff"></i><i style="--w:3;--c:#ffa94d"></i><i style="--w:3;--c:#3ddc97"></i><i style="--w:3;--c:#2bd0ff"></i><i style="--w:2;--c:#9b6bff"></i></div>
-      <small class="last" id="last1">Noch kein Plan gespeichert</small>
       <span class="go">Öffnen →</span>
     </a>
     <a class="card c2" href="sprit/">
@@ -67,7 +66,7 @@ footer{text-align:center;color:var(--mute);font-size:.85rem;padding:6px 18px 22p
     <a class="card c2" href="meine-stints/">
       <span class="ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 .001 0zM13 7h-2v6l5 3 1-1.7-4-2.4z"/></svg></span>
       <h2>Meine kommenden Stints</h2>
-      <p>Zeigt deine eigenen Stints aus dem zuletzt gespeicherten Plan, sortiert nach Startzeit.</p>
+      <p>Zeigt deine eigenen anstehenden Stints aus den aktuellen Events, sortiert nach Startzeit.</p>
       <span class="go">Öffnen →</span>
     </a>
     <div class="card soon" aria-hidden="true"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></span><div><h2>Weiteres Tool</h2><p>Bald verfügbar</p></div></div>
@@ -76,10 +75,8 @@ footer{text-align:center;color:var(--mute);font-size:.85rem;padding:6px 18px 22p
 <footer>ChaosRacing – Team Germany</footer>
 <script src="nav.js"></script>
 <script>
-const pad=n=>String(n).padStart(2,"0"),rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
-const p=rd("crtg-stintplan-v1"),q=rd("crtg-sprit-v1");
-if(p&&p.track){const t=(+p.h||0)*60+(+p.m||0),n=+p.stint>0?Math.ceil(t/+p.stint):0;
-  document.getElementById("last1").textContent="Zuletzt: "+p.track+" · "+Math.floor(t/60)+":"+pad(t%60)+" h"+(n?" · "+n+" Stints":"")}
+const rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const q=rd("crtg-sprit-v1");
 if(q&&q.cons){document.getElementById("last2").textContent="Zuletzt: "+(+q.stint>0?q.stint+" min Stints":"Stints nach Tank")+" · "+q.cons+" L/Runde · Tank "+q.tank+" L"}
 </script>
 </body>

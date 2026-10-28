@@ -8,7 +8,7 @@
 :root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
-background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.018) 22px 44px),var(--bg)}
+background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
 header{max-width:1280px;margin:auto;padding:26px 24px 14px}
 h1{margin:0;font-size:2.5rem;font-style:italic;font-weight:800;letter-spacing:.01em;line-height:1.1;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
 .sub{color:var(--mute);margin-top:2px}
@@ -21,46 +21,44 @@ h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
 label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
 input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.two{display:flex;gap:10px}.two>div{flex:1}
+.two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
 button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
 button:hover{border-color:var(--cy)}button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:default}
 button.go{background:linear-gradient(90deg,#0f8fb0,#6a45d6);border-color:transparent;font-weight:600}
-.drv{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.dot{width:14px;height:14px;border-radius:50%;flex:none;background:var(--c)}
-.drv button{padding:6px 12px;color:var(--mute)}
-.hero{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
-.trk{font-size:2.3rem;font-style:italic;font-weight:800;line-height:1.1}
+.hero{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.trk{font-size:2.1rem;font-style:italic;font-weight:800;line-height:1.1}
+.meta{color:var(--mute);font-size:.9rem;margin-top:3px}
 .stats{display:flex;gap:26px;flex-wrap:wrap}
 .stat b{display:block;font-size:1.8rem;line-height:1.1;color:var(--cy);font-variant-numeric:tabular-nums}
 .stat span{color:var(--mute);font-size:.85rem}
-.bar{display:flex;height:46px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
-.seg{display:flex;align-items:center;justify-content:center;color:#0b0e1b;font-weight:700;font-size:.85rem;overflow:hidden;white-space:nowrap;background:var(--c);border-right:3px solid var(--bg)}
-.seg:last-child{border-right:0}
-.ends{display:flex;justify-content:space-between;color:var(--mute);font-size:.85rem;margin:5px 2px 18px;font-variant-numeric:tabular-nums}
-.stint{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:9px 14px;margin-bottom:8px}
-.stint .n{width:40px;font-size:1.7rem;font-weight:800;font-style:italic;color:var(--c);line-height:1}
-.stint .who{flex:1 1 170px;display:flex;align-items:center;gap:8px;min-width:0}
-.stint .who select{max-width:260px}
-.stint .t{width:150px;font-variant-numeric:tabular-nums;font-weight:600}
-.stint .d,.stint .l{width:72px;color:var(--mute);font-variant-numeric:tabular-nums}
-.pr{display:none}
-.tot{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-.chip{position:relative;overflow:hidden;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px 10px;display:flex;gap:8px;align-items:center}
-.chip small{color:var(--mute)}
-.chip i{position:absolute;left:0;bottom:0;height:3px;background:var(--c)}
+.banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c,var(--line));border-radius:12px;padding:12px 16px;margin:0 0 16px}
+.banner b{font-size:1.15rem}
+.banner .cd{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.4rem;font-style:italic;color:var(--c,var(--cy))}
+.banner small{color:var(--mute);display:block}
+.banner.open{--c:var(--cy)}.banner.soon{--c:var(--vi)}.banner.closed{--c:#ffa94d}.banner.locked{--c:#3ddc97}.banner.draft{--c:var(--mute)}.banner.off{--c:#ff5d6c}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
+.cell{background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:8px 11px;min-width:0}
+.cell .n{font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c);line-height:1.1}
+.cell .t{font-variant-numeric:tabular-nums;font-weight:600}
+.cell .who{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cell .fu{color:var(--mute);font-size:.8rem;font-variant-numeric:tabular-nums}
+.cell select{margin-top:4px;padding:5px 7px;font-size:.9rem}
+.cell.free{--c:var(--mute)}.cell.free .who{color:var(--mute)}
+.cell.mine{--c:var(--cy)}
+.cell.other{--c:var(--vi)}
+.cell.past{opacity:.5}
+.cell.hit{cursor:pointer}.cell.hit:hover{border-color:var(--cy)}
+.cell.hit:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.legend{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--mute);font-size:.85rem;margin-top:14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hint{color:var(--mute);font-size:.85rem;margin-top:10px}
 .empty{color:var(--mute);padding:20px 0}
-.tot-h{margin:22px 0 0;font-weight:700}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cy);padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cy);padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:92vw;text-align:center}
 #toast.on{opacity:1}
-dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(680px,92vw);padding:20px}
-dialog::backdrop{background:rgba(5,7,16,.72)}
-dialog p{color:var(--mute);margin:4px 0 14px}
-pre{-webkit-user-select:all;user-select:all;cursor:copy;white-space:pre-wrap;word-break:break-word;margin:0 0 8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font:14px/1.55 ui-monospace,Consolas,monospace;max-height:36vh;overflow:auto}
-.part{margin-bottom:16px}.part .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:var(--mute);font-size:.85rem}
-
-.sv{display:flex;gap:8px;margin-top:6px}.sv select,.sv input{width:auto;flex:1;min-width:0}.sv button{white-space:nowrap}
-button:disabled{opacity:.45;cursor:default}
+body.ro .cfg{display:none}
+body.ro main{grid-template-columns:1fr}
 @media print{
 @page{size:A4 portrait;margin:14mm}
 body{background:#fff;color:#111;font-size:12pt}
@@ -69,19 +67,10 @@ header{padding:0 0 8px}
 h1{background:none;color:#111;-webkit-text-fill-color:#111;font-size:22pt}
 main{display:block;padding:0;max-width:none}
 section{background:none;border:0;padding:0}
-.hero{display:block;margin-bottom:10px}.trk{font-size:20pt}
-.stats{gap:24px;margin-top:6px}.stat b{color:#111;font-size:15pt}.stat span{color:#555}
-.bar{border:1px solid #999}.seg{border-right-color:#fff}.ends{color:#444}
-.stint{background:#fff;border:1px solid #bbb;border-left:7px solid var(--c);break-inside:avoid;padding:6px 12px}
-.stint .n{color:#111}.stint .d,.stint .l{color:#444}
-.stint .who select{display:none}.pr{display:inline;font-weight:600}
-.tot{display:block}.chip{background:#fff;border:1px solid #bbb;border-radius:8px;margin-bottom:6px;break-inside:avoid}
-.chip small{color:#444}
+.trk{font-size:20pt}.stat b{color:#111}
+.cell{background:#fff;border:1px solid #bbb;border-left:7px solid var(--c);break-inside:avoid}
+.cell select{display:none}
 }
-body.ro .cfg{display:none}
-body.ro main{grid-template-columns:1fr}
-body.ro .no-print{display:none}
-body.ro .pr{display:inline}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
@@ -92,308 +81,370 @@ body.ro .pr{display:inline}
   <div class="stripe"></div>
 </header>
 <main>
-  <section class="cfg" aria-label="Einstellungen">
-    <h2>Pläne</h2>
-    <label for="planSel">Gespeicherte Pläne</label>
-    <div class="sv"><select id="planSel"></select><button id="loadPlan" type="button">Laden</button><button id="delPlan" type="button">Löschen</button></div>
-    <label for="planName">Aktuellen Plan speichern als</label>
-    <div class="sv"><input id="planName" placeholder="z. B. Nordschleife 24H"><button id="savePlan" type="button">Speichern</button></div>
-    <h2 style="margin-top:24px">Rennen</h2>
-    <label for="track">Strecke</label>
-    <select id="track"></select>
-    <div class="two">
-      <div><label for="h">Stunden</label><input id="h" type="number" min="0" max="48"></div>
-      <div><label for="m">Minuten</label><input id="m" type="number" min="0" max="59"></div>
+  <section class="cfg" aria-label="Event verwalten">
+    <h2>Event</h2>
+    <div class="actions" style="margin-top:10px">
+      <button id="fNew" type="button">Neues Event</button>
+      <button id="fEdit" type="button">Ausgewähltes bearbeiten</button>
     </div>
-    <label for="stint">Stint-Länge (Minuten)</label>
-    <input id="stint" type="number" min="5" max="240">
+    <label for="fName">Name</label>
+    <input id="fName" placeholder="z. B. 6H Spa">
+    <label for="fTrack">Strecke</label>
+    <select id="fTrack"></select>
+    <label for="fClass">Klasse</label>
+    <input id="fClass" placeholder="z. B. GT3">
     <div class="two">
-      <div><label for="start">Startzeit (optional)</label><input id="start" type="time"></div>
-      <div><label for="lap">Rundenzeit (optional)</label><input id="lap" placeholder="1:48.5"></div>
+      <div><label for="fStart">Start (lokal)</label><input id="fStart" type="datetime-local"></div>
+      <div><label for="fHours">Dauer (h)</label><input id="fHours" type="number" min="1" max="48" step="1"></div>
     </div>
-    <h2 style="margin-top:24px">Fahrer</h2>
-    <div id="drivers" style="margin-top:10px"></div>
-    <button id="addDrv" type="button">Fahrer hinzufügen</button>
+    <h2 style="margin-top:22px">Anmeldefenster</h2>
+    <div class="two">
+      <div><label for="fOpenD">Tage vorher öffnen</label><input id="fOpenD" type="number" min="0" step="0.5"></div>
+      <div><label for="fCloseD">Tage vorher schließen</label><input id="fCloseD" type="number" min="0" step="0.5"></div>
+    </div>
+    <p class="hint" id="fPrev"></p>
+    <div class="two">
+      <div><label for="fOpenAt">Öffnet (direkt, optional)</label><input id="fOpenAt" type="datetime-local"></div>
+      <div><label for="fCloseAt">Schließt (direkt, optional)</label><input id="fCloseAt" type="datetime-local"></div>
+    </div>
+    <h2 style="margin-top:22px">Sprit</h2>
+    <label for="fLap">Rundenzeit (m:ss.x)</label>
+    <input id="fLap" placeholder="1:48.5">
+    <div class="two">
+      <div><label for="fCons">Verbrauch/Runde (L)</label><input id="fCons" type="number" step="0.01" min="0"></div>
+      <div><label for="fTank">Tank (L)</label><input id="fTank" type="number" step="1" min="0"></div>
+    </div>
+    <label for="fRes">Reserve (Runden)</label>
+    <input id="fRes" type="number" step="1" min="0" placeholder="1">
+    <h2 style="margin-top:22px">Erinnerungen &amp; Discord</h2>
+    <label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label>
+    <input id="fLead" placeholder="1440,120,20">
+    <div class="two">
+      <div><label for="fGuild">Server-ID (optional)</label><input id="fGuild" placeholder="Server-Standard"></div>
+      <div><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
+    </div>
+    <div class="actions">
+      <button class="go" id="fSave" type="button">Speichern</button>
+    </div>
+    <p class="hint" id="fHint"></p>
   </section>
 
   <section aria-label="Stintplan">
-    <div class="hero"><div class="trk" id="trk"></div><div class="stats" id="stats"></div></div>
-    <div class="bar" id="bar" role="img" aria-label="Zeitleiste der Stints"></div>
-    <div class="ends" id="ends"></div>
-    <div id="plan"></div>
-    <div class="tot-h" id="toth"></div>
-    <div class="tot" id="tot"></div>
-    <div class="actions">
-      <button class="go" id="discord" type="button">Für Discord exportieren</button>
-      <button id="print" type="button">Drucken / PDF</button>
-      <button id="reset" type="button">Rotation neu setzen</button>
-      <a class="btn go" href="../sprit/#import">Weiter zum Sprit-Rechner →</a>
-    </div>
+    <label for="evSel" style="margin-top:0">Event</label>
+    <select id="evSel"><option value="">Lädt …</option></select>
+    <div id="view"></div>
   </section>
 </main>
-
-<dialog id="dlg">
-  <h2>Für Discord</h2>
-  <p>Text kopieren und im Kanal einfügen. Discord erlaubt 2000 Zeichen pro Nachricht, lange Pläne werden deshalb in mehrere Nachrichten geteilt.</p>
-  <div id="parts"></div>
-  <div id="imgPart"></div>
-  <button type="button" id="close">Schließen</button>
-</dialog>
 <div id="toast" role="status"></div>
 
 <script>
 const TRACKS=["Barcelona","Brands Hatch","Circuit of the Americas","Donington Park","Hungaroring","Imola","Indianapolis","Kyalami","Laguna Seca","Misano","Monza","Mount Panorama (Bathurst)","Nürburgring","Nürburgring Nordschleife 24H","Oulton Park","Paul Ricard","Red Bull Ring","Silverstone","Snetterton","Spa-Francorchamps","Suzuka","Valencia","Watkins Glen","Zandvoort","Zolder"];
-const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
-const EMO=["🟦","🟪","🟧","🟩","🟥","🟨","🟫","⬜","⬛"];
 const $=id=>document.getElementById(id);
-let S={track:"Spa-Francorchamps",h:3,m:0,stint:40,start:"",lap:"",drivers:["Fahrer 1","Fahrer 2","Fahrer 3"],assign:[]};
-let TEAM=[],PL=[],canEdit=false,saveTimer;
-const save=()=>{
-  if(!canEdit)return;
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>fetch("/api/admin/plan",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({track:S.track,h:S.h,m:S.m,stint:S.stint,start:S.start,lap:S.lap,drivers:S.drivers,assign:S.assign})}),400);
-};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
-const dur=min=>Math.floor(min/60)+":"+pad(Math.round(min%60));
-const name=i=>(S.drivers[i]||"").trim()||"Fahrer "+(i+1);
-const col=i=>COLORS[((i%COLORS.length)+COLORS.length)%COLORS.length];
+// Server-Antworten: immer JSON, Fehler als {error}. Timestamps kommen als UTC-ISO rein und raus.
+async function api(path,opt){
+  const r=await fetch(path,Object.assign({credentials:"same-origin"},opt));
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||("Fehler "+r.status));
+  return d;
+}
+const body=(method,obj)=>({method,headers:{"Content-Type":"application/json"},body:JSON.stringify(obj||{})});
+const T=iso=>new Date(iso).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+const DT=iso=>new Date(iso).toLocaleString([],{dateStyle:"medium",timeStyle:"short"});
+const D=iso=>new Date(iso).toLocaleDateString([],{day:"2-digit",month:"2-digit",year:"numeric"});
+const toInput=iso=>{const d=new Date(iso);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())};
 
+let ME=null,ADMIN=false,EVENTS=[],EV=null,DETAIL=null,USERS=[],openCell=null,editId=null;
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2600)}
+
+// Spiegelt eventPhase() aus api/index.js: /api/admin/events liefert keine Phase mit,
+// und die Phase von /api/events veraltet, solange die Seite offen bleibt.
+function phaseOf(e,now){
+  if(!e)return null;
+  if(e.status==="draft"||e.status==="locked"||e.status==="done"||e.status==="cancelled")return e.status;
+  if(e.status==="assigning")return "after_signup";
+  if(now<new Date(e.signup_opens_at))return "before_signup";
+  if(now<=new Date(e.signup_closes_at))return "signup_open";
+  return "after_signup";
+}
+const STATUS={draft:"Entwurf",signup:"Anmeldung",assigning:"Verteilung",locked:"Festgeschrieben",done:"Gelaufen",cancelled:"Abgesagt"};
+
+// Fallback nur noch für den Fall, dass der Detail-Fetch selbst fehlschlägt (Netzwerk-/
+// Serverfehler) und DETAIL deshalb null bleibt – die Admin-Detailroute liefert Entwürfe
+// inzwischen korrekt mit aus, das ist also kein Grund mehr für diesen Fallback.
 function stints(){
-  const total=(+S.h||0)*60+(+S.m||0),len=+S.stint||0;
-  if(total<=0||len<=0)return [];
-  const n=Math.ceil(total/len),a=[];
-  for(let i=0;i<n;i++)a.push({s:i*len,e:Math.min(total,(i+1)*len)});
+  if(DETAIL)return DETAIL.stints;
+  if(!EV)return [];
+  const t0=new Date(EV.start_at).getTime(),a=[];
+  for(let i=0;i<EV.duration_minutes/60;i++)a.push({
+    number:i+1,start_at:new Date(t0+i*36e5).toISOString(),end_at:new Date(t0+(i+1)*36e5).toISOString(),
+    fuel_liters:null,pit_stops:0,assigned_user:null,
+  });
   return a;
 }
-function fill(n){
-  const D=S.drivers.length;
-  S.assign=S.assign.slice(0,n);
-  for(let i=0;i<n;i++){
-    const v=S.assign[i];
-    if(!(Number.isInteger(v)&&v>=0&&v<D))S.assign[i]=D?((i?S.assign[i-1]:-1)+1)%D:-1;
+const isMine=s=>!!(s.assigned_user&&ME&&((ME.discord_id&&s.assigned_user.discord_id===ME.discord_id)||s.assigned_user.display_name===ME.display_name));
+const userLabel=u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name;
+const userIdOf=s=>{
+  if(!s.assigned_user)return "";
+  const u=USERS.find(x=>x.discord_id&&x.discord_id===s.assigned_user.discord_id)||USERS.find(x=>x.display_name===s.assigned_user.display_name);
+  return u?u.id:"";
+};
+
+function renderBanner(){
+  const el=$("banner");
+  if(!el||!EV)return;
+  const now=new Date(),ph=phaseOf(EV,now);
+  const set=(cls,html)=>{el.className="banner "+cls;el.innerHTML=html};
+  if(ph==="draft")return set("draft","<div><b>Entwurf</b><small>Noch nicht veröffentlicht – nur für Admins sichtbar.</small></div>");
+  if(ph==="before_signup")return set("soon","<div><b>Anmeldung noch nicht offen</b><small>Öffnet am "+esc(DT(EV.signup_opens_at))+".</small></div>");
+  if(ph==="signup_open"){
+    const left=new Date(EV.signup_closes_at)-now,mins=Math.max(0,Math.floor(left/60000));
+    const d=Math.floor(mins/1440),h=Math.floor(mins%1440/60),m=mins%60;
+    const txt=d>0?d+" Tag"+(d===1?"":"en")+", "+h+" Stunde"+(h===1?"":"n"):h>0?h+" Stunde"+(h===1?"":"n")+", "+m+" Minute"+(m===1?"":"n"):m+" Minute"+(m===1?"":"n");
+    return set("open","<div><b>Anmeldung schließt in</b><small>Bis "+esc(DT(EV.signup_closes_at))+" – freie Stunden anklicken.</small></div><span class=\"cd\">"+esc(txt)+"</span>");
   }
-}
-function clock(off){
-  if(!S.start)return dur(off);
-  const [hh,mm]=S.start.split(":").map(Number),t=(hh*60+mm+off)%1440;
-  return pad(Math.floor(t/60))+":"+pad(t%60);
-}
-function lapSec(){
-  const v=String(S.lap).trim().replace(",","."),m=v.match(/^(\d+):(\d+(?:\.\d+)?)$/);
-  if(m)return +m[1]*60+ +m[2];
-  return /^\d+(\.\d+)?$/.test(v)?+v:0;
-}
-function sums(){
-  const r=S.drivers.map(()=>({t:0,n:0}));
-  stints().forEach((x,i)=>{const a=r[S.assign[i]];if(a){a.t+=x.e-x.s;a.n++}});
-  return r;
+  if(ph==="after_signup")return set("closed","<div><b>Anmeldung geschlossen</b><small>Wer sich nicht einträgt, bekommt was noch frei ist.</small></div>");
+  if(ph==="locked")return set("locked","<div><b>Plan festgeschrieben</b><small>Erinnerungen sind erzeugt. Änderungen nur noch durch einen Admin.</small></div>");
+  if(ph==="done")return set("locked","<div><b>Rennen gelaufen</b><small>Dieser Plan ist Archiv.</small></div>");
+  return set("off","<div><b>Abgesagt</b><small>Dieses Event findet nicht statt.</small></div>");
 }
 
-const PLACEHOLDERS=["Fahrer 1","Fahrer 2","Fahrer 3"];
-function renderDrivers(){
-  $("drivers").innerHTML=S.drivers.map((d,i)=>{
-    const opts=[...new Set([...PLACEHOLDERS,...TEAM,d])].map(o=>`<option${o===d?" selected":""}>${esc(o)}</option>`).join("");
-    return `<div class="drv" style="--c:${col(i)}"><span class="dot"></span><select data-d="${i}" aria-label="Fahrer ${i+1}">${opts}</select><button type="button" data-x="${i}" aria-label="Fahrer ${i+1} entfernen">Entfernen</button></div>`;
+function renderGrid(){
+  const el=$("grid");
+  if(!el)return;
+  const now=Date.now(),list=stints(),ph=phaseOf(EV,new Date());
+  const canClaim=ph==="signup_open",canRelease=EV.status!=="locked";
+  el.innerHTML=list.map(s=>{
+    const past=new Date(s.end_at).getTime()<=now,mine=isMine(s);
+    const cls=["cell",mine?"mine":s.assigned_user?"other":"free",past?"past":""];
+    const hit=ADMIN||(!past&&(mine?canRelease:!s.assigned_user&&canClaim));
+    if(hit)cls.push("hit");
+    const who=mine?"Du":s.assigned_user?esc(s.assigned_user.display_name):"frei";
+    const sel=ADMIN&&openCell===s.number
+      ?'<select data-as="'+s.number+'" aria-label="Fahrer für Stint '+s.number+'"><option value="">— frei —</option>'
+        +USERS.map(u=>'<option value="'+u.id+'"'+(u.id===userIdOf(s)?" selected":"")+">"+esc(userLabel(u))+"</option>").join("")+"</select>"
+      :"";
+    const fuel=s.fuel_liters!=null?'<div class="fu">'+esc(String(s.fuel_liters).replace(".",","))+" L"+(s.pit_stops?" · "+s.pit_stops+" Stopp"+(s.pit_stops===1?"":"s"):"")+"</div>":"";
+    const hitAttrs=hit?' role="button" tabindex="0"':"";
+    return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"'+hitAttrs+'><div class="n">'+s.number+'</div><div class="t">'
+      +esc(T(s.start_at))+" – "+esc(T(s.end_at))+'</div><div class="who">'+who+"</div>"+fuel+sel+"</div>";
   }).join("");
 }
-function renderPlan(){
-  const st=stints();fill(st.length);
-  const total=st.length?st[st.length-1].e:0,lap=lapSec();
-  $("trk").textContent=S.track;
-  document.title="CRTG Stintplan – "+S.track;
-  if(!S.drivers.length||!st.length){
-    ["stats","bar","ends","tot","toth"].forEach(k=>$(k).innerHTML="");
-    $("plan").innerHTML='<p class="empty">'+(S.drivers.length?"Trage eine Renndauer und eine Stint-Länge ein.":"Füge mindestens einen Fahrer hinzu.")+"</p>";
+
+function renderView(){
+  const v=$("view");
+  if(!EV){v.innerHTML='<p class="empty">Kein Event vorhanden.</p>';return}
+  const list=stints(),assigned=list.filter(s=>s.assigned_user).length,mine=list.filter(isMine).length;
+  const stat=(b,l)=>'<div class="stat"><b>'+b+'</b><span>'+l+"</span></div>";
+  v.innerHTML='<div class="hero"><div><div class="trk">'+esc(EV.track)+'</div><div class="meta">'+esc(EV.name)
+    +(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))+" · "+STATUS[EV.status]
+    +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div></div>"
+    +'<div class="stats">'+stat(EV.duration_minutes/60+" h","Renndauer")+stat(assigned+" / "+list.length,"Stints belegt")+stat(mine,"davon deine")+"</div></div>"
+    +'<div id="banner" class="banner"></div><div class="grid" id="grid"></div>'
+    +'<div class="legend"><span style="--c:var(--mute)"><i></i>frei</span><span style="--c:var(--cy)"><i></i>deine Stunde</span>'
+    +'<span style="--c:var(--vi)"><i></i>anderer Fahrer</span><span style="--c:var(--line)"><i></i>vorbei (blass)</span></div>'
+    +'<p class="hint" id="gridHint"></p><div class="actions" id="evActions"></div>';
+  renderBanner();renderGrid();
+
+  const ph=phaseOf(EV,new Date());
+  $("gridHint").textContent=ADMIN
+    ?"Admin: Feld anklicken, um einen Fahrer direkt zuzuweisen oder freizugeben – jederzeit, unabhängig vom Anmeldefenster."
+    :ph==="signup_open"?"Freie Stunde anklicken = eintragen. Eigene Stunde anklicken = wieder freigeben."
+    :ph==="before_signup"?"Sobald die Anmeldung öffnet, kannst du hier freie Stunden anklicken."
+    :EV.status==="locked"?"Der Plan ist festgeschrieben.":"Eintragen ist nur während des Anmeldefensters möglich.";
+
+  if(!ADMIN)return;
+  const now=new Date();
+  const btn=(id,txt,on,cls)=>'<button type="button" id="'+id+'"'+(cls?' class="'+cls+'"':"")+(on?"":" disabled")+">"+txt+"</button>";
+  const closed=!!EV.signup_closes_at&&now>=new Date(EV.signup_closes_at);
+  $("evActions").innerHTML=
+    (EV.status==="draft"?btn("doPub","Veröffentlichen",true,"go"):"")
+    +(EV.status==="signup"?btn("doDist","Freie Stints verteilen",closed):"")
+    +(EV.status==="signup"||EV.status==="assigning"?btn("doLock","Plan festschreiben",true):"");
+  if($("doPub"))$("doPub").onclick=()=>act("publish","Event veröffentlichen? Danach ist die Anmeldung sichtbar.");
+  if($("doDist"))$("doDist").onclick=()=>act("distribute","Freie Stints automatisch auf Fahrer ohne Stint verteilen?");
+  if($("doLock"))$("doLock").onclick=()=>act("lock","Plan festschreiben? Danach werden die Discord-Erinnerungen erzeugt.");
+}
+
+async function act(what,ask){
+  if(!confirm(ask))return;
+  try{
+    const r=await api("/api/admin/events/"+EV.id+"/"+what,body("POST"));
+    toast(what==="distribute"?"Verteilt: "+(r.assigned!=null?r.assigned+" Stints":"fertig"):"Erledigt ✓");
+    await load(EV.id);
+  }catch(e){toast(e.message)}
+}
+
+async function claim(n){
+  try{await api("/api/events/"+EV.id+"/stints/"+n+"/claim",body("POST"));await load(EV.id);toast("Eingetragen ✓")}
+  catch(e){toast(e.message);await load(EV.id)}
+}
+async function release(n){
+  if(!confirm("Stunde "+n+" wieder freigeben?"))return;
+  try{await api("/api/events/"+EV.id+"/stints/"+n+"/claim",body("DELETE"));await load(EV.id);toast("Freigegeben ✓")}
+  catch(e){toast(e.message);await load(EV.id)}
+}
+async function assign(n,userId){
+  try{
+    await api("/api/admin/events/"+EV.id+"/stints/"+n,body("PATCH",{assigned_user_id:userId===""?null:+userId}));
+    openCell=null;await load(EV.id);toast("Zugewiesen ✓");
+  }catch(e){toast(e.message)}
+}
+
+// Gemeinsame Logik für Klick UND Tastatur (Enter/Leertaste) auf eine Zelle –
+// nur eine Stelle, die claim/release/assign auslöst.
+function activateCell(cell){
+  if(!cell||!EV)return;
+  const n=+cell.dataset.n,s=stints().find(x=>x.number===n);
+  if(!s)return;
+  if(ADMIN){
+    openCell=openCell===n?null:n;renderGrid();
+    // renderGrid() setzt die Zelle per innerHTML neu, das <select> hat also nie den Fokus
+    // der Zelle geerbt -> ohne .focus() braucht es einen zweiten Klick, um es zu öffnen.
+    if(openCell===n)$("view").querySelector('select[data-as="'+n+'"]')?.focus();
     return;
   }
-  const stat=(b,l)=>`<div class="stat"><b>${b}</b><span>${l}</span></div>`;
-  $("stats").innerHTML=stat(dur(total)+" h","Renndauer")+stat(st.length,"Stints")+stat(st.length-1,"Boxenstopps")+(S.start?stat(esc(S.start),"Start (Uhr)"):"");
-  $("bar").innerHTML=st.map((x,i)=>`<div class="seg" style="--c:${col(S.assign[i])};width:${(x.e-x.s)/total*100}%" title="${esc(name(S.assign[i]))}: ${clock(x.s)}–${clock(x.e)}">${(x.e-x.s)/total>.07?esc(name(S.assign[i])):""}</div>`).join("");
-  $("ends").innerHTML=`<span>Start ${clock(0)}</span><span>Ziel ${clock(total)}</span>`;
-  $("plan").innerHTML=st.map((x,i)=>{
-    const a=S.assign[i];
-    const cur=name(a),opts=[...new Set([...PLACEHOLDERS,...TEAM,cur])];
-    return `<div class="stint" style="--c:${col(a)}"><span class="n">${i+1}</span><span class="who"><span class="dot no-print"></span><select class="no-print" data-s="${i}" aria-label="Fahrer Stint ${i+1}">${opts.map(o=>`<option${o===cur?" selected":""}>${esc(o)}</option>`).join("")}</select><span class="pr">${esc(cur)}</span></span><span class="t">${clock(x.s)} – ${clock(x.e)}</span><span class="d">${Math.round(x.e-x.s)} min</span>${lap?`<span class="l">ca. ${Math.round((x.e-x.s)*60/lap)} Rd.</span>`:""}</div>`;
-  }).join("");
-  $("toth").textContent="Fahrzeit pro Fahrer";
-  $("tot").innerHTML=sums().map((a,i)=>`<div class="chip" style="--c:${col(i)}"><span class="dot"></span><b>${esc(name(i))}</b><small>${a.n} Stint${a.n===1?"":"s"} · ${dur(a.t)} h</small><i style="width:${a.t/total*100}%"></i></div>`).join("");
-  save();
+  if(new Date(s.end_at)<=new Date())return;
+  if(isMine(s))return EV.status==="locked"?toast("Plan ist festgeschrieben."):release(n);
+  if(s.assigned_user)return toast("Diese Stunde hat schon "+s.assigned_user.display_name+".");
+  if(phaseOf(EV,new Date())!=="signup_open")return toast("Eintragen ist nur während des Anmeldefensters möglich.");
+  claim(n);
 }
+$("view").onclick=e=>{
+  if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
+  activateCell(e.target.closest(".cell"));
+};
+$("view").onkeydown=e=>{
+  if(e.key!=="Enter"&&e.key!==" "&&e.key!=="Spacebar")return;
+  if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
+  const cell=e.target.closest(".cell");
+  if(!cell||!cell.classList.contains("hit"))return;
+  e.preventDefault();
+  activateCell(cell);
+};
+$("view").onchange=e=>{const n=e.target.dataset.as;if(n!==undefined)assign(+n,e.target.value)};
 
-function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)}
-function flash(btn,txt){
-  if(!btn)return;
-  const old=btn.dataset.old||btn.textContent;btn.dataset.old=old;
-  btn.textContent=txt;clearTimeout(btn._t);
-  btn._t=setTimeout(()=>{btn.textContent=old},2000);
+// --- Admin-Formular -------------------------------------------------------
+function fillForm(e){
+  editId=e?e.id:null;
+  $("fName").value=e?e.name:"";
+  $("fTrack").value=e&&TRACKS.includes(e.track)?e.track:"Spa-Francorchamps";
+  $("fClass").value=e?e.car_class||"":"";
+  $("fStart").value=e?toInput(e.start_at):"";
+  $("fHours").value=e?e.duration_minutes/60:"";
+  $("fOpenD").value=e&&e.signup_opens_offset_minutes!=null?e.signup_opens_offset_minutes/1440:e?"":7;
+  $("fCloseD").value=e&&e.signup_closes_offset_minutes!=null?e.signup_closes_offset_minutes/1440:e?"":2;
+  $("fOpenAt").value=e&&e.signup_opens_offset_minutes==null&&e.signup_opens_at?toInput(e.signup_opens_at):"";
+  $("fCloseAt").value=e&&e.signup_closes_offset_minutes==null&&e.signup_closes_at?toInput(e.signup_closes_at):"";
+  $("fLap").value=e&&e.lap_seconds!=null?Math.floor(e.lap_seconds/60)+":"+(e.lap_seconds%60<10?"0":"")+(Math.round(e.lap_seconds%60*10)/10):"";
+  $("fCons").value=e&&e.fuel_cons_per_lap!=null?e.fuel_cons_per_lap:"";
+  $("fTank").value=e&&e.tank_liters!=null?e.tank_liters:"";
+  $("fRes").value=e&&e.fuel_reserve_laps!=null?e.fuel_reserve_laps:"";
+  $("fLead").value=e&&e.reminder_lead_times?e.reminder_lead_times.join(","):"";
+  $("fGuild").value=e&&e.guild_id?e.guild_id:"";
+  $("fVoice").value=e&&e.voice_channel_id?e.voice_channel_id:"";
+  $("fSave").textContent=editId?"Änderungen speichern":"Event anlegen";
+  $("fHint").textContent=editId?"Bearbeitet: „"+e.name+"“.":"Neues Event. Nach dem Anlegen entstehen die Stunden-Stints automatisch.";
+  preview();
 }
-function copyText(t,btn){
-  const ok=()=>flash(btn,"Kopiert ✓");
-  const fb=()=>{
-    const host=$("dlg").open?$("dlg"):document.body;
-    const a=document.createElement("textarea");
-    a.value=t;a.style.cssText="position:fixed;top:0;left:0;opacity:0";
-    host.appendChild(a);a.focus();a.select();
-    let r=false;try{r=document.execCommand("copy")}catch(e){}
-    a.remove();
-    r?ok():flash(btn,"Text anklicken, dann Strg+C");
+function preview(){
+  const st=$("fStart").value,p=(d,at,lab)=>{
+    if(at)return lab+" "+DT(new Date(at).toISOString());
+    const v=parseFloat(d);
+    if(!st||!(v>=0))return lab+" –";
+    return lab+" "+DT(new Date(new Date(st).getTime()-v*1440*60000).toISOString());
   };
-  (navigator.clipboard&&window.isSecureContext)?navigator.clipboard.writeText(t).then(ok,fb):fb();
+  $("fPrev").textContent=p($("fOpenD").value,$("fOpenAt").value,"Öffnet:")+" · "+p($("fCloseD").value,$("fCloseAt").value,"Schließt:");
 }
-const dn=i=>name(i).replace(/([\\*_~`|>])/g,"\\$1");
-function discordParts(){
-  const st=stints();if(!st.length||!S.drivers.length)return [];
-  const total=st[st.length-1].e,BT="`",b=[];
-  b.push("🏁 **CRTG – "+S.track+"**\n⏱️ "+dur(total)+" h · "+st.length+" Stints · "+(st.length-1)+" Boxenstopps"+(S.start?" · Start "+S.start+" Uhr":"")+"\n");
-  st.forEach((x,i)=>b.push(EMO[S.assign[i]%EMO.length]+" **"+(i+1)+"** "+BT+clock(x.s)+"–"+clock(x.e)+BT+"  "+dn(S.assign[i])+" · "+Math.round(x.e-x.s)+" min"));
-  b.push("\n**Fahrzeit**");
-  sums().forEach((a,i)=>b.push(EMO[i%EMO.length]+" "+dn(i)+" · "+a.n+" Stint"+(a.n===1?"":"s")+" · "+dur(a.t)+" h"));
-  const parts=[];let cur="";
-  b.forEach(l=>{if(cur&&(cur+"\n"+l).length>1900){parts.push(cur);cur=l}else cur=cur?cur+"\n"+l:l});
-  if(cur)parts.push(cur);
-  return parts;
-}
-function openDiscord(){
-  const p=discordParts();
-  if(!p.length){toast("Noch kein Plan vorhanden");return}
-  $("parts").innerHTML=p.map((t,i)=>`<div class="part"><div class="hd"><span>Nachricht ${i+1} von ${p.length} · ${t.length} Zeichen</span><button type="button" data-c="${i}">Kopieren</button></div><pre>${esc(t)}</pre></div>`).join("");
-  $("parts").onclick=e=>{const i=e.target.dataset.c;if(i!==undefined)copyText(p[i],e.target)};
-  renderImg();$("dlg").showModal();
-}
-
-
-function planCanvas(){
-  const st=stints();if(!st.length||!S.drivers.length)return null;
-  const total=st[st.length-1].e,W=1200,P=40,cols=st.length>16?2:1,gap=20,rw=(W-2*P-(cols-1)*gap)/cols,rh=60,rn=Math.ceil(st.length/cols);
-  const FF="Bahnschrift,'Roboto Condensed','Arial Narrow',system-ui,sans-serif",F=(w,z,i)=>(i?"italic ":"")+w+" "+z+"px "+FF;
-  const m=document.createElement("canvas").getContext("2d");m.font=F(600,24);
-  const chips=sums().map((a,i)=>({i,t:name(i)+" · "+a.n+" Stint"+(a.n===1?"":"s")+" · "+dur(a.t)+" h",w:0}));
-  chips.forEach(c=>c.w=m.measureText(c.t).width+60);
-  let cx=P,cy=0;const pos=chips.map(c=>{if(cx+c.w>W-P&&cx>P){cx=P;cy+=56}const r={x:cx,y:cy};cx+=c.w+12;return r});
-  const barY=170,rowsY=barY+88,chipsY=rowsY+rn*(rh+10)+56,H=chipsY+cy+108;
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;
-  const g=cv.getContext("2d");
-  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
-  const fit=(t,max)=>{if(g.measureText(t).width<=max)return t;while(t.length>1&&g.measureText(t+"…").width>max)t=t.slice(0,-1);return t+"…"};
-  g.fillStyle="#0b0e1b";g.fillRect(0,0,W,H);
-  [[0,"43,208,255"],[W,"155,107,255"]].forEach(([x,c])=>{const r=g.createRadialGradient(x,0,0,x,0,760);r.addColorStop(0,"rgba("+c+",.22)");r.addColorStop(1,"rgba("+c+",0)");g.fillStyle=r;g.fillRect(0,0,W,H)});
-  const ic=document.querySelector(".nav .brand img");let tx=P;
-  if(ic&&ic.complete&&ic.naturalWidth){g.save();rr(P,36,88,88,18);g.clip();g.drawImage(ic,P,36,88,88);g.restore();tx=P+110}
-  g.fillStyle="#eaedfa";g.font=F(800,48,1);g.fillText(fit(S.track,W-P-tx),tx,86);
-  g.fillStyle="#8f98bd";g.font=F(500,26);
-  g.fillText(dur(total)+" h · "+st.length+" Stints · "+(st.length-1)+" Boxenstopps"+(S.start?" · Start "+S.start+" Uhr":""),tx,124);
-  const sg=g.createLinearGradient(P,0,W-P,0);sg.addColorStop(0,"#2bd0ff");sg.addColorStop(1,"#9b6bff");g.fillStyle=sg;g.fillRect(P,146,W-2*P,5);
-  g.save();rr(P,barY,W-2*P,44,10);g.clip();
-  st.forEach((x,i)=>{
-    const x0=P+x.s/total*(W-2*P),w=(x.e-x.s)/total*(W-2*P);
-    g.fillStyle=col(S.assign[i]);g.fillRect(x0,barY,w,44);
-    if(i<st.length-1){g.fillStyle="#0b0e1b";g.fillRect(x0+w-3,barY,3,44)}
-    if(w>120){g.font=F(700,20);g.fillStyle="#0b0e1b";g.textAlign="center";g.fillText(fit(name(S.assign[i]),w-16),x0+w/2,barY+29);g.textAlign="left"}
-  });
-  g.restore();
-  g.font=F(500,20);g.fillStyle="#8f98bd";g.fillText("Start "+clock(0),P,barY+68);g.textAlign="right";g.fillText("Ziel "+clock(total),W-P,barY+68);g.textAlign="left";
-  st.forEach((x,i)=>{
-    const c=Math.floor(i/rn),r=i%rn,X=P+c*(rw+gap),Y=rowsY+r*(rh+10),a=S.assign[i],cl=col(a);
-    g.fillStyle="#1a2040";rr(X,Y,rw,rh,12);g.fill();
-    g.save();rr(X,Y,rw,rh,12);g.clip();g.fillStyle=cl;g.fillRect(X,Y,8,rh);g.restore();
-    g.font=F(800,34,1);g.fillStyle=cl;g.fillText(String(i+1),X+24,Y+43);
-    const ts=clock(x.s)+" – "+clock(x.e);
-    g.font=F(600,26);const tw=g.measureText(ts).width;
-    g.fillStyle="#eaedfa";g.font=F(700,28);g.fillText(fit(name(a),rw-78-110-tw-24),X+78,Y+41);
-    g.font=F(600,26);g.fillText(ts,X+rw-110-tw,Y+41);
-    g.fillStyle="#8f98bd";g.font=F(500,22);g.textAlign="right";g.fillText(Math.round(x.e-x.s)+" min",X+rw-18,Y+40);g.textAlign="left";
-  });
-  g.fillStyle="#8f98bd";g.font=F(700,24);g.fillText("Fahrzeit pro Fahrer",P,chipsY-16);
-  chips.forEach((c,k)=>{
-    const X=pos[k].x,Y=chipsY+pos[k].y;
-    g.fillStyle="#1a2040";rr(X,Y,c.w,44,22);g.fill();g.strokeStyle="#2a3157";g.lineWidth=1.5;g.stroke();
-    g.fillStyle=col(c.i);g.beginPath();g.arc(X+24,Y+22,8,0,7);g.fill();
-    g.fillStyle="#eaedfa";g.font=F(600,24);g.fillText(c.t,X+42,Y+30);
-  });
-  g.fillStyle="#8f98bd";g.font=F(500,20);g.textAlign="right";g.fillText("ChaosRacing – Team Germany",W-P,H-26);g.textAlign="left";
-  return cv;
-}
-function renderImg(){
-  const box=$("imgPart"),cv=planCanvas();
-  if(!cv){box.innerHTML="";return}
-  const url=cv.toDataURL("image/png");
-  const canCopy=!!(navigator.clipboard&&window.ClipboardItem&&window.isSecureContext);
-  box.innerHTML=`<div class="part"><div class="hd"><span>Als Bild (PNG) · ${cv.width}×${cv.height}</span><span><button type="button" data-img="dl">Herunterladen</button>${canCopy?' <button type="button" data-img="cp">Bild kopieren</button>':""}</span></div><img src="${url}" alt="Vorschau des Stintplans als Bild" style="width:100%;border-radius:10px;border:1px solid var(--line)"></div>`;
-  box.onclick=e=>{
-    const k=e.target.dataset.img;if(!k)return;
-    if(k==="dl"){
-      const a=document.createElement("a");a.href=url;a.download="stintplan-"+S.track.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".png";
-      $("dlg").appendChild(a);a.click();a.remove();flash(e.target,"Gespeichert ✓");
-    }else cv.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(()=>flash(e.target,"Kopiert ✓"),()=>flash(e.target,"Nicht möglich")));
+function formBody(){
+  const start=$("fStart").value;
+  if(!$("fName").value.trim())throw new Error("Name fehlt.");
+  if(!start)throw new Error("Startzeit fehlt.");
+  const h=+$("fHours").value;
+  if(!Number.isInteger(h)||h<1)throw new Error("Dauer in ganzen Stunden angeben (mindestens 1).");
+  const lap=$("fLap").value.trim();
+  // Muss zu api/_lib/fuel.js lapSeconds() passen (m:ss.x ODER reine Sekunden), sonst
+  // parst der Server es stillschweigend zu 0 und computeStintFuel() liefert NaN.
+  if(lap&&!/^(\d+:)?\d+([.,]\d+)?$/.test(lap))
+    throw new Error("Rundenzeit ungültig – Format m:ss.x (z. B. 1:48.5) oder Sekunden als Zahl.");
+  const b={
+    name:$("fName").value.trim(),track:$("fTrack").value,car_class:$("fClass").value.trim(),
+    start_at:new Date(start).toISOString(),duration_minutes:h*60,
+    lap_seconds:lap,fuel_cons_per_lap:$("fCons").value,tank_liters:$("fTank").value,
+    fuel_reserve_laps:$("fRes").value===""?1:+$("fRes").value,
   };
+  [["opens","fOpenD","fOpenAt","Öffnen"],["closes","fCloseD","fCloseAt","Schließen"]].forEach(([k,dId,atId,lab])=>{
+    const at=$(atId).value;
+    if(at){b["signup_"+k+"_at"]=new Date(at).toISOString();b["signup_"+k+"_offset_minutes"]=null}
+    else{
+      const v=parseFloat($(dId).value);
+      if(!(v>=0))throw new Error("Anmeldefenster "+lab+": Tage vorher oder direkte Zeit angeben.");
+      b["signup_"+k+"_offset_minutes"]=Math.round(v*1440);
+    }
+  });
+  const lead=$("fLead").value.trim();
+  if(lead){
+    const arr=lead.split(",").map(s=>parseInt(s.trim(),10));
+    if(!arr.length||arr.some(n=>!Number.isInteger(n)||n<=0))
+      throw new Error("Erinnerungsstufen: kommagetrennte Liste positiver Minuten-Werte angeben (z. B. 1440,120,20).");
+    b.reminder_lead_times=arr;
+  }
+  b.guild_id=$("fGuild").value.trim()||null;
+  b.voice_channel_id=$("fVoice").value.trim()||null;
+  return b;
 }
-async function loadPL(sel){
-  PL=await fetch("/api/admin/plans",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]);
-  renderPL(sel);
-}
-function renderPL(sel){
-  $("planSel").innerHTML=PL.length?PL.map(q=>`<option value="${q.id}">${esc(q.name)}</option>`).join(""):'<option value="">Noch keine Pläne gespeichert</option>';
-  if(sel!==undefined)$("planSel").value=sel;
-  $("loadPlan").disabled=$("delPlan").disabled=!PL.length;
-}
-$("savePlan").onclick=()=>{
-  const nm=$("planName").value.trim()||(S.track+" · "+dur((+S.h||0)*60+(+S.m||0))+" h");
-  fetch("/api/admin/plans",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:nm})})
-    .then(r=>r.json().then(d=>({ok:r.ok,d})))
-    .then(({ok,d})=>{if(!ok)return toast(d.error||"Fehler");$("planName").value=nm;loadPL(d.id);flash($("savePlan"),"Gespeichert ✓")});
+$("fSave").onclick=async()=>{
+  try{
+    const b=formBody();
+    const ev=editId?await api("/api/admin/events/"+editId,body("PATCH",b)):await api("/api/admin/events",body("POST",b));
+    toast(editId?"Gespeichert ✓":"Event angelegt ✓");
+    editId=ev.id;
+    await load(ev.id);
+  }catch(e){toast(e.message)}
 };
-$("loadPlan").onclick=()=>{
-  const id=$("planSel").value;if(!id)return;
-  fetch("/api/admin/plans/"+id+"/load",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"})
-    .then(r=>r.json().then(d=>({ok:r.ok,d})))
-    .then(({ok,d})=>{
-      if(!ok)return toast(d.error||"Fehler");
-      S=d;if(!TRACKS.includes(S.track))S.track=TRACKS[0];
-      $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
-      renderDrivers();renderPlan();flash($("loadPlan"),"Geladen ✓");
-    });
-};
-$("delPlan").onclick=()=>{
-  const id=$("planSel").value,q=PL.find(p=>p.id==id);
-  if(!q||!confirm("Plan „"+q.name+"“ löschen?"))return;
-  fetch("/api/admin/plans/"+id,{method:"DELETE",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).then(()=>loadPL());
-};
+$("fNew").onclick=()=>fillForm(null);
+$("fEdit").onclick=()=>EV?fillForm(EV):toast("Kein Event ausgewählt.");
+["fStart","fOpenD","fCloseD","fOpenAt","fCloseAt"].forEach(id=>$(id).oninput=preview);
 
-$("track").innerHTML=TRACKS.map(t=>`<option>${esc(t)}</option>`).join("");
-
-$("track").onchange=e=>{S.track=e.target.value;renderPlan()};
-["h","m","stint","start","lap"].forEach(id=>$(id).oninput=e=>{S[id]=e.target.value;renderPlan()});
-$("addDrv").onclick=()=>{S.drivers.push("Fahrer "+(S.drivers.length+1));renderDrivers();renderPlan()};
-$("drivers").onchange=e=>{const i=e.target.dataset.d;if(i!==undefined){S.drivers[i]=e.target.value;renderPlan()}};
-$("drivers").onclick=e=>{
-  const i=e.target.dataset.x;if(i===undefined)return;
-  S.drivers.splice(+i,1);
-  S.assign=S.assign.map(v=>v===+i?-1:v>+i?v-1:v);
-  renderDrivers();renderPlan();
-};
-$("plan").onchange=e=>{
-  const i=e.target.dataset.s;if(i===undefined)return;
-  const v=e.target.value;let j=S.drivers.indexOf(v);
-  if(j<0){S.drivers.push(v);j=S.drivers.length-1;renderDrivers()}
-  S.assign[i]=j;renderPlan();
-};
-$("reset").onclick=()=>{S.assign=[];renderPlan()};
-$("print").onclick=()=>window.print();
-$("discord").onclick=openDiscord;
-$("close").onclick=()=>$("dlg").close();
+// --- Laden ---------------------------------------------------------------
+const evLabel=e=>e.name+" · "+e.track+" · "+D(e.start_at)+" · "+STATUS[e.status]
+  +(e.total!=null?" ("+e.assigned+"/"+e.total+")":"");
+async function load(selectId){
+  EVENTS=await api(ADMIN?"/api/admin/events":"/api/events").catch(e=>{toast(e.message);return []});
+  EVENTS.sort((a,b)=>new Date(a.start_at)-new Date(b.start_at));
+  const want=selectId!=null?selectId:(EV?EV.id:null);
+  EV=EVENTS.find(e=>e.id===want)||EVENTS.find(e=>new Date(e.start_at)>=new Date())||EVENTS[0]||null;
+  $("evSel").innerHTML=EVENTS.length
+    ?EVENTS.map(e=>'<option value="'+e.id+'"'+(EV&&e.id===EV.id?" selected":"")+">"+esc(evLabel(e))+"</option>").join("")
+    :'<option value="">Noch kein Event angelegt</option>';
+  openCell=null;
+  DETAIL=null;
+  // Admin sieht Zuweisungen über jedem Status (inkl. draft) via die Admin-Detailroute;
+  // Fahrer bleiben auf dem draft-ausschließenden /api/v1/-Vertrag.
+  const detailUrl=ADMIN?(EV&&"/api/admin/events/"+EV.id):(EV&&EV.status!=="draft"&&"/api/v1/events/"+EV.id);
+  if(detailUrl){
+    try{DETAIL=await api(detailUrl)}catch(e){toast(e.message)}
+  }
+  renderView();
+}
+$("evSel").onchange=e=>load(+e.target.value);
 
 (async function init(){
-  const me=await fetch("/api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  canEdit=!!me&&me.role==="admin";
-  if(!canEdit){document.body.classList.add("ro");$("reset").style.display="none"}
-  const plan=await fetch("/api/plan",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  if(plan)S=plan;
-  if(!TRACKS.includes(S.track))S.track=TRACKS[0];
-  $("track").value=S.track;$("h").value=S.h;$("m").value=S.m;$("stint").value=S.stint;$("start").value=S.start;$("lap").value=S.lap;
-  TEAM=await fetch("/api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).then(list=>list.map(u=>u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name)).catch(()=>[]);
-  if(canEdit)await loadPL();
-  renderDrivers();renderPlan();
+  $("fTrack").innerHTML=TRACKS.map(t=>'<option>'+esc(t)+"</option>").join("");
+  ME=await fetch("/api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  ADMIN=!!ME&&ME.role==="admin";
+  if(!ADMIN)document.body.classList.add("ro");
+  if(ADMIN){
+    USERS=await api("/api/admin/users").then(d=>d.users.filter(u=>u.active)).catch(()=>[]);
+    fillForm(null);
+  }
+  await load();
+  // Raster mit refreshen, damit anklickbare/gesperrte Zellen nicht veralten, wenn das
+  // Anmeldefenster während einer offenen Seite schließt – aber nicht, während ein Admin
+  // gerade ein Zuweisungs-<select> offen hat (sonst reißt der Tick ihm die Auswahl weg).
+  setInterval(()=>{renderBanner();if(openCell==null)renderGrid();},30000);
 })();
 </script>
 <script src="../nav.js"></script>

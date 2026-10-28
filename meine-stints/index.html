@@ -14,9 +14,12 @@ h1{margin:0;font-size:2.2rem;font-style:italic;font-weight:800;background:linear
 .sub{color:var(--mute);margin-top:2px}
 .stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
 main{max-width:860px;margin:auto;padding:8px 24px 48px}
+.event{margin-bottom:22px}
+.event h2{margin:0 0 8px;font-size:1.1rem;font-weight:700}
+.event h2 .trk{color:var(--mute);font-weight:400;font-size:.9rem}
 .stint{display:flex;align-items:center;gap:16px;background:rgba(19,24,48,.88);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;margin-bottom:10px}
 .stint .n{width:36px;font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
-.stint .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:140px}
+.stint .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:220px}
 .stint .track{flex:1;color:var(--mute);min-width:0}
 .tag{font-size:.75rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mute);white-space:nowrap}
 .tag.now{color:var(--cy);border-color:var(--cy)}
@@ -37,55 +40,50 @@ main{max-width:860px;margin:auto;padding:8px 24px 48px}
 </main>
 <script>
 const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
-const pad=n=>String(n).padStart(2,"0");
-const dur=min=>Math.floor(min/60)+":"+pad(Math.round(min%60));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function stints(S){
-  const total=(+S.h||0)*60+(+S.m||0),len=+S.stint||0;
-  if(total<=0||len<=0)return [];
-  const n=Math.ceil(total/len),a=[];
-  for(let i=0;i<n;i++)a.push({s:i*len,e:Math.min(total,(i+1)*len)});
-  return a;
-}
-function clock(S,off){
-  if(!S.start)return dur(off);
-  const [hh,mm]=S.start.split(":").map(Number),t=(hh*60+mm+off)%1440;
-  return pad(Math.floor(t/60))+":"+pad(t%60);
-}
-function nowOffset(S){
-  if(!S.start)return null;
-  const [hh,mm]=S.start.split(":").map(Number);
-  const now=new Date(),start=hh*60+mm,cur=now.getHours()*60+now.getMinutes();
-  let off=cur-start; if(off<0)off+=1440;
-  return off;
+const fmt=iso=>new Date(iso).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});
+function tagOf(s,now){
+  const start=new Date(s.start_at), end=new Date(s.end_at);
+  if(start<=now&&now<end)return {cls:" now",label:"läuft"};
+  if(end<=now)return {cls:"",label:"vorbei"};
+  return {cls:"",label:"kommend"};
 }
 function render(){
   const box=document.getElementById("list");
-  Promise.all([
-    fetch("../api/plan",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null),
-    fetch("../api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null),
-  ]).then(([S,u])=>{
-    if(!u){box.innerHTML='<p class="empty">Bitte anmelden.</p>';return;}
-    if(!S||!Array.isArray(S.drivers)||!S.drivers.length){
-      box.innerHTML='<p class="empty">Kein Stintplan gespeichert. <a class="back" href="../stintplan/">Jetzt einen Plan anlegen →</a></p>';
+  fetch("../api/me",{credentials:"same-origin"}).then(r=>{
+    if(r.status===401)return null;
+    if(!r.ok)return Promise.reject();
+    return r.json();
+  }).then(me=>{
+    if(!me){box.innerHTML='<p class="empty">Bitte anmelden.</p>';return null;}
+    return fetch("../api/v1/drivers/"+me.discord_id+"/stints",{credentials:"same-origin"}).then(r=>r.ok?r.json():Promise.reject());
+  }).then(data=>{
+    if(!data)return;
+    const stints=data.stints||[];
+    if(!stints.length){
+      box.innerHTML='<p class="empty">Keine kommenden Stints. <a class="back" href="../stintplan/">Zum Stintplaner →</a></p>';
       return;
     }
-    const label=u.car_number!=null?"#"+u.car_number+" "+u.display_name:u.display_name;
-    const st=stints(S).map((x,i)=>({...x,i}));
-    const mine=st.filter(x=>{
-      const d=S.drivers[S.assign[x.i]]||"";
-      return d===label||d===u.display_name;
+    const now=new Date();
+    const groups=[], byId=new Map();
+    stints.forEach(s=>{
+      let g=byId.get(s.event.id);
+      if(!g){g={event:s.event,stints:[]};byId.set(s.event.id,g);groups.push(g);}
+      g.stints.push(s);
     });
-    if(!mine.length){
-      box.innerHTML='<p class="empty">Du bist in „'+esc(S.track||"diesem Plan")+'" aktuell keinem Stint zugeteilt.</p>';
-      return;
-    }
-    const off=nowOffset(S);
-    box.innerHTML=mine.map(x=>{
-      const past=off!=null&&x.e<=off, now=off!=null&&x.s<=off&&off<x.e;
-      const c=COLORS[S.assign[x.i]%COLORS.length];
-      const tag=now?'<span class="tag now">läuft</span>':past?'<span class="tag">vorbei</span>':'<span class="tag">kommend</span>';
-      return '<div class="stint" style="--c:'+c+'"><span class="n">'+(x.i+1)+'</span><span class="t">'+clock(S,x.s)+' – '+clock(S,x.e)+'</span><span class="track">'+esc(S.track||"")+'</span>'+tag+'</div>';
+    box.innerHTML=groups.map((g,gi)=>{
+      const c=COLORS[gi%COLORS.length];
+      const rows=g.stints.map(s=>{
+        const tag=tagOf(s,now);
+        const info=[];
+        if(s.fuel_liters!=null)info.push(s.fuel_liters.toFixed(1)+" l");
+        if(s.pit_stops!=null)info.push(s.pit_stops+" Boxenstopp"+(s.pit_stops===1?"":"s"));
+        return '<div class="stint" style="--c:'+c+'"><span class="n">'+s.number+'</span>'
+          +'<span class="t">'+fmt(s.start_at)+' – '+fmt(s.end_at)+'</span>'
+          +'<span class="track">'+esc(info.join(" · "))+'</span>'
+          +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
+      }).join("");
+      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'+rows+'</div>';
     }).join("");
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }

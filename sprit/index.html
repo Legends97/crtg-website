@@ -47,7 +47,6 @@ button:hover{border-color:var(--cy)}
 <main>
   <section class="cfg" aria-label="Eingaben">
     <h2>Rennen</h2>
-    <button id="imp" type="button" style="margin:8px 0 0">Aus Stintplaner übernehmen</button>
     <div class="two">
       <div><label for="h">Stunden</label><input id="h" type="number" min="0" max="48"></div>
       <div><label for="m">Minuten</label><input id="m" type="number" min="0" max="59"></div>
@@ -104,17 +103,7 @@ function calc(){
 }
 function sync(){KEYS.forEach(k=>$(k).value=S[k])}
 KEYS.forEach(k=>{$(k).oninput=e=>{S[k]=e.target.value;calc()}});
-$("imp").onclick=()=>{
-  const b=$("imp"),old="Aus Stintplaner übernehmen";
-  try{
-    const p=JSON.parse(localStorage.getItem("crtg-stintplan-v1"));
-    if(!p)throw 0;
-    S.h=p.h;S.m=p.m;S.stint=p.stint;sync();calc();b.textContent="Übernommen ✓";
-  }catch(e){b.textContent="Kein Stintplan gespeichert"}
-  setTimeout(()=>b.textContent=old,2200);
-};
 sync();calc();
-if(location.hash==="#import")$("imp").onclick();
 </script>
 <script src="../nav.js"></script>
 </body>
