@@ -39,10 +39,10 @@
     box.innerHTML=(u.steam_id?"":'<a class="login" href="'+base+'api/auth/steam">Steam verknüpfen</a>')+'<button type="button" class="login nr"></button><span class="who"></span><button type="button" class="out">Abmelden</button>';
     box.querySelector(".who").textContent=u.display_name;
     var nr=box.querySelector(".nr");
-    function setNr(n){nr.textContent=n?"#"+n:"Startnummer setzen"}
+    function setNr(n){nr.textContent=n?"#"+n:"Fahrernummer setzen"}
     setNr(u.car_number);
     nr.onclick=function(){
-      var v=prompt("Deine Startnummer (0–999):",u.car_number||"");
+      var v=prompt("Deine Fahrernummer (0–999):",u.car_number||"");
       if(v===null)return;
       fetch(base+"api/me",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({car_number:v})})
         .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d}})})

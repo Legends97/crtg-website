@@ -40,14 +40,14 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
     <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
     <div class="warn" id="warn" role="status"></div>
     <div class="bar"><input id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="btn go" id="new" type="button">Fahrer anlegen</button></div>
-    <div class="tw"><table><thead><tr><th>Name</th><th>#</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+    <div class="tw"><table><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
   </div>
 </main>
 <dialog id="dlg">
   <form id="f">
     <h2 id="ttl" style="margin:0">Fahrer</h2>
     <label for="fn">Anzeigename</label><input id="fn" required maxlength="60">
-    <label for="fnr">Startnummer</label><input id="fnr" inputmode="numeric" placeholder="z. B. 12">
+    <label for="fnr">Fahrernummer</label><input id="fnr" inputmode="numeric" placeholder="z. B. 12">
     <label for="fd">Discord-ID</label><input id="fd" inputmode="numeric" placeholder="17 bis 19 Ziffern">
     <label for="fs">Steam-ID (SteamID64)</label><input id="fs" placeholder="76561198000000000">
     <div class="hint">Mit oder ohne S, sie wird automatisch auf S + 17 Ziffern gesetzt. Ein leeres Feld löst die Verknüpfung.</div>
