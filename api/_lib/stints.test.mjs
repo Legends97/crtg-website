@@ -239,6 +239,30 @@ await test("distributeFreeStints: assigns a free stint to the first non-overlapp
   assert.deepStrictEqual(updates[0].params, [22, 101]); // skipped candidate 11 (overlap), used 22
 });
 
+await test("distributeFreeStints: round-robins 2 free stints across 2 candidates (regression: cursor must advance past a successful assignment)", async () => {
+  // A single-stint test cannot catch the "cursor never advances" bug: the next
+  // free stint simply doesn't exist. With 2 free stints and 2 non-overlapping
+  // candidates, the buggy version (cursor reset to the same i on every stint)
+  // assigns BOTH stints to candidate 11; the fixed version alternates.
+  const eventId = 5;
+  const stintA = { id: 301, number: 1, start_at: new Date(0), end_at: new Date(60000), assigned_user_id: null };
+  const stintB = { id: 302, number: 2, start_at: new Date(60000), end_at: new Date(120000), assigned_user_id: null };
+  const q = makeFakeQ([
+    { match: "from stints where event_id=$1 order by number", handle: () => ({ rows: [stintA, stintB] }) },
+    { match: "from users where active", handle: () => ({ rows: [{ id: 11 }, { id: 22 }] }) },
+    { match: "from stints s join events e", handle: () => ({ rows: [] }) }, // never overlaps
+    { match: "update stints set assigned_user_id", handle: () => ({ rows: [] }) },
+  ]);
+
+  const result = await distributeFreeStints(q, eventId);
+
+  assert.deepStrictEqual(result, { assigned: 2 });
+  const updates = q.calls.filter(c => c.text.includes("update stints set assigned_user_id"));
+  assert.strictEqual(updates.length, 2);
+  const assignedUserIds = updates.map(c => c.params[0]);
+  assert.deepStrictEqual(assignedUserIds.sort(), [11, 22]); // two DIFFERENT candidates, not both 11
+});
+
 await test("distributeFreeStints: no candidates left -> nothing assigned, no update calls", async () => {
   const eventId = 3;
   const freeStint = { id: 202, number: 1, start_at: new Date(0), end_at: new Date(60000), assigned_user_id: null };

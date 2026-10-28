@@ -171,8 +171,9 @@ function phaseOf(e,now){
 }
 const STATUS={draft:"Entwurf",signup:"Anmeldung",assigning:"Verteilung",locked:"Festgeschrieben",done:"Gelaufen",cancelled:"Abgesagt"};
 
-// Entwürfe liefert /api/v1/events/:id nicht aus (status<>'draft'), deshalb das Raster
-// für Entwürfe lokal aus start_at/duration_minutes bauen.
+// Fallback nur noch für den Fall, dass der Detail-Fetch selbst fehlschlägt (Netzwerk-/
+// Serverfehler) und DETAIL deshalb null bleibt – die Admin-Detailroute liefert Entwürfe
+// inzwischen korrekt mit aus, das ist also kein Grund mehr für diesen Fallback.
 function stints(){
   if(DETAIL)return DETAIL.stints;
   if(!EV)return [];
@@ -299,7 +300,11 @@ function activateCell(cell){
   const n=+cell.dataset.n,s=stints().find(x=>x.number===n);
   if(!s)return;
   if(ADMIN){
-    openCell=openCell===n?null:n;renderGrid();return;
+    openCell=openCell===n?null:n;renderGrid();
+    // renderGrid() setzt die Zelle per innerHTML neu, das <select> hat also nie den Fokus
+    // der Zelle geerbt -> ohne .focus() braucht es einen zweiten Klick, um es zu öffnen.
+    if(openCell===n)$("view").querySelector('select[data-as="'+n+'"]')?.focus();
+    return;
   }
   if(new Date(s.end_at)<=new Date())return;
   if(isMine(s))return EV.status==="locked"?toast("Plan ist festgeschrieben."):release(n);
@@ -436,7 +441,10 @@ $("evSel").onchange=e=>load(+e.target.value);
     fillForm(null);
   }
   await load();
-  setInterval(renderBanner,30000);
+  // Raster mit refreshen, damit anklickbare/gesperrte Zellen nicht veralten, wenn das
+  // Anmeldefenster während einer offenen Seite schließt – aber nicht, während ein Admin
+  // gerade ein Zuweisungs-<select> offen hat (sonst reißt der Tick ihm die Auswahl weg).
+  setInterval(()=>{renderBanner();if(openCell==null)renderGrid();},30000);
 })();
 </script>
 <script src="../nav.js"></script>

@@ -306,7 +306,10 @@ function fuelInputs(o) {
 // Bestehende Zuweisungen bleiben per ON CONFLICT erhalten, überschüssige Stints werden gelöscht.
 async function syncStints(event) {
   const n = event.duration_minutes / 60;
-  const fuelReady = event.lap_seconds != null && event.fuel_cons_per_lap != null && event.tank_liters != null;
+  // > 0 statt nur != null: ein lap_seconds/fuel_cons_per_lap von "0" (String aus pg
+  // numeric oder Eingabe) würde sonst als "bereit" gelten und computeStintFuel()
+  // durch Division durch 0 NaN liefern lassen, was die DB klaglos als numeric annimmt.
+  const fuelReady = event.lap_seconds > 0 && event.fuel_cons_per_lap > 0 && event.tank_liters > 0;
   for (let number = 1; number <= n; number++) {
     const start_at = new Date(event.start_at.getTime() + (number - 1) * 3600000);
     const end_at = new Date(start_at.getTime() + 3600000);
@@ -321,6 +324,9 @@ async function syncStints(event) {
   }
   await q(`delete from stints where event_id=$1 and number>$2`, [event.id, n]);
 }
+
+// Muss exakt zum CHECK-Constraint der events.status-Spalte oben passen.
+const EVENT_STATUSES = ["draft", "signup", "assigning", "locked", "done", "cancelled"];
 
 // reminder_lead_times: Array positiver Ganzzahlen (Minuten) oder undefined/null (unverändert/Default).
 function parseReminderLeadTimes(v) {
@@ -380,7 +386,12 @@ async function adminPatchEvent(req, res, id, user) {
   if (b.name !== undefined) { const v = String(b.name).trim(); if (!v) throw new HttpErr(400, "Name fehlt."); fields.name = v; }
   if (b.track !== undefined) fields.track = String(b.track).trim() || cur.track;
   if (b.car_class !== undefined) fields.car_class = String(b.car_class).trim();
-  if (b.status !== undefined) fields.status = String(b.status);
+  if (b.status !== undefined) {
+    const v = String(b.status);
+    if (!EVENT_STATUSES.includes(v)) throw new HttpErr(400, `Ungültiger Status. Erlaubt: ${EVENT_STATUSES.join(", ")}.`);
+    if (v === "locked") throw new HttpErr(400, "Zum Festschreiben bitte POST /api/admin/events/:id/lock verwenden.");
+    fields.status = v;
+  }
   if (b.start_at !== undefined) { const d = new Date(b.start_at); if (isNaN(d)) throw new HttpErr(400, "start_at ungültig."); fields.start_at = d; }
   if (b.duration_minutes !== undefined) {
     const d = +b.duration_minutes;
@@ -622,7 +633,7 @@ async function v1DriverStints(res, discordId, auth) {
   const r = await q(`select s.number, s.start_at, s.end_at, s.fuel_liters, s.pit_stops,
       e.id event_id, e.name event_name, e.track event_track
     from stints s join events e on e.id=s.event_id
-    where s.assigned_user_id=$1 and s.end_at > now()
+    where s.assigned_user_id=$1 and s.end_at > now() and e.status not in ('draft','cancelled')
     order by s.start_at`, [target.id]);
   return json(res, 200, { stints: r.rows.map(s => ({
     number: s.number,

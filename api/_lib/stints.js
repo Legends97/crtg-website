@@ -48,6 +48,13 @@ function groupBy(arr, keyFn) {
 export async function recomputeReminders(q, eventId, now = new Date()) {
   const eventRes = await q(`select * from events where id=$1`, [eventId]);
   const event = eventRes.rows[0];
+
+  await q(`update reminders set status='cancelled' where event_id=$1 and status='pending'`, [eventId]);
+  // Abgesagte/gelaufene Events bekommen keine neuen Reminder: sonst würde z.B.
+  // das Canceln eines gesperrten Events (PATCH status='cancelled') hier wieder
+  // frische pending-Reminder für ein nicht mehr stattfindendes Rennen erzeugen.
+  if (event.status === "cancelled" || event.status === "done") return;
+
   const stintsRes = await q(
     `select number, start_at, end_at, assigned_user_id, fuel_liters, pit_stops
      from stints where event_id=$1 order by number`,
@@ -55,8 +62,6 @@ export async function recomputeReminders(q, eventId, now = new Date()) {
   const stints = stintsRes.rows;
   const blocks = computeBlocks(stints);
   const maxLead = Math.max(...event.reminder_lead_times);
-
-  await q(`update reminders set status='cancelled' where event_id=$1 and status='pending'`, [eventId]);
 
   for (const b of blocks) for (const lead of event.reminder_lead_times) {
     if (lead === maxLead) continue;                        // größte Stufe separat, s.u.
@@ -99,7 +104,12 @@ export async function distributeFreeStints(q, eventId) {
       const uid = candidates[i % candidates.length];
       if (await hasOverlap(q, uid, stint.start_at, stint.end_at)) continue;  // Kollision mit anderem Event -> nächster Kandidat
       await q(`update stints set assigned_user_id=$1, assignment_source='auto', assigned_at=now() where id=$2`, [uid, stint.id]);
-      assigned++; break;
+      // i++ hier explizit (nicht nur im for-Update), weil `break` das for-Update
+      // überspringt -> ohne das hier würde der nächste freie Stint wieder bei
+      // DEMSELBEN Kandidaten anfangen und (da Stunden sich nie selbst überlappen)
+      // wieder sofort gewinnen. Ergebnis ohne Fix: ALLE freien Stints landen beim
+      // ersten Kandidaten statt Round-Robin.
+      assigned++; i++; break;
     }
   }
   return { assigned };
