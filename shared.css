@@ -43,3 +43,10 @@ body{padding-bottom:76px}
 @media(prefers-reduced-motion:no-preference){.kerb{animation:kerbMove 2.6s linear infinite}}
 @keyframes kerbMove{to{background-position:62.23px 0}}
 .tread{display:block;width:100%;height:58px;background:var(--panel)}
+footer{padding:40px 8vw 60px;color:var(--mute);font-size:.9rem;font-family:var(--body)}
+.footerRow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1500px;margin:0 auto}
+.footerCredit{font-size:.82rem}
+.footerSocial{display:flex;gap:16px}
+.footerSocial a{color:var(--mute);text-decoration:none;font-size:.82rem;transition:color 160ms ease}
+.footerSocial a:hover{color:var(--cy)}
+@media(max-width:700px){footer{padding-bottom:96px}}

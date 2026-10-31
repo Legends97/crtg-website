@@ -17,6 +17,13 @@
   nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
   nav.innerHTML='<a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="34" height="34"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div>';
   document.body.insertBefore(nav,document.body.firstChild);
+  var footer=document.createElement("footer");
+  footer.innerHTML='<div class="footerRow"><div class="footerText"><div class="footerCredit">Created by TheBenniblueTV &amp; Legends Service</div></div><div class="footerSocial">'
+    +'<a href="https://whatsapp.com/channel/0029Vb8ABAY7z4kk2DTtdN47" target="_blank" rel="noopener">WhatsApp</a>'
+    +'<a href="https://www.tiktok.com/@chaosracing7" target="_blank" rel="noopener">TikTok</a>'
+    +'<a href="https://discord.gg/qxJRq7Asm" target="_blank" rel="noopener">Discord</a>'
+    +'</div></div>';
+  document.body.appendChild(footer);
   [["icon","image/png"],["apple-touch-icon",""]].forEach(function(r){
     var l=document.createElement("link");l.rel=r[0];l.href=base+"icon.png";if(r[1])l.type=r[1];document.head.appendChild(l);
   });
