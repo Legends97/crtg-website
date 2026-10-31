@@ -20,6 +20,9 @@
   [["icon","image/png"],["apple-touch-icon",""]].forEach(function(r){
     var l=document.createElement("link");l.rel=r[0];l.href=base+"icon.png";if(r[1])l.type=r[1];document.head.appendChild(l);
   });
+  (function(){var l=document.createElement("link");l.rel="stylesheet";
+    l.href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Condensed:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap";
+    document.head.appendChild(l);})();
   // Zugriff nur für angemeldete Nutzer: login.html ist die einzige Ausnahme
   var isLogin=/\/login\.html$/.test(location.pathname);
   if(isLogin){document.documentElement.classList.add("ready");}
