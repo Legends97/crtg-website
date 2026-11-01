@@ -38,6 +38,8 @@ button.danger:hover{border-color:#ff8a8a;color:#ff8a8a}
 .banner .cd{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.4rem;font-style:italic;color:var(--c,var(--cy))}
 .banner small{color:var(--mute);display:block}
 .banner.open{--c:var(--cy)}.banner.soon{--c:var(--vi)}.banner.closed{--c:#ffa94d}.banner.locked{--c:#3ddc97}.banner.draft{--c:var(--mute)}.banner.off{--c:#ff5d6c}
+.planCols{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+@media(max-width:1100px){.planCols{grid-template-columns:1fr}#trackMount{order:-1}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
 .cell{background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:8px 11px;min-width:0}
 .cell .n{font-family:var(--mono);font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c);line-height:1.1}
@@ -93,7 +95,7 @@ section{background:none;border:0;padding:0}
     <label for="fTrack">Strecke</label>
     <select id="fTrack"></select>
     <label for="fClass">Klasse</label>
-    <input id="fClass" placeholder="z. B. GT3">
+    <select id="fClass"><option value="GT2">GT2</option><option value="GT3">GT3</option><option value="GT4">GT4</option><option value="CUP">CUP</option><option value="ST">ST</option><option value="CHL">CHL</option><option value="TCX">TCX</option></select>
     <div class="two">
       <div><label for="fStart">Start (lokal)</label><input id="fStart" type="datetime-local"></div>
       <div><label for="fHours">Dauer (h)</label><select id="fHours"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option></select></div>
@@ -138,6 +140,7 @@ section{background:none;border:0;padding:0}
 </main>
 <div id="toast" role="status"></div>
 
+<script src="../tracks-data.js"></script>
 <script>
 const TRACKS=["Barcelona","Brands Hatch","Circuit of the Americas","Donington Park","Hungaroring","Imola","Indianapolis","Kyalami","Laguna Seca","Misano","Monza","Mount Panorama (Bathurst)","Nürburgring","Nürburgring Nordschleife 24H","Oulton Park","Paul Ricard","Red Bull Ring","Silverstone","Snetterton","Spa-Francorchamps","Suzuka","Valencia","Watkins Glen","Zandvoort","Zolder"];
 const $=id=>document.getElementById(id);
@@ -243,11 +246,13 @@ function renderView(){
     +(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))+" · "+STATUS[EV.status]
     +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div></div>"
     +'<div class="stats">'+stat(EV.duration_minutes/60+" h","Renndauer")+stat(assigned+" / "+list.length,"Stints belegt")+stat(mine,"davon deine")+"</div></div>"
+    +'<div class="planCols"><div>'
     +'<div id="banner" class="banner"></div><div class="grid" id="grid"></div>'
     +'<div class="legend"><span style="--c:var(--mute)"><i></i>frei</span><span style="--c:var(--cy)"><i></i>deine Stunde</span>'
     +'<span style="--c:var(--vi)"><i></i>anderer Fahrer</span><span style="--c:var(--line)"><i></i>vorbei (blass)</span></div>'
-    +'<p class="hint" id="gridHint"></p><div class="actions" id="evActions"></div>';
-  renderBanner();renderGrid();
+    +'<p class="hint" id="gridHint"></p><div class="actions" id="evActions"></div>'
+    +'</div><div id="trackMount"></div></div>';
+  renderBanner();renderGrid();renderTrackVisual();
 
   const ph=phaseOf(EV,new Date());
   $("gridHint").textContent=ADMIN
@@ -271,6 +276,18 @@ function renderView(){
   if($("doLock"))$("doLock").onclick=()=>act("lock","Plan festschreiben? Danach werden die Discord-Erinnerungen erzeugt.");
   if($("doDel"))$("doDel").onclick=()=>doDeleteEvent();
   if($("doCancel"))$("doCancel").onclick=()=>doCancelEvent();
+}
+
+function renderTrackVisual(){
+  const m=$("trackMount");if(!m)return;
+  const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[EV.track];
+  const t=slug&&TRACKS_DATA[slug];
+  if(!t){m.innerHTML="";return}
+  const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
+    +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
+  m.innerHTML='<svg viewBox="'+t.viewBox+'" style="width:100%;max-width:420px;overflow:visible">'
+    +'<path style="fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
+    +corners+'</svg><div style="text-align:center;color:var(--mute);font-size:.85rem;margin-top:6px">'+esc(t.name)+'</div>';
 }
 
 async function doDeleteEvent(){
@@ -347,7 +364,7 @@ function fillForm(e){
   editId=e?e.id:null;
   $("fName").value=e?e.name:"";
   $("fTrack").value=e&&TRACKS.includes(e.track)?e.track:"Spa-Francorchamps";
-  $("fClass").value=e?e.car_class||"":"";
+  $("fClass").value=e&&e.car_class?e.car_class:"GT3";
   $("fStart").value=e?toInput(e.start_at):"";
   $("fHours").value=e?e.duration_minutes/60:"";
   $("fOpenD").value=e&&e.signup_opens_offset_minutes!=null?e.signup_opens_offset_minutes/1440:e?"":7;
