@@ -30,10 +30,10 @@ background:radial-gradient(900px 520px at 8% -10%,rgba(9,142,223,.17),transparen
 .ticker span b{color:var(--text);font-weight:600}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){.ticker .track{animation:none}}
-@media(max-width:700px){.ticker{display:none}}
+@media(max-width:860px){.ticker{display:none}}
 @media print{.ticker{display:none}}
-@media(max-width:700px){
-body{padding-bottom:76px}
+@media(max-width:860px){
+body{padding-bottom:76px;padding-top:96px}
 .nav{position:fixed;top:auto;bottom:0;left:0;right:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-bottom:0;border-top:1px solid var(--line)}
 .nav .navLeft{padding-left:0;gap:0;width:100%}
 .nav .brand{display:none}
@@ -41,7 +41,7 @@ body{padding-bottom:76px}
 .nav .tabs a{flex:1;flex-direction:column;justify-content:center;gap:2px;font-size:.75rem;padding:6px 4px;border-radius:12px}
 #toast{bottom:92px!important}
 }
-@media print{.nav{display:none}body::before{display:none}body{padding-bottom:0}}
+@media print{.nav{display:none}body::before{display:none}body{padding-bottom:0;padding-top:0}}
 /* Konto-Anzeige in der Navigation */
 .nav .navRight{display:flex;align-items:center;gap:14px;padding-right:8vw;flex:none}
 .nav .themeToggle{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;border-radius:999px;background:none;border:1px solid var(--line);color:var(--mute);cursor:pointer;transition:border-color 160ms ease,color 160ms ease,transform 120ms ease-out}
@@ -50,10 +50,10 @@ body{padding-bottom:76px}
 .nav .acct{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:.9rem;white-space:nowrap;padding:0 0 0 26px}
 .nav .acct .who{color:var(--text)}
 .nav .acct .login,.nav .acct .out{color:var(--cy);background:none;border:1px solid var(--cy);border-radius:999px;padding:5px 12px;text-decoration:none;font:inherit;font-size:.85rem;cursor:pointer}
-@media(max-width:700px){
+@media(max-width:860px){
 .nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--navbgSolid)}
 .nav .themeToggle{display:none}
-.nav .acct{position:fixed;top:8px;right:10px;background:var(--navbgSolid);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;z-index:30}
+.nav .acct{position:fixed;top:8px;right:10px;left:10px;max-width:calc(100vw - 20px);background:var(--navbgSolid);border:1px solid var(--line);border-radius:16px;padding:6px 10px;z-index:30;flex-wrap:wrap;justify-content:flex-end;white-space:normal}
 .nav .acct .login{border:0;padding:3px 8px}
 }
 .kerb{height:16px;width:100%;position:relative;overflow:hidden}
@@ -72,10 +72,10 @@ footer{padding:40px 8vw 60px;color:var(--mute);font-size:.9rem;font-family:var(-
 .footerSocial{display:flex;gap:16px}
 .footerSocial a{color:var(--mute);text-decoration:none;font-size:.82rem;transition:color 160ms ease}
 .footerSocial a:hover{color:var(--cy)}
-@media(max-width:700px){footer{padding-bottom:96px}}
+@media(max-width:860px){footer{padding-bottom:96px}}
 .cookieBar{position:fixed;left:16px;right:16px;bottom:16px;z-index:40;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
   background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);max-width:620px;margin:0 auto}
 .cookieBar p{margin:0;flex:1 1 260px;font-size:.88rem;color:var(--mute);line-height:1.5}
 .cookieBar button{flex:none}
-@media(max-width:700px){.cookieBar{bottom:86px}}
+@media(max-width:860px){.cookieBar{bottom:86px}}
 @media print{.cookieBar{display:none}}

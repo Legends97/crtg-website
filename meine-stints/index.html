@@ -14,9 +14,11 @@
 .eventName{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:1.1rem;margin:0 0 20px}
 .eventName .trk{color:var(--mute);font-weight:400;text-transform:none;font-size:.9rem;font-family:var(--body)}
 .meineLayout{display:grid;grid-template-columns:1.3fr .9fr;gap:52px;align-items:start}
+.meineCol{min-width:0}
 @media(max-width:900px){.meineLayout{grid-template-columns:1fr}}
 .timeline{margin:0 0 28px}
 .tlTrack{position:relative;height:64px;background:var(--panel2);border-radius:3px}
+@media(max-width:700px){.timeline{overflow-x:auto}.tlTrack{min-width:900px}}
 .tlStint{position:absolute;top:0;bottom:0;background:var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--mono);font-size:.74rem;color:var(--mute);overflow:hidden}
 .tlStint .num{font-size:.72rem;opacity:.85}
 .tlStint.mine{background:var(--vi);color:#1a0624;font-weight:600}
@@ -124,9 +126,12 @@ function render(){
           +'<span class="tag2 '+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");
       return '<div class="eventGroup"><h3 class="eventName">'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h3>'
-        +'<div class="meineLayout"><div><div class="timeline">'+track+'</div><div class="stintList">'+rows+'</div></div>'
+        +'<div class="meineLayout"><div class="meineCol"><div class="timeline">'+track+'</div><div class="stintList">'+rows+'</div></div>'
         +trackSvgHtml(g.event.track)+'</div></div>';
     }).join("");
+    // Schmale Bildschirme: Zeitleiste scrollt horizontal (24 Segmente passen sonst nicht lesbar
+    // rein), direkt zur "jetzt"-Markierung springen statt beim ersten Stint zu starten.
+    box.querySelectorAll(".tlNow").forEach(el=>el.closest(".timeline").scrollLeft=Math.max(0,el.offsetLeft-120));
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }
 render();
