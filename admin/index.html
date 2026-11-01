@@ -90,7 +90,7 @@ async function load(){
       cell(tr,u.car_number!=null?"#"+u.car_number:"–","mono");
       cell(tr,u.discord_id||"fehlt",u.discord_id?"mono":"miss");
       cell(tr,u.steam_id||"fehlt",u.steam_id?"mono":"miss");
-      const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Admin":"Fahrer";r.appendChild(tag);
+      const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Developer":"Fahrer";r.appendChild(tag);
       const clsTd=cell(tr,"");
       const picker=document.createElement("div");picker.className="classPicker";
       picker.innerHTML=CAR_CLASSES.map(c=>'<button type="button" class="classChip'+(u.classes&&u.classes.includes(c)?" on":"")+'" data-c="'+c+'">'+c+"</button>").join("");
