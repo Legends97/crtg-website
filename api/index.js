@@ -77,6 +77,14 @@ const init = () => (ready ||= q(`create table if not exists users (
   assigned_at timestamptz,
   unique(event_id, number)
 )`))
+  .then(() => q(`create table if not exists event_debriefs (
+  event_id int primary key references events(id) on delete cascade,
+  notes text not null default '',
+  overall_position int,
+  class_position int,
+  updated_by int references users(id),
+  updated_at timestamptz not null default now()
+)`))
   .then(() => q(`create index if not exists stints_user_idx on stints(assigned_user_id)`))
   .then(() => q(`create table if not exists reminders (
   id serial primary key,
@@ -681,6 +689,39 @@ async function listEvents(res, user) {
   return json(res, 200, r.rows.filter(e => classAllowed(user, e)).map(e => ({ ...e, phase: eventPhase(e, now) })));
 }
 
+// Nachbesprechung: Notizen + Ergebnis pro Event. Eigene Tabelle statt Spalten auf events,
+// damit die Felder nicht ungefragt durch eventJson()s {...e}-Spread in jede Event-Route
+// durchsickern. Lesen darf jeder angemeldete Nutzer, Schreiben nur Admin (adminPatchDebrief).
+const debriefJson = d => d
+  ? { notes: d.notes, overall_position: d.overall_position, class_position: d.class_position, updated_at: d.updated_at.toISOString() }
+  : { notes: "", overall_position: null, class_position: null, updated_at: null };
+async function getDebrief(res, id, user) {
+  if (!user) throw new HttpErr(401, "Nicht angemeldet.");
+  const ev = (await q("select status from events where id=$1", [id])).rows[0];
+  if (!ev || (ev.status === "draft" && user.role !== "admin")) throw new HttpErr(404, "Event nicht gefunden.");
+  const d = (await q("select notes, overall_position, class_position, updated_at from event_debriefs where event_id=$1", [id])).rows[0];
+  return json(res, 200, debriefJson(d));
+}
+async function adminPatchDebrief(req, res, id, user) {
+  const ev = (await q("select id from events where id=$1", [id])).rows[0];
+  if (!ev) throw new HttpErr(404, "Event nicht gefunden.");
+  const b = req.body || {};
+  const notes = String(b.notes ?? "").trim();
+  if (notes.length > 4000) throw new HttpErr(400, "Notizen: maximal 4000 Zeichen.");
+  const pos = v => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = +v;
+    if (!Number.isInteger(n) || n < 1) throw new HttpErr(400, "Platzierung: positive ganze Zahl.");
+    return n;
+  };
+  const overall = pos(b.overall_position), cls = pos(b.class_position);
+  const r = await q(`insert into event_debriefs(event_id, notes, overall_position, class_position, updated_by, updated_at)
+    values($1,$2,$3,$4,$5,now())
+    on conflict (event_id) do update set notes=$2, overall_position=$3, class_position=$4, updated_by=$5, updated_at=now()
+    returning notes, overall_position, class_position, updated_at`, [id, notes, overall, cls, user.id]);
+  return json(res, 200, debriefJson(r.rows[0]));
+}
+
 async function claimStint(res, eventId, number, user) {
   if (!user) throw new HttpErr(401, "Nicht angemeldet.");
   const event = (await q("select * from events where id=$1", [eventId])).rows[0];
@@ -955,6 +996,11 @@ export default async function handler(req, res) {
       requireAdmin(user);
       return await adminPatchStint(req, res, +evStint[1], +evStint[2], user);
     }
+    const evDebrief = path.match(/^\/api\/admin\/events\/(\d+)\/debrief$/);
+    if (evDebrief && req.method === "PATCH") {
+      requireAdmin(user);
+      return await adminPatchDebrief(req, res, +evDebrief[1], user);
+    }
     const evOne = path.match(/^\/api\/admin\/events\/(\d+)$/);
     if (evOne) {
       requireAdmin(user);
@@ -975,6 +1021,8 @@ export default async function handler(req, res) {
       return await adminGenBotToken(res);
     }
     if (path === "/api/events" && req.method === "GET") return await listEvents(res, user);
+    const evDebriefRead = path.match(/^\/api\/events\/(\d+)\/debrief$/);
+    if (evDebriefRead && req.method === "GET") return await getDebrief(res, +evDebriefRead[1], user);
     const claimM = path.match(/^\/api\/events\/(\d+)\/stints\/(\d+)\/claim$/);
     if (claimM) {
       const eventId = +claimM[1], number = +claimM[2];

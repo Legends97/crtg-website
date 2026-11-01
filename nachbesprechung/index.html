@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<script>document.documentElement.dataset.theme=localStorage.getItem("crtg-theme")||"dark"</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRTG Nachbesprechung</title>
+<style>
+.pageHead{padding:12px 8vw 0}
+.pageHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);margin:0}
+.pageBody{padding:36px 8vw 10vh}
+.desc{color:var(--mute);font-weight:300;margin:0 0 28px;max-width:60ch}
+.tw{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;min-width:620px}
+.table th{text-align:left;font-weight:600;color:var(--mute);padding:10px 16px;border-bottom:1px solid var(--line)}
+.table td{padding:14px 16px;border-bottom:1px solid var(--bg)}
+.table tr{cursor:pointer}
+.table tr:hover td{background:var(--panel2)}
+.table tr.sel td{background:var(--panel2);box-shadow:inset 3px 0 0 var(--vi)}
+.pill{font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--panel2);white-space:nowrap}
+.empty{color:var(--mute);padding:20px 0}
+.panel{background:var(--panel);padding:28px 32px;margin-top:24px;display:none}
+.panel.on{display:block}
+.panel h3{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:1.3rem;margin:0 0 4px}
+.panel .meta{color:var(--mute);font-size:.88rem;margin-bottom:22px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.88rem;color:var(--mute);margin-bottom:6px}
+.field textarea,.field input{width:100%;background:var(--panel2);border:none;border-radius:3px;color:var(--text);font:1rem var(--body);padding:11px 12px;resize:vertical}
+.field textarea{min-height:140px;font:.95rem/1.5 var(--body)}
+.field input{font:1rem var(--mono);max-width:220px}
+.field textarea:focus,.field input:focus{outline:2px solid var(--cy);outline-offset:1px}
+.fieldRow{display:flex;gap:24px;flex-wrap:wrap}
+.addBtn{background:var(--vi);color:#fff;border:none;border-radius:999px;padding:11px 22px;font-weight:600;transition:background 160ms ease,transform 120ms ease-out}
+.addBtn:hover{background:#b34de0}
+.addBtn:active{transform:scale(.97)}
+.readView .k{color:var(--mute);font-size:.85rem;margin-bottom:4px}
+.readView .v{margin-bottom:18px;white-space:pre-wrap}
+.readView .posRow{display:flex;gap:40px;flex-wrap:wrap;margin-bottom:18px}
+.saved{color:var(--mute);font-size:.78rem;margin-top:14px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cy);padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:92vw;text-align:center}
+#toast.on{opacity:1}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<main>
+  <div class="pageHead"><h2>Nachbesprechung</h2></div>
+  <div class="kerb"></div>
+  <div class="pageBody">
+    <p class="desc">Notizen und Ergebnis zu vergangenen Events — was lief gut, was nicht, Unfälle, Strafen. Eintragen kann die Developer-Rolle, ansehen jeder.</p>
+    <div class="tw"><table class="table"><thead><tr><th>Event</th><th>Strecke</th><th>Datum</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div id="empty" class="empty" hidden>Noch keine Events vorhanden.</div>
+    <div class="panel" id="panel">
+      <h3 id="pName"></h3>
+      <div class="meta" id="pMeta"></div>
+      <div id="pBody"></div>
+    </div>
+  </div>
+</main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
+<div id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const D=iso=>new Date(iso).toLocaleDateString([],{day:"2-digit",month:"2-digit",year:"numeric"});
+const DT=iso=>new Date(iso).toLocaleString([],{dateStyle:"medium",timeStyle:"short"});
+const STATUS={draft:"Entwurf",signup:"Anmeldung",assigning:"Verteilung",locked:"Festgeschrieben",done:"Gelaufen",cancelled:"Abgesagt"};
+async function api(path,opt){
+  const r=await fetch(path,Object.assign({credentials:"same-origin",headers:{"Content-Type":"application/json"}},opt));
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||("Fehler "+r.status));
+  return d;
+}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2600)}
+
+let EVENTS=[],ADMIN=false,SELECTED=null;
+
+function renderRows(){
+  const tb=$("rows");
+  if(!EVENTS.length){$("empty").hidden=false;tb.innerHTML="";return}
+  $("empty").hidden=true;
+  tb.innerHTML=EVENTS.map(e=>
+    '<tr data-id="'+e.id+'"'+(SELECTED===e.id?' class="sel"':'')+'>'
+    +'<td>'+esc(e.name)+'</td><td>'+esc(e.track)+'</td><td>'+D(e.start_at)+'</td>'
+    +'<td><span class="pill">'+STATUS[e.status]+'</span></td>'
+    +'</tr>'
+  ).join("");
+}
+
+function renderEdit(e,d){
+  $("pBody").innerHTML=
+    '<div class="field"><label for="dNotes">Notizen</label><textarea id="dNotes" placeholder="Was lief gut? Was lief nicht gut? Unfälle, Strafen…">'+esc(d.notes)+'</textarea></div>'
+    +'<div class="fieldRow">'
+    +'<div class="field"><label for="dOverall">Platzierung gesamt</label><input id="dOverall" type="number" min="1" step="1" value="'+(d.overall_position??"")+'"></div>'
+    +'<div class="field"><label for="dClass">Platzierung Klasse</label><input id="dClass" type="number" min="1" step="1" value="'+(d.class_position??"")+'"></div>'
+    +'</div>'
+    +'<button type="button" class="go addBtn" id="dSave">Speichern</button>'
+    +(d.updated_at?'<div class="saved">Zuletzt gespeichert: '+DT(d.updated_at)+'</div>':"");
+  $("dSave").onclick=async()=>{
+    try{
+      const body={notes:$("dNotes").value,overall_position:$("dOverall").value,class_position:$("dClass").value};
+      await api("../api/admin/events/"+e.id+"/debrief",{method:"PATCH",body:JSON.stringify(body)});
+      toast("Gespeichert ✓");
+    }catch(err){toast(err.message)}
+  };
+}
+function renderRead(d){
+  if(!d.notes&&d.overall_position==null&&d.class_position==null){
+    $("pBody").innerHTML='<p class="empty">Noch keine Nachbesprechung für dieses Event.</p>';
+    return;
+  }
+  $("pBody").innerHTML='<div class="readView">'
+    +(d.overall_position!=null||d.class_position!=null?'<div class="posRow">'
+      +(d.overall_position!=null?'<div><div class="k">Platzierung gesamt</div><div class="v">'+d.overall_position+'</div></div>':"")
+      +(d.class_position!=null?'<div><div class="k">Platzierung Klasse</div><div class="v">'+d.class_position+'</div></div>':"")
+      +'</div>':"")
+    +(d.notes?'<div class="k">Notizen</div><div class="v">'+esc(d.notes)+'</div>':"")
+    +(d.updated_at?'<div class="saved">Zuletzt aktualisiert: '+DT(d.updated_at)+'</div>':"")
+    +'</div>';
+}
+
+async function selectEvent(id){
+  SELECTED=id;renderRows();
+  const e=EVENTS.find(x=>x.id===id);
+  $("panel").classList.add("on");
+  $("pName").textContent=e.name;
+  $("pMeta").textContent=e.track+" · "+D(e.start_at)+" · "+STATUS[e.status];
+  $("pBody").innerHTML='<p class="empty">Lädt …</p>';
+  try{
+    const d=await api("../api/events/"+id+"/debrief");
+    if(ADMIN)renderEdit(e,d);else renderRead(d);
+  }catch(err){$("pBody").innerHTML='<p class="empty">Konnte Nachbesprechung nicht laden.</p>'}
+}
+$("rows").onclick=e=>{
+  const tr=e.target.closest("tr");
+  if(tr)selectEvent(+tr.dataset.id);
+};
+
+(async function init(){
+  const me=await fetch("../api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  ADMIN=!!me&&me.role==="admin";
+  try{
+    const list=await api("../api/events");
+    EVENTS=list.sort((a,b)=>new Date(b.start_at)-new Date(a.start_at));
+  }catch(err){$("empty").hidden=false;$("empty").textContent="Konnte Events nicht laden.";}
+  renderRows();
+})();
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>

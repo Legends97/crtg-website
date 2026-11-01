@@ -7,6 +7,9 @@
     ["meine-stints/","Meine Stints",'<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l3 2"/>'],
     ["sprit/","Sprit-Rechner",'<path d="M8 2c2.2 2.8 4 5.3 4 7.4A4 4 0 0 1 4 9.4C4 7.3 5.8 4.8 8 2Z"/>'],
     ["streamer/","Streamer",'<rect x="2" y="4" width="8" height="8" rx="1.3"/><path d="M10 7 13.5 5 13.5 11 10 9Z"/>']
+    // Nachbesprechung-Tab absichtlich noch nicht hier — Seite ist fertig, aber auf
+    // User-Wunsch erst live schalten wenn ausdrücklich freigegeben:
+    // ["nachbesprechung/","Nachbesprechung",'<rect x="3" y="2" width="10" height="12" rx="1.3"/><path d="M6 2h4v1.5H6z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/>']
   ];
   var admin=["admin/","Admin",'<path d="M8 2 13 4v4c0 3.3-2.1 5.6-5 6.5C5.1 13.6 3 11.3 3 8V4Z"/>'];
   var here=location.pathname.replace(/index\.html$/,"");
@@ -14,7 +17,7 @@
   var root=new URL(base).pathname;
   function tab(i){var on=here===root+i[0];
     return '<a href="'+base+i[0]+'"'+(on?' class="on" aria-current="page"':'')+'><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+i[2]+'</svg><span>'+i[1]+'</span></a>';}
-  var noTicker=/\/(admin|sprit|streamer)\/$/.test(here);
+  var noTicker=/\/(admin|sprit|streamer|nachbesprechung)\/$/.test(here);
   var navWrap=document.createElement("div");
   navWrap.className="navWrap";
   var nav=document.createElement("nav");
