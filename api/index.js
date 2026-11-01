@@ -520,7 +520,6 @@ async function adminLock(req, res, id, user) {
 async function adminDeleteEvent(res, id) {
   const cur = (await q("select * from events where id=$1", [id])).rows[0];
   if (!cur) throw new HttpErr(404, "Event nicht gefunden.");
-  if (cur.status !== "draft") throw new HttpErr(409, "Nur Entwürfe können gelöscht werden. Stattdessen Event auf 'cancelled' setzen (via PATCH status).");
   await q("delete from events where id=$1", [id]);
   return json(res, 200, { ok: true });
 }

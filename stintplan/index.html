@@ -111,7 +111,7 @@ body{background:#fff;color:#111;font-size:12pt}
   <button id="fNew" type="button" class="go sideBtn">Neues Event</button>
   <button id="fEdit" type="button" class="go sideBtn">Ausgewähltes bearbeiten</button>
   <button id="fDel" type="button" class="go sideBtn danger">Ausgewähltes löschen</button>
-  <p class="fieldHint">Löschen nur für Entwürfe möglich — sonst Status auf „Abgesagt" setzen.</p>
+  <p class="fieldHint">Löschen entfernt das Event unwiderruflich inkl. aller Stints — unabhängig vom Status.</p>
   <div class="field"><label for="fName">Name</label><input id="fName" placeholder="z. B. 6H Spa"></div>
   <div class="field"><label for="fTrack">Strecke</label><select class="trackSelect" id="fTrack"></select></div>
   <div class="field"><label for="fClass">Klasse</label><select class="trackSelect" id="fClass"><option value="GT2">GT2</option><option value="GT3">GT3</option><option value="GT4">GT4</option><option value="CUP">CUP</option><option value="ST">ST</option><option value="CHL">CHL</option><option value="TCX">TCX</option></select></div>
@@ -298,7 +298,7 @@ function renderView(){
     (EV.status==="draft"?btn("doPub","Veröffentlichen",true,"addBtn"):"")
     +(EV.status==="signup"?btn("doDist","Freie Stints verteilen",closed,"rowBtn"):"")
     +(EV.status==="signup"||EV.status==="assigning"?btn("doLock","Plan festschreiben",true,"addBtn"):"")
-    +(EV.status==="draft"?btn("doDel","Löschen",true,"rowBtn danger"):"")
+    +btn("doDel","Löschen",true,"rowBtn danger")
     +(EV.status==="signup"||EV.status==="assigning"||EV.status==="locked"?btn("doCancel","Absagen",true,"rowBtn danger"):"");
   if($("doPub"))$("doPub").onclick=()=>act("publish","Event veröffentlichen? Danach ist die Anmeldung sichtbar.");
   if($("doDist"))$("doDist").onclick=()=>act("distribute","Freie Stints automatisch auf Fahrer ohne Stint verteilen?");
