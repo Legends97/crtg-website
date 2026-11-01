@@ -39,7 +39,7 @@ body.ro .devSidebar{display:none}
 .rowBtn{background:var(--panel2);color:var(--text);border:none;border-radius:999px;padding:7px 16px;font-size:.85rem;white-space:nowrap;transition:background 160ms ease,transform 120ms ease-out}
 .rowBtn:hover{background:var(--line)}
 .rowBtn:active{transform:scale(.96)}
-.rowBtn.danger:hover{color:#ff6b6b}
+.rowBtn.danger:hover,.sideBtn.danger:hover{color:#ff6b6b}
 .rowBtn:disabled{opacity:.45;cursor:default}
 .evHead{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:28px}
 .evHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(1.5rem,2.4vw,2.1rem);margin:0 0 8px}
@@ -110,6 +110,8 @@ body{background:#fff;color:#111;font-size:12pt}
   <div class="fieldGroup">Event</div>
   <button id="fNew" type="button" class="go sideBtn">Neues Event</button>
   <button id="fEdit" type="button" class="go sideBtn">Ausgewähltes bearbeiten</button>
+  <button id="fDel" type="button" class="go sideBtn danger">Ausgewähltes löschen</button>
+  <p class="fieldHint">Löschen nur für Entwürfe möglich — sonst Status auf „Abgesagt" setzen.</p>
   <div class="field"><label for="fName">Name</label><input id="fName" placeholder="z. B. 6H Spa"></div>
   <div class="field"><label for="fTrack">Strecke</label><select class="trackSelect" id="fTrack"></select></div>
   <div class="field"><label for="fClass">Klasse</label><select class="trackSelect" id="fClass"><option value="GT2">GT2</option><option value="GT3">GT3</option><option value="GT4">GT4</option><option value="CUP">CUP</option><option value="ST">ST</option><option value="CHL">CHL</option><option value="TCX">TCX</option></select></div>
@@ -467,6 +469,7 @@ $("fSave").onclick=async()=>{
 };
 $("fNew").onclick=()=>fillForm(null);
 $("fEdit").onclick=()=>EV?fillForm(EV):toast("Kein Event ausgewählt.");
+$("fDel").onclick=()=>EV?doDeleteEvent():toast("Kein Event ausgewählt.");
 ["fStart","fOpenD","fCloseD","fOpenAt","fCloseAt"].forEach(id=>$(id).oninput=preview);
 
 // --- Laden ---------------------------------------------------------------
