@@ -6,7 +6,7 @@
     ["stintplan/","Stintplaner",'<path d="M3 2v12"/><path d="M3 2.5 12.5 5 3 7.5"/>'],
     ["meine-stints/","Meine Stints",'<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l3 2"/>'],
     ["sprit/","Sprit-Rechner",'<path d="M8 2c2.2 2.8 4 5.3 4 7.4A4 4 0 0 1 4 9.4C4 7.3 5.8 4.8 8 2Z"/>'],
-    ["streamer/","Streamer",'<circle cx="8" cy="11" r="1.4"/><path d="M4.5 8.5a5 5 0 0 1 7 0"/><path d="M2.3 6.3a8 8 0 0 1 11.4 0"/>']
+    ["streamer/","Streamer",'<rect x="2" y="4" width="8" height="8" rx="1.3"/><path d="M10 7 13.5 5 13.5 11 10 9Z"/>']
   ];
   var admin=["admin/","Admin",'<path d="M8 2 13 4v4c0 3.3-2.1 5.6-5 6.5C5.1 13.6 3 11.3 3 8V4Z"/>'];
   var here=location.pathname.replace(/index\.html$/,"");
