@@ -9,16 +9,16 @@
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
 background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.018) 22px 44px),var(--bg)}
-header{max-width:1100px;margin:auto;padding:26px 24px 14px}
-h1{margin:0;font-family:var(--disp);font-size:2.5rem;font-style:italic;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--vi),var(--cy));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
-.sub{color:var(--mute);margin-top:2px}.back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
+header{max-width:1100px;margin:auto;padding:26px 24px 10px}
+h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);line-height:1.1;color:var(--text)}
+.back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
 .stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--vi),var(--cy) 60%,transparent)}
 main{display:grid;grid-template-columns:320px 1fr;gap:22px;padding:8px 24px 48px;max-width:1100px;margin:auto;align-items:start}
 @media(max-width:860px){main{grid-template-columns:1fr;padding:8px 14px 40px}header{padding:20px 14px 10px}h1{font-size:2rem}}
 section{background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px;padding:18px}
 h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
 label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
-input{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+input{width:100%;background:var(--panel2);color:var(--text);border:none;border-radius:3px;padding:11px 12px;font:1rem var(--mono)}
 input:focus{outline:2px solid var(--cy);outline-offset:1px}
 .two{display:flex;gap:10px}.two>div{flex:1}
 .stats{display:flex;gap:12px 32px;flex-wrap:wrap;margin-bottom:18px}
@@ -41,7 +41,6 @@ button:hover{border-color:var(--cy)}
 <body>
 <header>
   <h1>Sprit-Rechner</h1>
-  <div class="sub">ChaosRacing – Team Germany</div>
 </header>
 <div class="kerb"></div>
 <main>

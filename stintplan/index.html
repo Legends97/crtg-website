@@ -9,9 +9,8 @@
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
 background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
-header{max-width:1280px;margin:auto;padding:26px 24px 14px}
-h1{margin:0;font-family:var(--disp);font-size:2.5rem;font-style:italic;font-weight:800;letter-spacing:.01em;line-height:1.1;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
-.sub{color:var(--mute);margin-top:2px}
+header{max-width:1280px;margin:auto;padding:26px 24px 10px}
+h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);letter-spacing:.01em;line-height:1.1;color:var(--text)}
 .back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
 .stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
 main{display:grid;grid-template-columns:330px 1fr;gap:22px;padding:8px 24px 48px;max-width:1280px;margin:auto;align-items:start}
@@ -19,7 +18,9 @@ main{display:grid;grid-template-columns:330px 1fr;gap:22px;padding:8px 24px 48px
 section{background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px;padding:18px}
 h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
 label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
-input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+input,select{width:100%;background:var(--panel2);color:var(--text);border:none;border-radius:3px;padding:11px 12px}
+input{font:1rem var(--mono)}
+select{font:1rem var(--body)}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
 .two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
 button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
@@ -80,8 +81,7 @@ section{background:none;border:0;padding:0}
 </head>
 <body>
 <header>
-  <h1>CRTG Stintplaner</h1>
-  <div class="sub">ChaosRacing – Team Germany</div>
+  <h1>Stintplaner</h1>
 </header>
 <div class="kerb"></div>
 <main>
