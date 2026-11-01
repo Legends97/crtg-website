@@ -35,6 +35,18 @@ a.panel:active{transform:scale(.985)}
 .panel .last{display:block;color:var(--mute);font-size:.82rem;margin:-14px 0 22px}
 .panel .go{display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-size:1rem;font-weight:600;color:var(--cy)}
 a.panel:hover .go{color:var(--vi);text-decoration:underline}
+.liveWrap{margin:0 8vw 32px;display:none}
+.liveWrap.on{display:block}
+.liveHead{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--mute);letter-spacing:.04em;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.liveHead::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff5d6c;box-shadow:0 0 0 3px rgba(255,93,108,.25)}
+.liveGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.liveCard{display:block;background:var(--panel);padding:18px 20px;text-decoration:none;color:inherit;transition:background 160ms ease}
+.liveCard:hover{background:var(--panel2)}
+.liveCard .liveBadge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.7rem;font-weight:600;color:#ff5d6c;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.liveCard .liveBadge::before{content:"";width:6px;height:6px;border-radius:50%;background:#ff5d6c}
+.liveCard .liveName{font-family:var(--disp);font-weight:600;font-size:1.1rem}
+.liveCard .liveTitle{color:var(--mute);font-size:.88rem;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.liveCard .liveMeta{color:var(--mute);font-size:.78rem;margin-top:8px}
 </style>
 <link rel="stylesheet" href="shared.css">
 </head>
@@ -71,6 +83,7 @@ a.panel:hover .go{color:var(--vi);text-decoration:underline}
     </svg>
   </div>
   </div>
+  <div class="liveWrap" id="liveWrap"><div class="liveHead">Live jetzt</div><div class="liveGrid" id="liveGrid"></div></div>
   <div class="kerb"></div>
 
   <div class="pitboard">
@@ -133,6 +146,25 @@ fetch("api/events",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(
   document.getElementById("heroDur").textContent=(ev.duration_minutes/60)+"h";
   if(ev.car_class)document.getElementById("heroClass").textContent=ev.car_class;
 });
+// Wer ist gerade live auf Twitch — Startseite pollt alle 60s, Bereich bleibt versteckt wenn niemand live ist.
+function refreshLive(){
+  fetch("api/twitch/live",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(list=>{
+    const wrap=document.getElementById("liveWrap");
+    if(!list||!list.length){wrap.classList.remove("on");return}
+    document.getElementById("liveGrid").innerHTML=list.map(s=>
+      '<a class="liveCard" href="https://twitch.tv/'+encodeURIComponent(s.twitch_login)+'" target="_blank" rel="noopener">'
+      +'<div class="liveBadge">Live</div>'
+      +'<div class="liveName">'+esc(s.display_name)+'</div>'
+      +(s.title?'<div class="liveTitle">'+esc(s.title)+'</div>':"")
+      +'<div class="liveMeta">'+(s.game_name?esc(s.game_name)+" · ":"")+s.viewer_count+' Zuschauer</div>'
+      +'</a>'
+    ).join("");
+    wrap.classList.add("on");
+  });
+}
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+refreshLive();
+setInterval(refreshLive,60000);
 </script>
 </body>
 </html>

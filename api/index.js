@@ -24,6 +24,8 @@ const init = () => (ready ||= q(`create table if not exists users (
   created_at timestamptz not null default now()
 )`).then(() => q(`alter table users add column if not exists car_number integer`))
   .then(() => q(`alter table users add column if not exists classes text[] not null default '{}'`))
+  .then(() => q(`alter table users add column if not exists twitch_login text`))
+  .then(() => q(`alter table users add column if not exists twitch_user_id text unique`))
   .then(() => q(`create table if not exists stint_plans (
   id serial primary key,
   name text,
@@ -161,7 +163,7 @@ async function currentUser(req) {
   const s = readSession(req);
   return s ? (await q("select * from users where id=$1 and active", [s.uid])).rows[0] || null : null;
 }
-const pub = u => ({ id: u.id, display_name: u.display_name, role: u.role, discord_id: u.discord_id, steam_id: u.steam_id, car_number: u.car_number });
+const pub = u => ({ id: u.id, display_name: u.display_name, role: u.role, discord_id: u.discord_id, steam_id: u.steam_id, car_number: u.car_number, twitch_login: u.twitch_login });
 
 // Dual-Auth für Routen, die sowohl vom Discord-Bot (Bot-Token) als auch per Session genutzt werden
 async function authEither(req) {
@@ -281,6 +283,72 @@ async function steamCallback(req, res, url, user) {
   await ensureFree("steam_id", steamId, user.id);
   await q("update users set steam_id=$1 where id=$2", [steamId, user.id]);
   redirect(res, "/");
+}
+
+// Twitch-Verknüpfung (echtes OAuth2, anders als Steams OpenID): hängt den verifizierten
+// Twitch-Login an den eingeloggten Nutzer. Kein Scope nötig — nur Identität, kein API-Zugriff
+// im Namen des Nutzers danach.
+const twitchRedirectUri = req => baseUrl(req) + "/api/auth/twitch/callback";
+function twitchLogin(req, res, user) {
+  if (!user) return redirect(res, "/login.html");
+  const p = new URLSearchParams({ client_id: process.env.TWITCH_CLIENT_ID, response_type: "code", redirect_uri: twitchRedirectUri(req), scope: "" });
+  redirect(res, "https://id.twitch.tv/oauth2/authorize?" + p);
+}
+async function twitchCallback(req, res, url, user) {
+  if (!user) return redirect(res, "/login.html");
+  const code = url.searchParams.get("code");
+  if (!code) return redirect(res, "/?error=twitch");
+  const tr = await fetch("https://id.twitch.tv/oauth2/token", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: process.env.TWITCH_CLIENT_ID, client_secret: process.env.TWITCH_CLIENT_SECRET, grant_type: "authorization_code", code, redirect_uri: twitchRedirectUri(req) }),
+  });
+  if (!tr.ok) return redirect(res, "/?error=twitch");
+  const { access_token } = await tr.json();
+  const ur = await fetch("https://api.twitch.tv/helix/users", {
+    headers: { Authorization: "Bearer " + access_token, "Client-Id": process.env.TWITCH_CLIENT_ID },
+  });
+  if (!ur.ok) return redirect(res, "/?error=twitch");
+  const d = (await ur.json()).data?.[0];
+  if (!d) return redirect(res, "/?error=twitch");
+  await ensureFree("twitch_user_id", d.id, user.id);
+  await q("update users set twitch_login=$1, twitch_user_id=$2 where id=$3", [d.login, d.id, user.id]);
+  redirect(res, "/");
+}
+
+// App-Access-Token (client_credentials, kein Nutzer-Login) für den Live-Check — modulweit
+// gecacht, bei Cold-Start einfach neu geholt.
+let twitchAppToken = null, twitchAppTokenExp = 0;
+async function twitchAppAccessToken() {
+  if (twitchAppToken && Date.now() < twitchAppTokenExp) return twitchAppToken;
+  const r = await fetch("https://id.twitch.tv/oauth2/token", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: process.env.TWITCH_CLIENT_ID, client_secret: process.env.TWITCH_CLIENT_SECRET, grant_type: "client_credentials" }),
+  });
+  if (!r.ok) throw new HttpErr(502, "Twitch-App-Token konnte nicht geholt werden.");
+  const d = await r.json();
+  twitchAppToken = d.access_token;
+  twitchAppTokenExp = Date.now() + (d.expires_in - 60) * 1000;
+  return twitchAppToken;
+}
+async function twitchLive(res) {
+  const linked = (await q("select display_name, twitch_login from users where twitch_login is not null and active")).rows;
+  if (!linked.length) return json(res, 200, []);
+  const token = await twitchAppAccessToken();
+  const p = new URLSearchParams();
+  linked.forEach(u => p.append("user_login", u.twitch_login));
+  const r = await fetch("https://api.twitch.tv/helix/streams?" + p, {
+    headers: { Authorization: "Bearer " + token, "Client-Id": process.env.TWITCH_CLIENT_ID },
+  });
+  if (!r.ok) throw new HttpErr(502, "Twitch-Streams konnten nicht geladen werden.");
+  const streams = (await r.json()).data || [];
+  const byLogin = new Map(linked.map(u => [u.twitch_login.toLowerCase(), u.display_name]));
+  return json(res, 200, streams.map(s => ({
+    display_name: byLogin.get(s.user_login.toLowerCase()) || s.user_name,
+    twitch_login: s.user_login,
+    title: s.title,
+    game_name: s.game_name,
+    viewer_count: s.viewer_count,
+  })));
 }
 
 // Admin: Fahrer verwalten
@@ -849,6 +917,12 @@ export default async function handler(req, res) {
     if (path === "/api/me") return user ? json(res, 200, pub(user)) : json(res, 401, { error: "Nicht angemeldet." });
     if (path === "/api/auth/steam") return steamLogin(req, res, user);
     if (path === "/api/auth/steam/callback") return await steamCallback(req, res, url, user);
+    if (path === "/api/auth/twitch") return twitchLogin(req, res, user);
+    if (path === "/api/auth/twitch/callback") return await twitchCallback(req, res, url, user);
+    if (path === "/api/twitch/live" && req.method === "GET") {
+      if (!user) throw new HttpErr(401, "Nicht angemeldet.");
+      return await twitchLive(res);
+    }
     if (path === "/api/drivers") {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");
       const r = await q("select display_name,car_number from users where active order by car_number nulls last, lower(display_name)");
