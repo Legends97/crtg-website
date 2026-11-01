@@ -21,7 +21,7 @@ tr.off td{opacity:.5}
 .miss{color:#ffa94d}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tag{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;color:var(--mute)}
 .tag.admin{color:var(--cy);border-color:var(--cy)}
-.classPicker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.classPicker{display:flex;gap:6px;flex-wrap:wrap;max-width:220px}
 .classChip{font-family:var(--mono);font-size:.78rem;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
 .classChip:hover{border-color:var(--cy)}
 .classChip.on{background:rgba(9,142,223,.18);color:var(--cy);border-color:var(--cy)}
@@ -57,7 +57,6 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
     <label for="fd">Discord-ID</label><input id="fd" inputmode="numeric" placeholder="17 bis 19 Ziffern">
     <label for="fs">Steam-ID (SteamID64)</label><input id="fs" placeholder="76561198000000000">
     <div class="hint">Mit oder ohne S, sie wird automatisch auf S + 17 Ziffern gesetzt. Ein leeres Feld löst die Verknüpfung.</div>
-    <label>Klassen</label><div class="classPicker" id="fc"></div>
     <label for="fr">Rolle</label><select id="fr"><option value="driver">Fahrer</option><option value="admin">Admin</option></select>
     <label class="row" id="far"><input type="checkbox" id="fa" style="width:auto"> Konto aktiv</label>
     <div class="err" id="err" role="alert"></div>
@@ -75,16 +74,6 @@ async function api(path,opt){
 }
 let list=[],editId=null,timer;
 const CAR_CLASSES=["GT2","GT3","GT4","CUP","ST","CHL","TCX"];
-let selClasses=[];
-function renderClassPicker(){
-  $("fc").innerHTML=CAR_CLASSES.map(c=>'<button type="button" class="classChip'+(selClasses.includes(c)?" on":"")+'" data-c="'+c+'">'+c+"</button>").join("");
-}
-$("fc").onclick=e=>{
-  const b=e.target.closest(".classChip");if(!b)return;
-  const c=b.dataset.c;
-  selClasses=selClasses.includes(c)?selClasses.filter(x=>x!==c):[...selClasses,c];
-  renderClassPicker();
-};
 function cell(tr,txt,cls){const td=document.createElement("td");td.textContent=txt;if(cls)td.className=cls;tr.appendChild(td);return td}
 async function load(){
   try{
@@ -101,7 +90,17 @@ async function load(){
       cell(tr,u.discord_id||"fehlt",u.discord_id?"mono":"miss");
       cell(tr,u.steam_id||"fehlt",u.steam_id?"mono":"miss");
       const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Admin":"Fahrer";r.appendChild(tag);
-      cell(tr,u.classes&&u.classes.length?u.classes.join(", "):"–");
+      const clsTd=cell(tr,"");
+      const picker=document.createElement("div");picker.className="classPicker";
+      picker.innerHTML=CAR_CLASSES.map(c=>'<button type="button" class="classChip'+(u.classes&&u.classes.includes(c)?" on":"")+'" data-c="'+c+'">'+c+"</button>").join("");
+      picker.onclick=async e=>{
+        const b=e.target.closest(".classChip");if(!b)return;
+        const c=b.dataset.c;
+        const next=(u.classes||[]).includes(c)?u.classes.filter(x=>x!==c):[...(u.classes||[]),c];
+        try{await api("/api/admin/users/"+u.id,{method:"PATCH",body:JSON.stringify({classes:next})});u.classes=next;b.classList.toggle("on")}
+        catch(err){alert(err.message)}
+      };
+      clsTd.appendChild(picker);
       cell(tr,u.active?"aktiv":"deaktiviert");
       const a=cell(tr,"");
       [["Bearbeiten",()=>openEdit(u)],[u.active?"Deaktivieren":"Aktivieren",()=>toggle(u)]].forEach(([t,f])=>{
@@ -120,7 +119,6 @@ function openEdit(u){
   $("ttl").textContent=u?"Fahrer bearbeiten":"Fahrer anlegen";
   $("fn").value=u?u.display_name:"";$("fnr").value=u?.car_number??"";$("fd").value=u?.discord_id||"";$("fs").value=u?.steam_id||"";
   $("fr").value=u?u.role:"driver";$("fa").checked=u?u.active:true;$("far").hidden=!u;
-  selClasses=u?.classes?[...u.classes]:[];renderClassPicker();
   $("dlg").showModal();
 }
 async function toggle(u){try{await api("/api/admin/users/"+u.id,{method:"PATCH",body:JSON.stringify({active:!u.active})});load()}catch(e){alert(e.message)}}
@@ -129,7 +127,7 @@ $("cancel").onclick=()=>$("dlg").close();
 $("q").oninput=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
 $("f").onsubmit=async e=>{
   e.preventDefault();$("err").textContent="";
-  const body={display_name:$("fn").value,car_number:$("fnr").value,discord_id:$("fd").value,steam_id:$("fs").value,classes:selClasses,role:$("fr").value};
+  const body={display_name:$("fn").value,car_number:$("fnr").value,discord_id:$("fd").value,steam_id:$("fs").value,role:$("fr").value};
   try{
     if(editId){body.active=$("fa").checked;await api("/api/admin/users/"+editId,{method:"PATCH",body:JSON.stringify(body)})}
     else await api("/api/admin/users",{method:"POST",body:JSON.stringify(body)});
