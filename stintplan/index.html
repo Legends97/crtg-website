@@ -65,7 +65,8 @@ body.ro main{grid-template-columns:1fr}
 @media print{
 @page{size:A4 portrait;margin:14mm}
 body{background:#fff;color:#111;font-size:12pt}
-.cfg,.actions,.no-print,.stripe,.sub{display:none!important}
+.cfg,.actions,.no-print,.kerb,.tireBand,.sub,#trackMount{display:none!important}
+.planCols{display:block}
 header{padding:0 0 8px}
 h1{background:none;color:#111;-webkit-text-fill-color:#111;font-size:22pt}
 main{display:block;padding:0;max-width:none}
@@ -81,8 +82,8 @@ section{background:none;border:0;padding:0}
 <header>
   <h1>CRTG Stintplaner</h1>
   <div class="sub">ChaosRacing – Team Germany</div>
-  <div class="stripe"></div>
 </header>
+<div class="kerb"></div>
 <main>
   <section class="cfg" aria-label="Event verwalten">
     <h2>Event</h2>
@@ -138,6 +139,7 @@ section{background:none;border:0;padding:0}
     <div id="view"></div>
   </section>
 </main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <div id="toast" role="status"></div>
 
 <script src="../tracks-data.js"></script>

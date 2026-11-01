@@ -42,11 +42,13 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
   <div id="app">
     <h1>Fahrer-Verwaltung</h1>
     <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
+    <div class="kerb" style="margin-bottom:18px"></div>
     <div class="warn" id="warn" role="status"></div>
     <div class="bar"><input id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="btn go" id="new" type="button">Fahrer anlegen</button></div>
     <div class="tw"><table><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Klassen</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
   </div>
 </main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <dialog id="dlg">
   <form id="f">
     <h2 id="ttl" style="margin:0">Fahrer</h2>

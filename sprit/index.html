@@ -34,7 +34,7 @@ input:focus{outline:2px solid var(--cy);outline-offset:1px}
 button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;margin-top:16px}
 button:hover{border-color:var(--cy)}
 .row.bad{border-left-color:#ff6b6b}.row.bad .n{color:#ff6b6b}.flag{flex-basis:100%;color:#ff8a8a;font-size:.85rem}
-@media print{@page{size:A4 portrait;margin:14mm}body{background:#fff;color:#111}.cfg,button,.stripe,.back{display:none!important}h1{background:none;color:#111;-webkit-text-fill-color:#111}main{display:block;padding:0}section{background:none;border:0;padding:0}.stat b{color:#111}.row{background:#fff;border-color:#bbb;border-left-color:#555;break-inside:avoid}.row .n{color:#111}}
+@media print{@page{size:A4 portrait;margin:14mm}body{background:#fff;color:#111}.cfg,button,.kerb,.tireBand,.back{display:none!important}h1{background:none;color:#111;-webkit-text-fill-color:#111}main{display:block;padding:0}section{background:none;border:0;padding:0}.stat b{color:#111}.row{background:#fff;border-color:#bbb;border-left-color:#555;break-inside:avoid}.row .n{color:#111}}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
@@ -42,8 +42,8 @@ button:hover{border-color:var(--cy)}
 <header>
   <h1>Sprit-Rechner</h1>
   <div class="sub">ChaosRacing – Team Germany</div>
-  <div class="stripe"></div>
 </header>
+<div class="kerb"></div>
 <main>
   <section class="cfg" aria-label="Eingaben">
     <h2>Rennen</h2>
@@ -70,6 +70,7 @@ button:hover{border-color:var(--cy)}
     <button type="button" onclick="window.print()">Drucken / PDF</button>
   </section>
 </main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <script>
 const $=id=>document.getElementById(id),KEY="crtg-sprit-v1",KEYS=["h","m","lap","cons","tank","res","stint"];
 let S={h:3,m:0,lap:"1:48.5",cons:3.1,tank:120,res:1,stint:40};

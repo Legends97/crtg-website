@@ -17,6 +17,9 @@ main{max-width:860px;margin:auto;padding:8px 24px 48px}
 .event{margin-bottom:28px}
 .event h2{margin:0 0 10px;font-size:1.1rem;font-weight:700}
 .event h2 .trk{color:var(--mute);font-weight:400;font-size:.9rem}
+.eventCols{display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start}
+@media(max-width:760px){.eventCols{grid-template-columns:1fr}.trackBox{order:-1}}
+.trackBox{display:flex;justify-content:center}
 .bar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}
 .seg{flex:1;display:flex;align-items:center;justify-content:center;background:var(--panel2);border-right:2px solid var(--bg);font-size:.72rem;color:var(--mute);overflow:hidden;white-space:nowrap;padding:0 4px;min-width:0}
 .seg:last-child{border-right:0}
@@ -37,15 +40,27 @@ main{max-width:860px;margin:auto;padding:8px 24px 48px}
 <header>
   <h1>Meine kommenden Stints</h1>
   <div class="sub">ChaosRacing – Team Germany</div>
-  <div class="stripe"></div>
 </header>
+<div class="kerb"></div>
 <main>
   <div id="list"><p class="empty">Lädt …</p></div>
 </main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
+<script src="../tracks-data.js"></script>
 <script>
 const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmt=iso=>new Date(iso).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});
+function trackSvgHtml(trackName){
+  const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[trackName];
+  const t=slug&&TRACKS_DATA[slug];
+  if(!t)return "";
+  const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
+    +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
+  return '<div class="trackBox"><svg viewBox="'+t.viewBox+'" style="width:100%;max-width:280px;overflow:visible">'
+    +'<path style="fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
+    +corners+'</svg></div>';
+}
 function tagOf(s,now){
   const start=new Date(s.start_at), end=new Date(s.end_at);
   if(start<=now&&now<end)return {cls:" now",label:"läuft"};
@@ -100,7 +115,8 @@ function render(){
           +'<span class="track">'+esc(info.join(" · "))+'</span>'
           +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");
-      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'+bar+rows+'</div>';
+      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'
+        +'<div class="eventCols"><div>'+bar+rows+'</div>'+trackSvgHtml(g.event.track)+'</div></div>';
     }).join("");
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }
