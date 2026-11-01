@@ -599,17 +599,23 @@ function eventPhase(e, now) {
   if (now <= e.signup_closes_at) return "signup_open";
   return "after_signup";
 }
+// Ein Event ohne gesetzte Klasse ist für alle sichtbar; ein Fahrer ohne zugewiesene Klassen
+// (noch nicht konfiguriert) sieht ebenfalls alles, statt plötzlich leer dazustehen.
+const classAllowed = (user, event) =>
+  user.role === "admin" || !event.car_class || !user.classes || !user.classes.length || user.classes.includes(event.car_class);
+
 async function listEvents(res, user) {
   if (!user) throw new HttpErr(401, "Nicht angemeldet.");
   const r = await q(`select * from events where status<>'draft' order by start_at`);
   const now = new Date();
-  return json(res, 200, r.rows.map(e => ({ ...e, phase: eventPhase(e, now) })));
+  return json(res, 200, r.rows.filter(e => classAllowed(user, e)).map(e => ({ ...e, phase: eventPhase(e, now) })));
 }
 
 async function claimStint(res, eventId, number, user) {
   if (!user) throw new HttpErr(401, "Nicht angemeldet.");
   const event = (await q("select * from events where id=$1", [eventId])).rows[0];
   if (!event) throw new HttpErr(404, "Event nicht gefunden.");
+  if (!classAllowed(user, event)) throw new HttpErr(403, "Dieses Event ist nicht für deine Fahrzeugklasse.");
   const now = new Date();
   if (event.status !== "signup" || now < event.signup_opens_at || now > event.signup_closes_at)
     throw new HttpErr(403, "Anmeldung ist aktuell nicht möglich.");
