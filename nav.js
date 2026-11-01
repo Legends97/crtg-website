@@ -13,13 +13,15 @@
   var root=new URL(base).pathname;
   function tab(i){var on=here===root+i[0];
     return '<a href="'+base+i[0]+'"'+(on?' class="on" aria-current="page"':'')+'><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+i[2]+'</svg><span>'+i[1]+'</span></a>';}
+  var navWrap=document.createElement("div");
+  navWrap.className="navWrap";
   var nav=document.createElement("nav");
   nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
   nav.innerHTML='<div class="navLeft"><a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="32" height="32"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div></div>';
-  document.body.insertBefore(nav,document.body.firstChild);
   var ticker=document.createElement("div");
   ticker.className="ticker";ticker.innerHTML='<div class="track" id="tickerTrack"></div>';
-  document.body.insertBefore(ticker,nav.nextSibling);
+  navWrap.appendChild(nav);navWrap.appendChild(ticker);
+  document.body.insertBefore(navWrap,document.body.firstChild);
   function renderTicker(){
     var t=(typeof TRACKS_DATA!=="undefined")&&TRACKS_DATA["spa-francorchamps"];
     if(!t)return;
