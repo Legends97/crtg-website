@@ -33,10 +33,14 @@
 .back{color:var(--cy);text-decoration:none}
 .back:hover{text-decoration:underline}
 .empty{color:var(--mute);padding:30px 0}
+.carDot{offset-rotate:0deg;offset-distance:0%;animation:driveAlong 16s linear infinite}
+@keyframes driveAlong{to{offset-distance:100%}}
+@media(prefers-reduced-motion:reduce){.carDot{display:none}}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute"><defs><clipPath id="logoClip" clipPathUnits="userSpaceOnUse"><circle cx="0" cy="0" r="6.5"/></clipPath></defs></svg>
 <main>
   <div class="pageHead"><h2>Meine Stints</h2></div>
   <div class="kerb"></div>
@@ -55,8 +59,10 @@ function trackSvgHtml(trackName){
   if(!t)return "";
   const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
     +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
+  const carD=t.paths[0].replace(/'/g,"\\'");
   return '<div class="trackBox"><svg viewBox="'+t.viewBox+'" style="width:100%;max-width:280px;opacity:.95;overflow:visible">'
     +'<path style="fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
+    +'<g class="carDot" style="offset-path:path(\''+carD+'\')"><circle r="7.5" fill="var(--bg)" style="filter:drop-shadow(0 0 4px var(--vi))"/><image href="../icon.png" x="-6.5" y="-6.5" width="13" height="13" clip-path="url(#logoClip)"/></g>'
     +corners+'</svg><div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
 }
 function tagOf(s,now){
