@@ -20,8 +20,8 @@ background:repeating-linear-gradient(115deg,transparent 0 170px,rgba(9,142,223,.
 .nav .brand img{width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 0 2px var(--cy)}
 .nav .tabs{display:flex;gap:6px}
 .nav .tabs a{display:flex;align-items:center;gap:8px;color:var(--mute);text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid transparent;font-family:var(--body);transition:color 160ms ease,border-color 160ms ease,background 160ms ease}
-.nav .tabs a:hover{color:var(--text);border-color:var(--line)}
-.nav .tabs a.on{color:var(--text);background:linear-gradient(90deg,rgba(9,142,223,.2),rgba(162,50,207,.2));border-color:var(--cy)}
+.nav .tabs a:hover{color:var(--vi)}
+.nav .tabs a.on{color:var(--cy);background:rgba(9,142,223,.08);border-color:var(--cy)}
 .nav svg{width:16px;height:16px;flex:none}
 .ticker{position:sticky;top:0;z-index:19;height:30px;overflow:hidden;background:var(--panel2);box-shadow:0 10px 24px -14px rgba(0,0,0,.6)}
 .ticker .track{display:flex;gap:44px;white-space:nowrap;animation:tick 48s linear infinite;position:absolute;height:30px;align-items:center;padding-left:8vw}

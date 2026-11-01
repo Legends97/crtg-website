@@ -5,35 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin – CRTG</title>
 <style>
-main{max-width:1100px;margin:auto;padding:22px 20px 60px}
+.pageHead{padding:26px 8vw 0}
+.pageBody{padding:36px 8vw 10vh}
 h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);color:var(--text)}
-.sub{color:var(--mute);margin:14px 0 18px}
-.warn{background:rgba(255,169,77,.12);border:1px solid #ffa94d;border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.sub{color:var(--mute);margin:-14px 0 24px}
+.warn{background:rgba(255,169,77,.12);border-left:3px solid #ffa94d;border-radius:3px;padding:10px 14px;margin-bottom:14px}
 .warn:empty,[hidden]{display:none!important}
-.bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}.bar input{flex:1;min-width:200px}
-input,select{width:100%;background:var(--panel2);color:var(--text);border:none;border-radius:3px;padding:11px 12px}
-input{font:1rem var(--mono)}
-select{font:1rem var(--body)}
-input:focus,select:focus{outline:2px solid var(--cy);outline-offset:1px}
-.tw{overflow-x:auto;background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px}
-table{width:100%;border-collapse:collapse;min-width:760px}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
-th{color:var(--mute);font-weight:500;font-size:.85rem}
+.adminBar{display:flex;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.searchInput{flex:1;min-width:220px;background:var(--panel2);border:none;border-radius:999px;color:var(--text);font:1rem var(--body);padding:11px 18px}
+.searchInput:focus{outline:2px solid var(--cy);outline-offset:1px}
+.searchInput::placeholder{color:var(--mute)}
+.addBtn{background:var(--vi);color:#fff;border:none;border-radius:999px;padding:11px 22px;font-weight:600;white-space:nowrap;transition:background 160ms ease,transform 120ms ease-out}
+.addBtn:hover{background:#b34de0}
+.addBtn:active{transform:scale(.97)}
+.tw{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;min-width:760px}
+.table th{text-align:left;font-weight:600;color:var(--mute);padding:10px 16px;border-bottom:1px solid var(--line)}
+.table td{padding:14px 16px;border-bottom:1px solid var(--bg)}
 tr.off td{opacity:.5}
 .miss{color:#ffa94d}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.tag.admin{color:var(--vi);font-weight:600}
-.classPicker{display:flex;gap:6px;flex-wrap:wrap;max-width:220px}
-.classChip{font-family:var(--mono);font-size:.78rem;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
+.role.admin{color:var(--vi);font-weight:600}
+.classPicker{display:flex;gap:5px;flex-wrap:wrap;max-width:220px}
+.classChip{font-family:var(--mono);font-size:.72rem;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--panel2);color:var(--mute);border:1px solid var(--line);transition:background 140ms ease,color 140ms ease,border-color 140ms ease,transform 120ms ease-out}
 .classChip:hover{border-color:var(--cy)}
+.classChip:active{transform:scale(.94)}
 .classChip.on{background:rgba(162,50,207,.18);color:var(--vi);border-color:var(--vi)}
-td .btn{margin-right:6px;padding:5px 12px}
-#empty,#gate{color:var(--mute);padding:18px}
+.rowBtn{background:var(--panel2);color:var(--text);border:none;border-radius:999px;padding:7px 16px;font-size:.85rem;white-space:nowrap;margin-right:6px;transition:background 160ms ease,transform 120ms ease-out}
+.rowBtn:hover{background:var(--line)}
+.rowBtn:active{transform:scale(.96)}
+.rowBtn.danger:hover{color:#ff6b6b}
+#empty,#gate{color:var(--mute);padding:18px 0}
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(480px,92vw);padding:22px}
 dialog::backdrop{background:rgba(5,7,16,.72)}
-label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
-.hint{color:var(--mute);font-size:.8rem;margin-top:4px}
-.err{color:#ff8a8a;min-height:1.4em;margin:12px 0 0}
-.row{display:flex;gap:10px;margin-top:8px;align-items:center}
+dialog input,dialog select{width:100%;background:var(--panel2);color:var(--text);border:none;border-radius:3px;padding:11px 12px}
+dialog input{font:1rem var(--mono)}
+dialog select{font:1rem var(--body)}
+dialog input:focus,dialog select:focus{outline:2px solid var(--cy);outline-offset:1px}
+dialog label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
+dialog .hint{color:var(--mute);font-size:.8rem;margin-top:4px}
+dialog .err{color:#ff8a8a;min-height:1.4em;margin:12px 0 0}
+dialog .row{display:flex;gap:10px;margin-top:8px;align-items:center}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
@@ -41,12 +52,14 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
 <main>
   <div id="gate" hidden></div>
   <div id="app">
-    <h1>Fahrer-Verwaltung</h1>
+    <div class="pageHead"><h1>Fahrer-Verwaltung</h1></div>
     <div class="kerb"></div>
+    <div class="pageBody">
     <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
     <div class="warn" id="warn" role="status"></div>
-    <div class="bar"><input id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="btn go" id="new" type="button">Fahrer anlegen</button></div>
-    <div class="tw"><table><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Klassen</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+    <div class="adminBar"><input class="searchInput" id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="go addBtn" id="new" type="button">Fahrer anlegen</button></div>
+    <div class="tw"><table class="table"><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Klassen</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+    </div>
   </div>
 </main>
 <div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
@@ -61,7 +74,7 @@ label{display:block;color:var(--mute);font-size:.85rem;margin:12px 0 4px}
     <label for="fr">Rolle</label><select id="fr"><option value="driver">Fahrer</option><option value="admin">Admin</option></select>
     <label class="row" id="far"><input type="checkbox" id="fa" style="width:auto"> Konto aktiv</label>
     <div class="err" id="err" role="alert"></div>
-    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" id="cancel">Abbrechen</button><button class="btn go">Speichern</button></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="rowBtn" id="cancel">Abbrechen</button><button class="go addBtn">Speichern</button></div>
   </form>
 </dialog>
 <script src="../nav.js"></script>
@@ -90,7 +103,7 @@ async function load(){
       cell(tr,u.car_number!=null?"#"+u.car_number:"–","mono");
       cell(tr,u.discord_id||"fehlt",u.discord_id?"mono":"miss");
       cell(tr,u.steam_id||"fehlt",u.steam_id?"mono":"miss");
-      const r=cell(tr,""),tag=document.createElement("span");tag.className="tag"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Developer":"Fahrer";r.appendChild(tag);
+      const r=cell(tr,""),tag=document.createElement("span");tag.className="role"+(u.role==="admin"?" admin":"");tag.textContent=u.role==="admin"?"Developer":"Fahrer";r.appendChild(tag);
       const clsTd=cell(tr,"");
       const picker=document.createElement("div");picker.className="classPicker";
       picker.innerHTML=CAR_CLASSES.map(c=>'<button type="button" class="classChip'+(u.classes&&u.classes.includes(c)?" on":"")+'" data-c="'+c+'">'+c+"</button>").join("");
@@ -104,15 +117,15 @@ async function load(){
       clsTd.appendChild(picker);
       cell(tr,u.active?"aktiv":"deaktiviert");
       const a=cell(tr,"");
-      [["Bearbeiten",()=>openEdit(u)],[u.active?"Deaktivieren":"Aktivieren",()=>toggle(u)]].forEach(([t,f])=>{
-        const b=document.createElement("button");b.type="button";b.className="btn";b.textContent=t;b.onclick=f;a.appendChild(b)});
+      [["Bearbeiten",()=>openEdit(u),""],[u.active?"Deaktivieren":"Aktivieren",()=>toggle(u),u.active?" danger":""]].forEach(([t,f,cls])=>{
+        const b=document.createElement("button");b.type="button";b.className="go rowBtn"+cls;b.textContent=t;b.onclick=f;a.appendChild(b)});
       tb.appendChild(tr);
     });
     $("empty").hidden=list.length>0;
   }catch(e){
     $("app").hidden=true;$("gate").hidden=false;
     $("gate").textContent=e.status===401?"Bitte melde dich zuerst an. ":e.status===403?"Dieser Bereich ist nur für Admins.":e.message;
-    if(e.status===401){const a=document.createElement("a");a.href="/login.html";a.className="btn go";a.textContent="Zur Anmeldung";$("gate").appendChild(a)}
+    if(e.status===401){const a=document.createElement("a");a.href="/login.html";a.className="go addBtn";a.textContent="Zur Anmeldung";$("gate").appendChild(a)}
   }
 }
 function openEdit(u){

@@ -5,150 +5,150 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CRTG Stintplaner</title>
 <style>
-:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
-*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
-background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
-header{max-width:1280px;margin:auto;padding:26px 24px 10px}
-h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);letter-spacing:.01em;line-height:1.1;color:var(--text)}
-.back{color:var(--cy);text-decoration:none}.back:hover{text-decoration:underline}
-.stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
-main{display:grid;grid-template-columns:330px 1fr;gap:22px;padding:8px 24px 48px;max-width:1280px;margin:auto;align-items:start}
-@media(max-width:880px){main{grid-template-columns:1fr;padding:8px 14px 40px}header{padding:20px 14px 10px}h1{font-size:2rem}}
-section{background:rgba(19,24,48,.88);border:1px solid var(--line);border-radius:14px;padding:18px}
-h2{margin:0 0 4px;font-size:1.15rem;font-weight:700}
-label{display:block;color:var(--mute);font-size:.85rem;margin:14px 0 5px}
-input,select{width:100%;background:var(--panel2);color:var(--text);border:none;border-radius:3px;padding:11px 12px}
-input{font:1rem var(--mono)}
-select{font:1rem var(--body)}
-input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
-button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
-button:hover{border-color:var(--cy)}button:active{transform:translateY(1px)}
-button:disabled{opacity:.45;cursor:default}
-button.go{background:linear-gradient(90deg,var(--cy),var(--vi));border-color:transparent;font-weight:600}
-button.danger:hover{border-color:#ff8a8a;color:#ff8a8a}
-.devBadge{display:inline-block;font-family:var(--disp);font-weight:600;font-size:.82rem;text-transform:uppercase;color:var(--vi);background:rgba(162,50,207,.14);border-radius:999px;padding:4px 12px;margin-bottom:12px}
-.sideBtns{display:flex;flex-direction:column;gap:8px;margin:10px 0 16px}
-.sideBtn{display:block;width:100%;background:var(--panel2);border:none;border-radius:3px;padding:10px 14px;font-size:.92rem;text-align:left}
+.pageHead{padding:26px 8vw 0}
+.pageHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);margin:0}
+.pageBody{padding:36px 8vw 10vh}
+.devLayout{display:grid;grid-template-columns:260px 1fr;gap:40px;align-items:start}
+@media(max-width:960px){.devLayout{grid-template-columns:1fr}}
+body.ro .devLayout{grid-template-columns:1fr}
+body.ro .devSidebar{display:none}
+.devSidebar{background:var(--panel2);border-radius:4px;padding:22px}
+.devBadge{display:inline-block;font-family:var(--disp);font-weight:600;font-size:.82rem;text-transform:uppercase;color:var(--vi);background:rgba(162,50,207,.14);border-radius:999px;padding:4px 12px;margin-bottom:18px}
+.sideBtn{display:block;width:100%;background:var(--panel);color:var(--text);border:none;border-radius:3px;padding:10px 14px;margin-bottom:10px;font-size:.92rem;text-align:left;transition:background 160ms ease,transform 120ms ease-out}
 .sideBtn:hover{background:var(--line)}
+.sideBtn:active{transform:scale(.98)}
+.devSidebar .fieldGroup{font-size:.82rem;margin:18px 0 8px}
+.devSidebar .fieldGroup:first-child{margin-top:0}
+.devSidebar .field{margin-bottom:14px}
+.devSidebar .field input,.devSidebar select.trackSelect{padding:9px 10px;font-size:.92rem}
+.fieldGroup{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--mute);margin:24px 0 10px;letter-spacing:.02em}
+.fieldRow{display:flex;gap:14px}
+.fieldRow .field{flex:1;min-width:0}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.88rem;color:var(--mute);margin-bottom:6px}
+.field input{width:100%;background:var(--panel);border:none;border-radius:3px;color:var(--text);font:1rem var(--mono);padding:11px 12px}
+.trackSelect{width:100%;background:var(--panel);border:none;border-radius:3px;color:var(--text);font:1rem var(--body);padding:11px 12px;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238f98bd' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+.trackSelect:focus,.field input:focus{outline:2px solid var(--cy);outline-offset:1px}
+.fieldHint{color:var(--mute);font-size:.875rem;line-height:1.5;margin:5px 2px 0}
+.addBtn{display:inline-block;background:var(--vi);color:#fff;border:none;border-radius:999px;padding:11px 22px;font-weight:600;white-space:nowrap;text-align:center;transition:background 160ms ease,transform 120ms ease-out}
+.addBtn:hover{background:#b34de0}
+.addBtn:active{transform:scale(.97)}
+.addBtn:disabled{opacity:.45;cursor:default}
+.rowBtn{background:var(--panel2);color:var(--text);border:none;border-radius:999px;padding:7px 16px;font-size:.85rem;white-space:nowrap;transition:background 160ms ease,transform 120ms ease-out}
+.rowBtn:hover{background:var(--line)}
+.rowBtn:active{transform:scale(.96)}
+.rowBtn.danger:hover{color:#ff6b6b}
+.rowBtn:disabled{opacity:.45;cursor:default}
+.evHead{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:28px}
+.evHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(1.5rem,2.4vw,2.1rem);margin:0 0 8px}
+.evMeta{color:var(--mute);font-size:.9rem;margin:0 0 10px}
+.evStats{display:flex;gap:32px;margin-top:18px;flex-wrap:wrap}
+.evStats .n{font-family:var(--mono);font-size:1.5rem;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.evStats .n.vi{color:var(--vi)}
+.evStats .l{font-size:.82rem;color:var(--mute);margin-top:2px}
 .pill{font-family:var(--body);font-size:.85rem;font-weight:600;padding:5px 14px;border-radius:999px;background:var(--panel2);display:inline-block}
-.pill.signup{color:var(--vi)}
-.chipRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 .chip{display:inline-flex;flex-direction:column;gap:3px;font-family:var(--mono);background:var(--panel2);border-radius:3px;padding:10px 14px;min-width:92px}
 .chip .v{font-size:1.1rem;color:var(--text);font-variant-numeric:tabular-nums}
 .chip .k{font-size:.72rem;color:var(--mute);margin-top:1px}
-.hero{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
-.trk{font-family:var(--disp);font-size:2.1rem;font-style:italic;font-weight:800;line-height:1.1}
-.meta{color:var(--mute);font-size:.9rem;margin-top:3px}
-.stats{display:flex;gap:26px;flex-wrap:wrap}
-.stat b{display:block;font-family:var(--mono);font-size:1.8rem;line-height:1.1;color:var(--cy);font-variant-numeric:tabular-nums}
-.stat span{color:var(--mute);font-size:.85rem}
-.banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c,var(--line));border-radius:12px;padding:12px 16px;margin:0 0 16px}
-.banner b{font-size:1.15rem}
-.banner .cd{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.4rem;font-style:italic;color:var(--c,var(--cy))}
-.banner small{color:var(--mute);display:block}
-.banner.open{--c:var(--cy)}.banner.soon{--c:var(--vi)}.banner.closed{--c:#ffa94d}.banner.locked{--c:#3ddc97}.banner.draft{--c:var(--mute)}.banner.off{--c:#ff5d6c}
-.planCols{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
-@media(max-width:1100px){.planCols{grid-template-columns:1fr}#trackMount{order:-1}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
-.cell{background:var(--panel2);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:8px 11px;min-width:0}
-.cell .n{font-family:var(--mono);font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c);line-height:1.1}
-.cell .t{font-variant-numeric:tabular-nums;font-weight:600}
-.cell .who{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cell .fu{color:var(--mute);font-size:.8rem;font-variant-numeric:tabular-nums}
-.cell select{margin-top:4px;padding:5px 7px;font-size:.9rem}
-.cell.free{--c:var(--mute)}.cell.free .who{color:var(--mute)}
-.cell.mine{--c:var(--cy)}
-.cell.other{--c:var(--vi)}
-.cell.past{opacity:.5}
-.cell.hit{cursor:pointer}.cell.hit:hover{border-color:var(--cy)}
-.cell.hit:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.legend{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--mute);font-size:.85rem;margin-top:14px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.hint{color:var(--mute);font-size:.85rem;margin-top:10px}
+.chipRow{display:flex;gap:10px;flex-wrap:wrap}
+.countdown{background:var(--panel2);border-left:3px solid var(--c,var(--vi));border-radius:3px;padding:16px 20px;margin-bottom:22px}
+.countdown-label{font-size:.9rem;color:var(--mute)}
+.countdown-value{font-family:var(--disp);font-size:1.5rem;font-weight:600;color:var(--c,var(--vi));margin-top:2px}
+.countdown-sub{font-size:.82rem;color:var(--mute);margin-top:6px}
+.hourgrid.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:7px;margin-top:22px}
+.hourcell{background:var(--panel2);padding:9px 11px;min-height:56px;transition:background 160ms ease;box-shadow:inset 3px 0 0 var(--line)}
+.hourcell.hit{cursor:pointer}
+.hourcell.hit:hover,.hourcell.hit:focus-visible{background:#212852;box-shadow:inset 0 0 0 1px var(--vi);outline:none}
+.hourcell .hr{font-family:var(--mono);font-size:.68rem;color:var(--mute)}
+.hourcell .who{font-size:.86rem;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hourcell select{margin-top:4px;width:100%;font-size:.78rem;padding:4px 6px;background:var(--panel);border:none;border-radius:3px;color:var(--text)}
+.hourcell.free{background:rgba(9,142,223,.08);box-shadow:inset 3px 0 0 var(--cy)}
+.hourcell.free .who{color:var(--cy);font-style:italic}
+.hourcell.mine{background:rgba(162,50,207,.16);box-shadow:inset 3px 0 0 var(--vi)}
+.hourcell.past{opacity:.5;filter:grayscale(.5)}
+.hourcell.past .who{color:var(--mute)}
+.hourcell.live{box-shadow:inset 0 0 0 2px var(--cy)}
+.hourcell.mine .who{color:var(--vi);font-weight:600}
+.hourcell .fu{font-family:var(--mono);font-size:.68rem;color:var(--mute);margin-top:2px}
+.meineLayout{display:grid;grid-template-columns:1.3fr .9fr;gap:52px;align-items:start}
+@media(max-width:1100px){.meineLayout{grid-template-columns:1fr}#stintTrackCol{order:-1}}
+.planLegend{display:flex;gap:20px;flex-wrap:wrap;margin-top:24px;font-size:.85rem;color:var(--mute)}
+.planLegend span{display:flex;align-items:center;gap:7px}
+.planLegend .dot{width:10px;height:10px;border-radius:50%;background:var(--panel2);display:inline-block}
+.planLegend .dot.free{background:rgba(9,142,223,.18);box-shadow:inset 0 0 0 1.5px var(--cy)}
+.planLegend .dot.mine{background:var(--vi)}
+.planLegend .dot.other{background:var(--line)}
+.planLegend .dot.past{background:var(--panel2);opacity:.4}
+.calcNote{color:var(--mute);font-size:.86rem;line-height:1.6;margin:22px 0}
+.planActions{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
 .empty{color:var(--mute);padding:20px 0}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cy);padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:92vw;text-align:center}
 #toast.on{opacity:1}
-body.ro .cfg{display:none}
-body.ro main{grid-template-columns:1fr}
 @media print{
 @page{size:A4 portrait;margin:14mm}
 body{background:#fff;color:#111;font-size:12pt}
-.cfg,.actions,.no-print,.kerb,.tireBand,.sub,#trackMount{display:none!important}
-.planCols{display:block}
-header{padding:0 0 8px}
-h1{background:none;color:#111;-webkit-text-fill-color:#111;font-size:22pt}
-main{display:block;padding:0;max-width:none}
-section{background:none;border:0;padding:0}
-.trk{font-size:20pt}.stat b{color:#111}
-.cell{background:#fff;border:1px solid #bbb;border-left:7px solid var(--c);break-inside:avoid}
-.cell select{display:none}
+.devSidebar,.planActions,.kerb,.tireBand,#toast,#stintTrackCol{display:none!important}
+.pageHead,.pageBody{padding:0}
+.devLayout{display:block}
+.pageHead h2{color:#111;font-size:22pt}
+.hourcell{background:#fff;border:1px solid #bbb;box-shadow:none;break-inside:avoid}
+.hourcell select{display:none}
 }
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-<header>
-  <h1>Stintplaner</h1>
-</header>
-<div class="kerb"></div>
 <main>
-  <section class="cfg" aria-label="Event verwalten">
-    <div class="devBadge">Developer-Bereich</div>
-    <h2>Event</h2>
-    <div class="sideBtns">
-      <button id="fNew" type="button" class="sideBtn">Neues Event</button>
-      <button id="fEdit" type="button" class="sideBtn">Ausgewähltes bearbeiten</button>
-    </div>
-    <label for="fName">Name</label>
-    <input id="fName" placeholder="z. B. 6H Spa">
-    <label for="fTrack">Strecke</label>
-    <select id="fTrack"></select>
-    <label for="fClass">Klasse</label>
-    <select id="fClass"><option value="GT2">GT2</option><option value="GT3">GT3</option><option value="GT4">GT4</option><option value="CUP">CUP</option><option value="ST">ST</option><option value="CHL">CHL</option><option value="TCX">TCX</option></select>
-    <div class="two">
-      <div><label for="fStart">Start (lokal)</label><input id="fStart" type="datetime-local"></div>
-      <div><label for="fHours">Dauer (h)</label><select id="fHours"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option></select></div>
-    </div>
-    <h2 style="margin-top:22px">Anmeldefenster</h2>
-    <div class="two">
-      <div><label for="fOpenD">Tage vorher öffnen</label><input id="fOpenD" type="number" min="0" step="0.5"></div>
-      <div><label for="fCloseD">Tage vorher schließen</label><input id="fCloseD" type="number" min="0" step="0.5"></div>
-    </div>
-    <p class="hint" id="fPrev"></p>
-    <div class="two">
-      <div><label for="fOpenAt">Öffnet (direkt, optional)</label><input id="fOpenAt" type="datetime-local"></div>
-      <div><label for="fCloseAt">Schließt (direkt, optional)</label><input id="fCloseAt" type="datetime-local"></div>
-    </div>
-    <h2 style="margin-top:22px">Sprit</h2>
-    <label for="fLap">Rundenzeit (m:ss.x)</label>
-    <input id="fLap" placeholder="1:48.5">
-    <div class="two">
-      <div><label for="fCons">Verbrauch/Runde (L)</label><input id="fCons" type="number" step="0.01" min="0"></div>
-      <div><label for="fTank">Tank (L)</label><input id="fTank" type="number" step="1" min="0"></div>
-    </div>
-    <label for="fRes">Reserve (Runden)</label>
-    <input id="fRes" type="number" step="1" min="0" placeholder="1">
-    <h2 style="margin-top:22px">Erinnerungen &amp; Discord</h2>
-    <label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label>
-    <input id="fLead" placeholder="1440,120,20">
-    <div class="two">
-      <div><label for="fGuild">Server-ID (optional)</label><input id="fGuild" placeholder="Server-Standard"></div>
-      <div><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
-    </div>
-    <div class="actions">
-      <button class="go" id="fSave" type="button">Speichern</button>
-    </div>
-    <p class="hint" id="fHint"></p>
-  </section>
-
-  <section aria-label="Stintplan">
-    <label for="evSel" style="margin-top:0">Event</label>
-    <select id="evSel"><option value="">Lädt …</option></select>
-    <div id="view"></div>
-  </section>
+<div class="pageHead"><h2>Stintplaner</h2></div>
+<div class="kerb"></div>
+<div class="pageBody">
+<div class="devLayout">
+<aside class="devSidebar">
+  <div class="devBadge">Developer-Bereich</div>
+  <div class="fieldGroup">Event</div>
+  <button id="fNew" type="button" class="go sideBtn">Neues Event</button>
+  <button id="fEdit" type="button" class="go sideBtn">Ausgewähltes bearbeiten</button>
+  <div class="field"><label for="fName">Name</label><input id="fName" placeholder="z. B. 6H Spa"></div>
+  <div class="field"><label for="fTrack">Strecke</label><select class="trackSelect" id="fTrack"></select></div>
+  <div class="field"><label for="fClass">Klasse</label><select class="trackSelect" id="fClass"><option value="GT2">GT2</option><option value="GT3">GT3</option><option value="GT4">GT4</option><option value="CUP">CUP</option><option value="ST">ST</option><option value="CHL">CHL</option><option value="TCX">TCX</option></select></div>
+  <div class="fieldRow">
+    <div class="field"><label for="fStart">Start (lokal)</label><input id="fStart" type="datetime-local"></div>
+    <div class="field"><label for="fHours">Dauer (h)</label><select class="trackSelect" id="fHours"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option></select></div>
+  </div>
+  <div class="fieldGroup">Anmeldefenster</div>
+  <div class="fieldRow">
+    <div class="field"><label for="fOpenD">Tage vorher öffnen</label><input id="fOpenD" type="number" min="0" step="0.5"></div>
+    <div class="field"><label for="fCloseD">Tage vorher schließen</label><input id="fCloseD" type="number" min="0" step="0.5"></div>
+  </div>
+  <p class="fieldHint" id="fPrev"></p>
+  <div class="fieldRow">
+    <div class="field"><label for="fOpenAt">Öffnet (direkt, optional)</label><input id="fOpenAt" type="datetime-local"></div>
+    <div class="field"><label for="fCloseAt">Schließt (direkt, optional)</label><input id="fCloseAt" type="datetime-local"></div>
+  </div>
+  <div class="fieldGroup">Sprit</div>
+  <div class="field"><label for="fLap">Rundenzeit (m:ss.x)</label><input id="fLap" placeholder="1:48.5"></div>
+  <div class="fieldRow">
+    <div class="field"><label for="fCons">Verbrauch/Runde (L)</label><input id="fCons" type="number" step="0.01" min="0"></div>
+    <div class="field"><label for="fTank">Tank (L)</label><input id="fTank" type="number" step="1" min="0"></div>
+  </div>
+  <div class="field"><label for="fRes">Reserve (Runden)</label><input id="fRes" type="number" step="1" min="0" placeholder="1"></div>
+  <div class="fieldGroup">Erinnerungen &amp; Discord</div>
+  <div class="field"><label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label><input id="fLead" placeholder="1440,120,20"></div>
+  <div class="fieldRow">
+    <div class="field"><label for="fGuild">Server-ID (optional)</label><input id="fGuild" placeholder="Server-Standard"></div>
+    <div class="field"><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
+  </div>
+  <button class="go addBtn" id="fSave" style="width:100%;margin-top:8px">Event anlegen</button>
+  <p class="fieldHint" id="fHint"></p>
+</aside>
+<div>
+  <div class="field" style="max-width:380px"><label for="evSel">Event</label><select class="trackSelect" id="evSel"><option value="">Lädt …</option></select></div>
+  <div id="view"></div>
+</div>
+</div>
+</div>
 </main>
 <div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <div id="toast" role="status"></div>
@@ -187,6 +187,7 @@ function phaseOf(e,now){
   return "after_signup";
 }
 const STATUS={draft:"Entwurf",signup:"Anmeldung",assigning:"Verteilung",locked:"Festgeschrieben",done:"Gelaufen",cancelled:"Abgesagt"};
+const STATUS_COLOR={draft:"var(--mute)",signup:"var(--vi)",assigning:"var(--cy)",locked:"#3ddc97",done:"var(--mute)",cancelled:"#ff5d6c"};
 
 // Fallback nur noch für den Fall, dass der Detail-Fetch selbst fehlschlägt (Netzwerk-/
 // Serverfehler) und DETAIL deshalb null bleibt – die Admin-Detailroute liefert Entwürfe
@@ -213,19 +214,19 @@ function renderBanner(){
   const el=$("banner");
   if(!el||!EV)return;
   const now=new Date(),ph=phaseOf(EV,now);
-  const set=(cls,html)=>{el.className="banner "+cls;el.innerHTML=html};
-  if(ph==="draft")return set("draft","<div><b>Entwurf</b><small>Noch nicht veröffentlicht – nur für Admins sichtbar.</small></div>");
-  if(ph==="before_signup")return set("soon","<div><b>Anmeldung noch nicht offen</b><small>Öffnet am "+esc(DT(EV.signup_opens_at))+".</small></div>");
+  const set=(c,label,value,sub)=>{el.style.setProperty("--c",c);el.innerHTML='<div class="countdown-label">'+label+'</div><div class="countdown-value">'+value+'</div>'+(sub?'<div class="countdown-sub">'+sub+'</div>':"")};
+  if(ph==="draft")return set("var(--mute)","Entwurf","Nicht veröffentlicht","Noch nicht veröffentlicht – nur für Admins sichtbar.");
+  if(ph==="before_signup")return set("var(--vi)","Anmeldung noch nicht offen",esc(DT(EV.signup_opens_at)),"Öffnet am "+esc(DT(EV.signup_opens_at))+".");
   if(ph==="signup_open"){
     const left=new Date(EV.signup_closes_at)-now,mins=Math.max(0,Math.floor(left/60000));
     const d=Math.floor(mins/1440),h=Math.floor(mins%1440/60),m=mins%60;
     const txt=d>0?d+" Tag"+(d===1?"":"en")+", "+h+" Stunde"+(h===1?"":"n"):h>0?h+" Stunde"+(h===1?"":"n")+", "+m+" Minute"+(m===1?"":"n"):m+" Minute"+(m===1?"":"n");
-    return set("open","<div><b>Anmeldung schließt in</b><small>Bis "+esc(DT(EV.signup_closes_at))+" – freie Stunden anklicken.</small></div><span class=\"cd\">"+esc(txt)+"</span>");
+    return set("var(--vi)","Anmeldung schließt in",esc(txt),"Bis "+esc(DT(EV.signup_closes_at))+" — freie Stunden anklicken.");
   }
-  if(ph==="after_signup")return set("closed","<div><b>Anmeldung geschlossen</b><small>Wer sich nicht einträgt, bekommt was noch frei ist.</small></div>");
-  if(ph==="locked")return set("locked","<div><b>Plan festgeschrieben</b><small>Erinnerungen sind erzeugt. Änderungen nur noch durch einen Admin.</small></div>");
-  if(ph==="done")return set("locked","<div><b>Rennen gelaufen</b><small>Dieser Plan ist Archiv.</small></div>");
-  return set("off","<div><b>Abgesagt</b><small>Dieses Event findet nicht statt.</small></div>");
+  if(ph==="after_signup")return set("#ffa94d","Anmeldung geschlossen","Geschlossen","Wer sich nicht einträgt, bekommt was noch frei ist.");
+  if(ph==="locked")return set("#3ddc97","Plan festgeschrieben","Festgeschrieben","Erinnerungen sind erzeugt. Änderungen nur noch durch einen Admin.");
+  if(ph==="done")return set("var(--mute)","Rennen gelaufen","Archiv","Dieser Plan ist Archiv.");
+  return set("#ff5d6c","Abgesagt","Abgesagt","Dieses Event findet nicht statt.");
 }
 
 function renderGrid(){
@@ -234,65 +235,69 @@ function renderGrid(){
   const now=Date.now(),list=stints(),ph=phaseOf(EV,new Date());
   const canClaim=ph==="signup_open",canRelease=EV.status!=="locked";
   el.innerHTML=list.map(s=>{
-    const past=new Date(s.end_at).getTime()<=now,mine=isMine(s);
-    const cls=["cell",mine?"mine":s.assigned_user?"other":"free",past?"past":""];
+    const start=new Date(s.start_at).getTime(),end=new Date(s.end_at).getTime();
+    const past=end<=now,live=start<=now&&now<end,mine=isMine(s);
+    const cls=["hourcell"];
+    if(mine)cls.push("mine");else if(!s.assigned_user)cls.push("free");
+    if(past)cls.push("past");
+    if(live)cls.push("live");
     const hit=ADMIN||(!past&&(mine?canRelease:!s.assigned_user&&canClaim));
     if(hit)cls.push("hit");
-    const who=mine?"Du":s.assigned_user?esc(s.assigned_user.display_name):"frei";
+    const name=mine?"Du":s.assigned_user?esc(s.assigned_user.display_name):(past?"frei — verpasst":"frei — eintragen");
+    const liveSuffix=s.assigned_user&&live?" · läuft":"";
     const sel=ADMIN&&openCell===s.number
       ?'<select data-as="'+s.number+'" aria-label="Fahrer für Stint '+s.number+'"><option value="">— frei —</option>'
         +USERS.map(u=>'<option value="'+u.id+'"'+(u.id===userIdOf(s)?" selected":"")+">"+esc(userLabel(u))+"</option>").join("")+"</select>"
       :"";
     const fuel=s.fuel_liters!=null?'<div class="fu">'+esc(String(s.fuel_liters).replace(".",","))+" L"+(s.pit_stops?" · "+s.pit_stops+" Stopp"+(s.pit_stops===1?"":"s"):"")+"</div>":"";
     const hitAttrs=hit?' role="button" tabindex="0"':"";
-    return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"'+hitAttrs+'><div class="n">S'+s.number+'</div><div class="t">'
-      +esc(T(s.start_at))+" – "+esc(T(s.end_at))+'</div><div class="who">'+who+"</div>"+fuel+sel+"</div>";
+    return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"'+hitAttrs+'><div class="hr">S'+s.number+' · '+esc(T(s.start_at))+'</div><div class="who">'+name+liveSuffix+"</div>"+fuel+sel+"</div>";
   }).join("");
 }
 
-const STATUS_COLOR={draft:"var(--mute)",signup:"var(--vi)",assigning:"var(--cy)",locked:"#3ddc97",done:"var(--mute)",cancelled:"#ff5d6c"};
 function renderView(){
   const v=$("view");
   if(!EV){v.innerHTML='<p class="empty">Kein Event vorhanden.</p>';return}
   const list=stints(),assigned=list.filter(s=>s.assigned_user).length,mine=list.filter(isMine).length;
-  const stat=(b,l)=>'<div class="stat"><b>'+b+'</b><span>'+l+"</span></div>";
+  const stat=(b,l,accent)=>'<div><div class="n'+(accent?" vi":"")+'">'+b+'</div><div class="l">'+l+"</div></div>";
   const chips=(EV.lap_seconds>0||EV.fuel_cons_per_lap>0||EV.tank_liters>0)
     ?'<div class="chipRow">'
       +(EV.lap_seconds>0?'<div class="chip"><span class="v">'+EV.lap_seconds+'s</span><span class="k">Rundenzeit</span></div>':"")
       +(EV.fuel_cons_per_lap>0?'<div class="chip"><span class="v">'+EV.fuel_cons_per_lap+'L</span><span class="k">Verbrauch/Runde</span></div>':"")
       +(EV.tank_liters>0?'<div class="chip"><span class="v">'+EV.tank_liters+'L</span><span class="k">Tank</span></div>':"")
       +"</div>":"";
-  v.innerHTML='<div class="hero"><div><div class="trk">'+esc(EV.track)+'</div><div class="meta">'+esc(EV.name)
-    +(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))
+  v.innerHTML='<div class="meineLayout"><div>'
+    +'<div class="evHead"><div><h2>'+esc(EV.name)+'</h2>'
+    +'<div class="evMeta">'+esc(EV.track)+(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))
     +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div>"
-    +'<span class="pill" style="color:'+STATUS_COLOR[EV.status]+'">'+STATUS[EV.status]+"</span></div>"
-    +'<div class="stats">'+stat(EV.duration_minutes/60+" h","Renndauer")+stat(assigned+" / "+list.length,"Stints belegt")+stat(mine,"davon deine")+"</div>"
-    +chips+"</div>"
-    +'<div class="planCols"><div>'
-    +'<div id="banner" class="banner"></div><div class="grid" id="grid"></div>'
-    +'<div class="legend"><span style="--c:var(--mute)"><i></i>frei</span><span style="--c:var(--cy)"><i></i>deine Stunde</span>'
-    +'<span style="--c:var(--vi)"><i></i>anderer Fahrer</span><span style="--c:var(--line)"><i></i>vorbei (blass)</span></div>'
-    +'<p class="hint" id="gridHint"></p><div class="actions" id="evActions"></div>'
-    +'</div><div id="trackMount"></div></div>';
+    +'<span class="pill" style="color:'+STATUS_COLOR[EV.status]+'">'+STATUS[EV.status]+"</span>"
+    +'<div class="evStats">'+stat(EV.duration_minutes/60+"h","Renndauer")+stat(assigned+"/"+list.length,"Stints belegt")+stat(mine,"davon deine",true)+"</div>"
+    +"</div>"+chips+"</div>"
+    +'<div class="countdown" id="banner"></div>'
+    +'<div class="hourgrid compact" id="grid"></div>'
+    +'</div><div id="stintTrackCol"></div></div>'
+    +'<div class="planLegend"><span><i class="dot free"></i>frei</span><span><i class="dot mine"></i>deine Stunde</span>'
+    +'<span><i class="dot other"></i>anderer Fahrer</span><span><i class="dot past"></i>vorbei (blass)</span></div>'
+    +'<p class="calcNote" id="gridHint"></p><div class="planActions" id="evActions"></div>';
   renderBanner();renderGrid();renderTrackVisual();
 
   const ph=phaseOf(EV,new Date());
   $("gridHint").textContent=ADMIN
-    ?"Admin: Feld anklicken, um einen Fahrer direkt zuzuweisen oder freizugeben – jederzeit, unabhängig vom Anmeldefenster."
+    ?"Admin: Feld anklicken, um einen Fahrer direkt zuzuweisen oder freizugeben — jederzeit, unabhängig vom Anmeldefenster."
     :ph==="signup_open"?"Freie Stunde anklicken = eintragen. Eigene Stunde anklicken = wieder freigeben."
     :ph==="before_signup"?"Sobald die Anmeldung öffnet, kannst du hier freie Stunden anklicken."
     :EV.status==="locked"?"Der Plan ist festgeschrieben.":"Eintragen ist nur während des Anmeldefensters möglich.";
 
   if(!ADMIN)return;
   const now=new Date();
-  const btn=(id,txt,on,cls)=>'<button type="button" id="'+id+'"'+(cls?' class="'+cls+'"':"")+(on?"":" disabled")+">"+txt+"</button>";
+  const btn=(id,txt,on,cls)=>'<button type="button" id="'+id+'" class="go '+(cls||"rowBtn")+'"'+(on?"":" disabled")+">"+txt+"</button>";
   const closed=!!EV.signup_closes_at&&now>=new Date(EV.signup_closes_at);
   $("evActions").innerHTML=
-    (EV.status==="draft"?btn("doPub","Veröffentlichen",true,"go"):"")
-    +(EV.status==="signup"?btn("doDist","Freie Stints verteilen",closed):"")
-    +(EV.status==="signup"||EV.status==="assigning"?btn("doLock","Plan festschreiben",true):"")
-    +(EV.status==="draft"?btn("doDel","Löschen",true,"danger"):"")
-    +(EV.status==="signup"||EV.status==="assigning"||EV.status==="locked"?btn("doCancel","Absagen",true,"danger"):"");
+    (EV.status==="draft"?btn("doPub","Veröffentlichen",true,"addBtn"):"")
+    +(EV.status==="signup"?btn("doDist","Freie Stints verteilen",closed,"rowBtn"):"")
+    +(EV.status==="signup"||EV.status==="assigning"?btn("doLock","Plan festschreiben",true,"addBtn"):"")
+    +(EV.status==="draft"?btn("doDel","Löschen",true,"rowBtn danger"):"")
+    +(EV.status==="signup"||EV.status==="assigning"||EV.status==="locked"?btn("doCancel","Absagen",true,"rowBtn danger"):"");
   if($("doPub"))$("doPub").onclick=()=>act("publish","Event veröffentlichen? Danach ist die Anmeldung sichtbar.");
   if($("doDist"))$("doDist").onclick=()=>act("distribute","Freie Stints automatisch auf Fahrer ohne Stint verteilen?");
   if($("doLock"))$("doLock").onclick=()=>act("lock","Plan festschreiben? Danach werden die Discord-Erinnerungen erzeugt.");
@@ -301,15 +306,16 @@ function renderView(){
 }
 
 function renderTrackVisual(){
-  const m=$("trackMount");if(!m)return;
+  const m=$("stintTrackCol");if(!m)return;
   const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[EV.track];
   const t=slug&&TRACKS_DATA[slug];
   if(!t){m.innerHTML="";return}
   const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
     +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
-  m.innerHTML='<svg viewBox="'+t.viewBox+'" style="width:100%;max-width:420px;overflow:visible">'
-    +'<path style="fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
-    +corners+'</svg><div style="text-align:center;color:var(--mute);font-size:.85rem;margin-top:6px">'+esc(t.name)+'</div>';
+  m.innerHTML='<div style="display:flex;flex-direction:column;align-items:center">'
+    +'<svg viewBox="'+t.viewBox+'" style="max-width:100%;max-height:520px;width:auto;height:auto;opacity:.95;overflow:visible">'
+    +'<path style="fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
+    +corners+'</svg><div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
 }
 
 async function doDeleteEvent(){
@@ -369,12 +375,12 @@ function activateCell(cell){
 }
 $("view").onclick=e=>{
   if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
-  activateCell(e.target.closest(".cell"));
+  activateCell(e.target.closest(".hourcell"));
 };
 $("view").onkeydown=e=>{
   if(e.key!=="Enter"&&e.key!==" "&&e.key!=="Spacebar")return;
   if(e.target.tagName==="SELECT"||e.target.tagName==="OPTION")return;
-  const cell=e.target.closest(".cell");
+  const cell=e.target.closest(".hourcell");
   if(!cell||!cell.classList.contains("hit"))return;
   e.preventDefault();
   activateCell(cell);

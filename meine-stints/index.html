@@ -5,49 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meine kommenden Stints</title>
 <style>
-:root{color-scheme:dark;--bg:#0b0e1b;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#2bd0ff;--vi:#9b6bff}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
-background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
-header{max-width:860px;margin:auto;padding:26px 24px 10px}
-h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(1.8rem,4vw,2.6rem);color:var(--text)}
-.stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
-main{max-width:860px;margin:auto;padding:8px 24px 48px}
-.event{margin-bottom:28px}
-.event h2{margin:0 0 10px;font-size:1.1rem;font-weight:700}
-.event h2 .trk{color:var(--mute);font-weight:400;font-size:.9rem}
-.eventCols{display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start}
-.eventCols>.evMain{min-width:0}
-@media(max-width:760px){.eventCols{grid-template-columns:1fr}.trackBox{order:-1}}
-.trackBox{display:flex;justify-content:center}
-.bar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px;min-width:0}
-.seg{flex:1;display:flex;align-items:center;justify-content:center;background:var(--panel2);border-right:2px solid var(--bg);font-size:.72rem;color:var(--mute);overflow:hidden;white-space:nowrap;padding:0 4px;min-width:0}
-.seg:last-child{border-right:0}
-.seg.mine{background:var(--cy);color:#06131c;font-weight:700}
-.stint{display:flex;align-items:center;gap:16px;background:rgba(19,24,48,.88);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;margin-bottom:10px}
-.stint .n{width:40px;font-family:var(--mono);font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
-.stint .t{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;min-width:220px}
-.stint .track{flex:1;color:var(--mute);min-width:0}
-.tag{font-size:.75rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mute);white-space:nowrap}
-.tag.now{color:var(--cy);border-color:var(--cy)}
-.empty{color:var(--mute);padding:30px 0}
+.pageHead{padding:26px 8vw 0}
+.pageHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);margin:0}
+.pageBody{padding:36px 8vw 10vh}
+.eventGroup{margin-bottom:52px}
+.eventGroup:last-child{margin-bottom:0}
+.eventName{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:1.1rem;margin:0 0 20px}
+.eventName .trk{color:var(--mute);font-weight:400;text-transform:none;font-size:.9rem;font-family:var(--body)}
+.meineLayout{display:grid;grid-template-columns:1.3fr .9fr;gap:52px;align-items:start}
+@media(max-width:900px){.meineLayout{grid-template-columns:1fr}}
+.timeline{margin:0 0 28px}
+.tlTrack{position:relative;height:64px;background:var(--panel2);border-radius:3px}
+.tlStint{position:absolute;top:0;bottom:0;background:var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--mono);font-size:.74rem;color:var(--mute);overflow:hidden}
+.tlStint .num{font-size:.72rem;opacity:.85}
+.tlStint.mine{background:var(--vi);color:#1a0624;font-weight:600}
+.tlStint.past{opacity:.45;filter:grayscale(.5)}
+.tlNow{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--cy)}
+.tlNow::after{content:"jetzt";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.72rem;color:var(--cy);font-family:var(--mono);white-space:nowrap}
+.stintList{margin-top:18px;display:flex;flex-direction:column;gap:2px}
+.stintRow{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--panel2);gap:12px}
+.tag2{font-size:.82rem;font-weight:600;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.tag2.live{background:rgba(9,142,223,.18);color:var(--cy)}
+.tag2.upcoming{background:rgba(162,50,207,.16);color:var(--vi)}
+.tag2.done{background:var(--panel2);color:var(--mute)}
+.trackBox{display:flex;flex-direction:column;align-items:center}
+@media(max-width:900px){.trackBox{order:-1}}
 .back{color:var(--cy);text-decoration:none}
 .back:hover{text-decoration:underline}
+.empty{color:var(--mute);padding:30px 0}
 </style>
 <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-<header>
-  <h1>Meine Stints</h1>
-</header>
-<div class="kerb"></div>
 <main>
-  <div id="list"><p class="empty">Lädt …</p></div>
+  <div class="pageHead"><h2>Meine Stints</h2></div>
+  <div class="kerb"></div>
+  <div class="pageBody">
+    <div id="list"><p class="empty">Lädt …</p></div>
+  </div>
 </main>
 <div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <script src="../tracks-data.js"></script>
 <script>
-const COLORS=["#2bd0ff","#9b6bff","#ffa94d","#3ddc97","#ff5d6c","#ffd93d","#b9805a","#e9ecf8","#8a93b8"];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmt=iso=>new Date(iso).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});
 function trackSvgHtml(trackName){
@@ -56,15 +55,15 @@ function trackSvgHtml(trackName){
   if(!t)return "";
   const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
     +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
-  return '<div class="trackBox"><svg viewBox="'+t.viewBox+'" style="width:100%;max-width:280px;overflow:visible">'
+  return '<div class="trackBox"><svg viewBox="'+t.viewBox+'" style="width:100%;max-width:280px;opacity:.95;overflow:visible">'
     +'<path style="fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
-    +corners+'</svg></div>';
+    +corners+'</svg><div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
 }
 function tagOf(s,now){
   const start=new Date(s.start_at), end=new Date(s.end_at);
-  if(start<=now&&now<end)return {cls:" now",label:"läuft"};
-  if(end<=now)return {cls:"",label:"vorbei"};
-  return {cls:"",label:"kommend"};
+  if(start<=now&&now<end)return {cls:"live",label:"läuft"};
+  if(end<=now)return {cls:"done",label:"vorbei"};
+  return {cls:"upcoming",label:"kommend"};
 }
 function render(){
   const box=document.getElementById("list");
@@ -97,25 +96,29 @@ function render(){
     if(!res)return;
     const now=new Date();
     box.innerHTML=res.groups.map((g,gi)=>{
-      const c=COLORS[gi%COLORS.length];
       const full=res.details[gi];
-      const bar=full&&full.stints&&full.stints.length?'<div class="bar">'+full.stints.map(s=>{
+      const all=full&&full.stints&&full.stints.length?full.stints:g.stints;
+      const t0=new Date(all[0].start_at).getTime(),t1=new Date(all[all.length-1].end_at).getTime(),span=Math.max(1,t1-t0);
+      const track=all.length?'<div class="tlTrack">'+all.map(s=>{
         const mine=s.assigned_user&&s.assigned_user.discord_id===myDiscordId;
+        const start=new Date(s.start_at).getTime(),end=new Date(s.end_at).getTime();
+        const left=(start-t0)/span*100,width=(end-start)/span*100,past=end<=now.getTime();
         const who=s.assigned_user?esc(s.assigned_user.display_name):"frei";
-        return '<div class="seg'+(mine?" mine":"")+'" title="'+esc(fmt(s.start_at))+' – '+esc(fmt(s.end_at))+' · '+who+'">'+who+'</div>';
-      }).join("")+'</div>':"";
+        return '<div class="tlStint'+(mine?" mine":"")+(past?" past":"")+'" style="left:'+left+'%;width:'+width+'%" title="'+who+'">S'+s.number+'<span class="num">'+(s.assigned_user?"#"+(s.assigned_user.car_number??""):"frei")+'</span></div>';
+      }).join("")
+        +(now.getTime()>=t0&&now.getTime()<=t1?'<div class="tlNow" style="left:'+((now.getTime()-t0)/span*100)+'%"></div>':"")
+        +'</div>':"";
       const rows=g.stints.map(s=>{
         const tag=tagOf(s,now);
         const info=[];
         if(s.fuel_liters!=null)info.push(s.fuel_liters.toFixed(1)+" l");
         if(s.pit_stops!=null)info.push(s.pit_stops+" Boxenstopp"+(s.pit_stops===1?"":"s"));
-        return '<div class="stint" style="--c:'+c+'"><span class="n">S'+s.number+'</span>'
-          +'<span class="t">'+fmt(s.start_at)+' – '+fmt(s.end_at)+'</span>'
-          +'<span class="track">'+esc(info.join(" · "))+'</span>'
-          +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
+        return '<div class="stintRow"><div>S'+s.number+' · '+esc(fmt(s.start_at))+'–'+esc(fmt(s.end_at))+(info.length?' · '+esc(info.join(" · ")):"")+'</div>'
+          +'<span class="tag2 '+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");
-      return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'
-        +'<div class="eventCols"><div class="evMain">'+bar+rows+'</div>'+trackSvgHtml(g.event.track)+'</div></div>';
+      return '<div class="eventGroup"><h3 class="eventName">'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h3>'
+        +'<div class="meineLayout"><div><div class="timeline">'+track+'</div><div class="stintList">'+rows+'</div></div>'
+        +trackSvgHtml(g.event.track)+'</div></div>';
     }).join("");
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }
