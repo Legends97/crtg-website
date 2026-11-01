@@ -38,8 +38,8 @@ body{padding-bottom:76px;padding-top:64px}
 .nav .navLeft{padding-left:0;gap:0;width:100%}
 .nav .brand{display:none}
 .nav .tabs{margin:0;width:100%}
-.nav .tabs a{flex:1;flex-direction:column;justify-content:center;gap:2px;font-size:.68rem;padding:6px 2px;border-radius:12px;white-space:normal;text-align:center;line-height:1.15;min-width:0}
-.nav .tabs a span{word-break:break-word;-webkit-hyphens:auto;hyphens:auto}
+.nav .tabs a{flex:1;flex-direction:column;justify-content:center;gap:2px;font-size:.68rem;padding:6px 2px;border-radius:12px;min-width:0}
+.nav .tabs a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #toast{bottom:92px!important}
 }
 @media print{.nav{display:none}body::before{display:none}body{padding-bottom:0;padding-top:0}}
