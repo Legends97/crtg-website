@@ -18,9 +18,10 @@ main{max-width:860px;margin:auto;padding:8px 24px 48px}
 .event h2{margin:0 0 10px;font-size:1.1rem;font-weight:700}
 .event h2 .trk{color:var(--mute);font-weight:400;font-size:.9rem}
 .eventCols{display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start}
+.eventCols>.evMain{min-width:0}
 @media(max-width:760px){.eventCols{grid-template-columns:1fr}.trackBox{order:-1}}
 .trackBox{display:flex;justify-content:center}
-.bar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}
+.bar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px;min-width:0}
 .seg{flex:1;display:flex;align-items:center;justify-content:center;background:var(--panel2);border-right:2px solid var(--bg);font-size:.72rem;color:var(--mute);overflow:hidden;white-space:nowrap;padding:0 4px;min-width:0}
 .seg:last-child{border-right:0}
 .seg.mine{background:var(--cy);color:#06131c;font-weight:700}
@@ -116,7 +117,7 @@ function render(){
           +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");
       return '<div class="event"><h2>'+esc(g.event.name||"")+(g.event.track?' <span class="trk">· '+esc(g.event.track)+'</span>':"")+'</h2>'
-        +'<div class="eventCols"><div>'+bar+rows+'</div>'+trackSvgHtml(g.event.track)+'</div></div>';
+        +'<div class="eventCols"><div class="evMain">'+bar+rows+'</div>'+trackSvgHtml(g.event.track)+'</div></div>';
     }).join("");
   }).catch(()=>{box.innerHTML='<p class="empty">Konnte Daten nicht laden.</p>'});
 }
