@@ -28,6 +28,16 @@ button:hover{border-color:var(--cy)}button:active{transform:translateY(1px)}
 button:disabled{opacity:.45;cursor:default}
 button.go{background:linear-gradient(90deg,var(--cy),var(--vi));border-color:transparent;font-weight:600}
 button.danger:hover{border-color:#ff8a8a;color:#ff8a8a}
+.devBadge{display:inline-block;font-family:var(--disp);font-weight:600;font-size:.82rem;text-transform:uppercase;color:var(--vi);background:rgba(162,50,207,.14);border-radius:999px;padding:4px 12px;margin-bottom:12px}
+.sideBtns{display:flex;flex-direction:column;gap:8px;margin:10px 0 16px}
+.sideBtn{display:block;width:100%;background:var(--panel2);border:none;border-radius:3px;padding:10px 14px;font-size:.92rem;text-align:left}
+.sideBtn:hover{background:var(--line)}
+.pill{font-family:var(--body);font-size:.85rem;font-weight:600;padding:5px 14px;border-radius:999px;background:var(--panel2);display:inline-block}
+.pill.signup{color:var(--vi)}
+.chipRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.chip{display:inline-flex;flex-direction:column;gap:3px;font-family:var(--mono);background:var(--panel2);border-radius:3px;padding:10px 14px;min-width:92px}
+.chip .v{font-size:1.1rem;color:var(--text);font-variant-numeric:tabular-nums}
+.chip .k{font-size:.72rem;color:var(--mute);margin-top:1px}
 .hero{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
 .trk{font-family:var(--disp);font-size:2.1rem;font-style:italic;font-weight:800;line-height:1.1}
 .meta{color:var(--mute);font-size:.9rem;margin-top:3px}
@@ -86,10 +96,11 @@ section{background:none;border:0;padding:0}
 <div class="kerb"></div>
 <main>
   <section class="cfg" aria-label="Event verwalten">
+    <div class="devBadge">Developer-Bereich</div>
     <h2>Event</h2>
-    <div class="actions" style="margin-top:10px">
-      <button id="fNew" type="button">Neues Event</button>
-      <button id="fEdit" type="button">Ausgewähltes bearbeiten</button>
+    <div class="sideBtns">
+      <button id="fNew" type="button" class="sideBtn">Neues Event</button>
+      <button id="fEdit" type="button" class="sideBtn">Ausgewähltes bearbeiten</button>
     </div>
     <label for="fName">Name</label>
     <input id="fName" placeholder="z. B. 6H Spa">
@@ -239,15 +250,24 @@ function renderGrid(){
   }).join("");
 }
 
+const STATUS_COLOR={draft:"var(--mute)",signup:"var(--vi)",assigning:"var(--cy)",locked:"#3ddc97",done:"var(--mute)",cancelled:"#ff5d6c"};
 function renderView(){
   const v=$("view");
   if(!EV){v.innerHTML='<p class="empty">Kein Event vorhanden.</p>';return}
   const list=stints(),assigned=list.filter(s=>s.assigned_user).length,mine=list.filter(isMine).length;
   const stat=(b,l)=>'<div class="stat"><b>'+b+'</b><span>'+l+"</span></div>";
+  const chips=(EV.lap_seconds>0||EV.fuel_cons_per_lap>0||EV.tank_liters>0)
+    ?'<div class="chipRow">'
+      +(EV.lap_seconds>0?'<div class="chip"><span class="v">'+EV.lap_seconds+'s</span><span class="k">Rundenzeit</span></div>':"")
+      +(EV.fuel_cons_per_lap>0?'<div class="chip"><span class="v">'+EV.fuel_cons_per_lap+'L</span><span class="k">Verbrauch/Runde</span></div>':"")
+      +(EV.tank_liters>0?'<div class="chip"><span class="v">'+EV.tank_liters+'L</span><span class="k">Tank</span></div>':"")
+      +"</div>":"";
   v.innerHTML='<div class="hero"><div><div class="trk">'+esc(EV.track)+'</div><div class="meta">'+esc(EV.name)
-    +(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))+" · "+STATUS[EV.status]
-    +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div></div>"
-    +'<div class="stats">'+stat(EV.duration_minutes/60+" h","Renndauer")+stat(assigned+" / "+list.length,"Stints belegt")+stat(mine,"davon deine")+"</div></div>"
+    +(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))
+    +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div>"
+    +'<span class="pill" style="color:'+STATUS_COLOR[EV.status]+'">'+STATUS[EV.status]+"</span></div>"
+    +'<div class="stats">'+stat(EV.duration_minutes/60+" h","Renndauer")+stat(assigned+" / "+list.length,"Stints belegt")+stat(mine,"davon deine")+"</div>"
+    +chips+"</div>"
     +'<div class="planCols"><div>'
     +'<div id="banner" class="banner"></div><div class="grid" id="grid"></div>'
     +'<div class="legend"><span style="--c:var(--mute)"><i></i>frei</span><span style="--c:var(--cy)"><i></i>deine Stunde</span>'
