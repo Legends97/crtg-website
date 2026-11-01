@@ -103,7 +103,7 @@ body{background:#fff;color:#111;font-size:12pt}
 <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute"><defs><clipPath id="logoClip" clipPathUnits="userSpaceOnUse"><circle cx="0" cy="0" r="6.5"/></clipPath></defs></svg>
+<svg width="0" height="0" style="position:absolute"><defs><clipPath id="logoClip" clipPathUnits="userSpaceOnUse"><circle cx="0" cy="0" r="7.5"/></clipPath></defs></svg>
 <main>
 <div class="pageHead"><h2>Stintplaner</h2></div>
 <div class="kerb"></div>
@@ -322,7 +322,7 @@ function renderTrackVisual(){
   m.innerHTML='<div style="display:flex;flex-direction:column;align-items:center">'
     +'<svg viewBox="'+t.viewBox+'" style="max-width:100%;max-height:520px;width:auto;height:auto;opacity:.95;overflow:visible">'
     +'<path style="fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round;stroke-linejoin:round" d="'+t.paths[0]+'"/>'
-    +'<g class="carDot" style="offset-path:path(\''+carD+'\')"><circle r="7.5" fill="var(--bg)" style="filter:drop-shadow(0 0 4px var(--vi))"/><image href="../icon.png" x="-6.5" y="-6.5" width="13" height="13" clip-path="url(#logoClip)"/></g>'
+    +'<g class="carDot" style="offset-path:path(\''+carD+'\')"><circle r="9.5" fill="var(--bg)" style="filter:drop-shadow(0 0 3px var(--cy)) drop-shadow(0 0 8px var(--vi))"/><circle r="9.5" fill="none" stroke="var(--cy)" stroke-width="1.5"/><image href="../icon.png" x="-7.5" y="-7.5" width="15" height="15" clip-path="url(#logoClip)"/></g>'
     +corners+'</svg><div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
 }
 
