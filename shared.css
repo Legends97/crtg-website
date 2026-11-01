@@ -1,6 +1,9 @@
 /* Gemeinsames Design für alle CRTG-Seiten: Farben, Hintergrund, Navigation, Buttons */
 :root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#098edf;--vi:#a232cf;
+--navbg:rgba(11,14,27,.9);--navbgSolid:rgba(11,14,27,.97);
 --disp:"Oswald",system-ui,sans-serif;--body:"Roboto Condensed",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+:root[data-theme="light"]{color-scheme:light;--bg:#f3f4fa;--panel:#ffffff;--panel2:#edeffa;--line:#d9dcee;--text:#15182c;--mute:#5a5f80;
+--navbg:rgba(255,255,255,.88);--navbgSolid:rgba(255,255,255,.97)}
 html{visibility:hidden}
 html.ready{visibility:visible}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -10,7 +13,7 @@ background:radial-gradient(900px 520px at 8% -10%,rgba(9,142,223,.17),transparen
 .btn:hover{border-color:var(--cy)}
 .btn.go{background:linear-gradient(90deg,var(--cy),var(--vi));border-color:transparent;font-weight:600}
 .navWrap{position:sticky;top:0;z-index:20}
-.nav{display:flex;align-items:center;justify-content:space-between;background:rgba(11,14,27,.9);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;background:var(--navbg);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 .nav .navLeft{display:flex;align-items:center;gap:36px;min-width:0;padding-left:8vw}
 .nav .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;padding:14px 0;flex:none}
 .nav .brand span{font-family:var(--disp);font-weight:700;font-size:1.05rem;letter-spacing:.01em}
@@ -39,12 +42,17 @@ body{padding-bottom:76px}
 }
 @media print{.nav{display:none}body::before{display:none}body{padding-bottom:0}}
 /* Konto-Anzeige in der Navigation */
-.nav .acct{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:.9rem;white-space:nowrap;padding:0 8vw 0 26px}
+.nav .navRight{display:flex;align-items:center;gap:14px;padding-right:8vw;flex:none}
+.nav .themeToggle{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;border-radius:999px;background:none;border:1px solid var(--line);color:var(--mute);cursor:pointer;transition:border-color 160ms ease,color 160ms ease,transform 120ms ease-out}
+.nav .themeToggle:hover{border-color:var(--cy);color:var(--text)}
+.nav .themeToggle:active{transform:scale(.92)}
+.nav .acct{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:.9rem;white-space:nowrap;padding:0 0 0 26px}
 .nav .acct .who{color:var(--text)}
 .nav .acct .login,.nav .acct .out{color:var(--cy);background:none;border:1px solid var(--cy);border-radius:999px;padding:5px 12px;text-decoration:none;font:inherit;font-size:.85rem;cursor:pointer}
 @media(max-width:700px){
-.nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(11,14,27,.97)}
-.nav .acct{position:fixed;top:8px;right:10px;background:rgba(11,14,27,.92);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;z-index:30}
+.nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--navbgSolid)}
+.nav .themeToggle{display:none}
+.nav .acct{position:fixed;top:8px;right:10px;background:var(--navbgSolid);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;z-index:30}
 .nav .acct .login{border:0;padding:3px 8px}
 }
 .kerb{height:16px;width:100%;position:relative;overflow:hidden}

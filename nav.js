@@ -19,6 +19,25 @@
   var nav=document.createElement("nav");
   nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
   nav.innerHTML='<div class="navLeft"><a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="32" height="32"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div></div>';
+  var navRight=document.createElement("div");
+  navRight.className="navRight";
+  nav.appendChild(navRight);
+  var SUN='<path d="M8 1.5v2M8 12.5v2M2.6 2.6l1.4 1.4M12 12l1.4 1.4M1.5 8h2M12.5 8h2M2.6 13.4l1.4-1.4M12 4l1.4-1.4" stroke-linecap="round"/><circle cx="8" cy="8" r="3"/>';
+  var MOON='<path d="M13.5 9.3A5.8 5.8 0 0 1 6.7 2.5 5.8 5.8 0 1 0 13.5 9.3Z"/>';
+  var themeBtn=document.createElement("button");
+  themeBtn.type="button";themeBtn.className="themeToggle";themeBtn.setAttribute("aria-label","Farbschema wechseln");
+  function paintThemeBtn(){
+    var dark=document.documentElement.dataset.theme!=="light";
+    themeBtn.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">'+(dark?SUN:MOON)+'</svg>';
+  }
+  paintThemeBtn();
+  themeBtn.onclick=function(){
+    var next=document.documentElement.dataset.theme==="light"?"dark":"light";
+    document.documentElement.dataset.theme=next;
+    try{localStorage.setItem("crtg-theme",next)}catch(e){}
+    paintThemeBtn();
+  };
+  navRight.appendChild(themeBtn);
   navWrap.appendChild(nav);
   if(!noTicker){
     var ticker=document.createElement("div");
@@ -73,7 +92,7 @@
       if(!isLogin){location.href=base+"login.html";return;}
       var box=document.createElement("div");box.className="acct";
       box.innerHTML='<a class="login" href="'+base+'login.html">Mit Discord anmelden</a>';
-      nav.appendChild(box);
+      navRight.appendChild(box);
       return;
     }
     document.documentElement.classList.add("ready");
@@ -94,7 +113,7 @@
     box.querySelector(".out").onclick=function(){
       fetch(base+"api/auth/logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){location.href=base});
     };
-    nav.appendChild(box);
+    navRight.appendChild(box);
     if(new URLSearchParams(location.search).get("error")==="steam"){alert("Diese Steam-ID ist schon mit einem anderen Konto verknüpft.");history.replaceState(null,"",location.pathname);}
   });
 })();

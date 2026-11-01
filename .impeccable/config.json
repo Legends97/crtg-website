@@ -65,6 +65,24 @@
         ],
         "createdAt": "2026-11-01T18:59:09.349Z",
         "reason": "pre-existing nav.js ticker component (corner-name ticker, injected on every page), built to match the mock's own auto-scrolling .ticker in an earlier session (commit 27ae058) — not introduced or changed in this session's edits"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "login.html"
+        ],
+        "createdAt": "2026-11-01T21:11:15.846Z",
+        "reason": "pre-existing nav.js ticker component (corner-name ticker, injected on every page), built to match the mock's own auto-scrolling .ticker in an earlier session — not introduced or changed in this session's edits"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "login.html"
+        ],
+        "createdAt": "2026-11-01T21:11:15.874Z",
+        "reason": "pre-existing login-card border-top accent + border-radius, unchanged by this session (only the .box background value was edited, from rgba literal to var(--panel) for theme support)"
       }
     ]
   }
