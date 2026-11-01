@@ -12,7 +12,7 @@ background:repeating-linear-gradient(115deg,transparent 0 170px,rgba(9,142,223,.
 @media(prefers-reduced-motion:reduce){body::before{animation:none}}
 .btn{display:inline-block;font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;text-decoration:none;cursor:pointer;transition:border-color .15s}
 .btn:hover{border-color:var(--cy)}
-.btn.go{background:linear-gradient(90deg,#0f8fb0,#6a45d6);border-color:transparent;font-weight:600}
+.btn.go{background:linear-gradient(90deg,var(--cy),var(--vi));border-color:transparent;font-weight:600}
 .nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:8px 20px;background:rgba(11,14,27,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .nav .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-weight:800;font-style:italic;font-size:1.2rem;font-family:var(--disp);text-transform:uppercase;letter-spacing:.01em}
 .nav .brand img{display:block;border-radius:8px}
