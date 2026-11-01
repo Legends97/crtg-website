@@ -48,8 +48,8 @@ body{padding-bottom:76px}
 .nav .acct .login{border:0;padding:3px 8px}
 }
 .kerb{height:16px;width:100%;background-image:repeating-linear-gradient(45deg,var(--text) 0 22px,var(--bg) 22px 44px);opacity:.9;
-  -webkit-mask-image:linear-gradient(90deg,transparent,black 20px,black calc(100% - 20px),transparent);
-  mask-image:linear-gradient(90deg,transparent,black 20px,black calc(100% - 20px),transparent)}
+  -webkit-mask-image:linear-gradient(90deg,transparent,black 44px,black calc(100% - 44px),transparent);
+  mask-image:linear-gradient(90deg,transparent,black 44px,black calc(100% - 44px),transparent)}
 @media(prefers-reduced-motion:no-preference){.kerb{animation:kerbMove 2.6s linear infinite}}
 @keyframes kerbMove{to{background-position:62.23px 0}}
 .tread{display:block;width:100%;height:58px;background:var(--panel)}
