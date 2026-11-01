@@ -33,7 +33,7 @@
 .back{color:var(--cy);text-decoration:none}
 .back:hover{text-decoration:underline}
 .empty{color:var(--mute);padding:30px 0}
-.carDot{offset-rotate:0deg;offset-distance:0%;animation:driveAlong 16s linear infinite}
+.carDot{offset-rotate:0deg;offset-distance:0%;animation:driveAlong 16s steps(48) infinite}
 @keyframes driveAlong{to{offset-distance:100%}}
 @media(prefers-reduced-motion:reduce){.carDot{display:none}}
 </style>
