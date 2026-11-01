@@ -23,6 +23,7 @@ const init = () => (ready ||= q(`create table if not exists users (
   active boolean not null default true,
   created_at timestamptz not null default now()
 )`).then(() => q(`alter table users add column if not exists car_number integer`))
+  .then(() => q(`alter table users add column if not exists classes text[] not null default '{}'`))
   .then(() => q(`create table if not exists stint_plans (
   id serial primary key,
   name text,
@@ -195,12 +196,19 @@ const normNumber = v => {
   if (!/^\d{1,3}$/.test(v)) throw new HttpErr(400, "Startnummer: 1 bis 3 Ziffern (0–999).");
   return +v;
 };
+const CAR_CLASSES = ["GT2", "GT3", "GT4", "CUP", "ST", "CHL", "TCX"];
+const normClasses = v => {
+  if (v == null) return [];
+  if (!Array.isArray(v) || !v.every(c => CAR_CLASSES.includes(c)))
+    throw new HttpErr(400, "classes muss ein Array aus " + CAR_CLASSES.join("/") + " sein.");
+  return [...new Set(v)];
+};
 function clean(o) {
   const name = String(o.display_name ?? "").trim();
   if (!name || name.length > 60) throw new HttpErr(400, "Anzeigename fehlt oder ist zu lang (max. 60 Zeichen).");
   const role = o.role ?? "driver";
   if (!["admin", "driver"].includes(role)) throw new HttpErr(400, "Ungültige Rolle.");
-  return { display_name: name, discord_id: normDiscord(o.discord_id), steam_id: normSteam(o.steam_id), car_number: normNumber(o.car_number), role, active: o.active !== false };
+  return { display_name: name, discord_id: normDiscord(o.discord_id), steam_id: normSteam(o.steam_id), car_number: normNumber(o.car_number), classes: normClasses(o.classes), role, active: o.active !== false };
 }
 async function ensureFree(field, val, exceptId) {
   if (!val) return;
@@ -280,7 +288,7 @@ async function adminUsers(req, res, url, id) {
   const m = req.method, b = req.body || {};
   if (m === "GET" && id === undefined) {
     const s = (url.searchParams.get("q") || "").trim();
-    const users = (await q(`select id,display_name,discord_id,steam_id,car_number,role,active,created_at from users
+    const users = (await q(`select id,display_name,discord_id,steam_id,car_number,classes,role,active,created_at from users
       where $1='' or display_name ilike '%'||$1||'%' or discord_id like '%'||$1||'%' or steam_id ilike '%'||$1||'%'
       order by active desc, lower(display_name)`, [s])).rows;
     const w = (await q("select count(*) filter (where discord_id is null) nd, count(*) filter (where steam_id is null) ns from users where active")).rows[0];
@@ -289,7 +297,7 @@ async function adminUsers(req, res, url, id) {
   if (m === "POST" && id === undefined) {
     const v = clean(b);
     await ensureFree("discord_id", v.discord_id); await ensureFree("steam_id", v.steam_id); await ensureFree("car_number", v.car_number);
-    const r = await q("insert into users(display_name,discord_id,steam_id,car_number,role,active) values($1,$2,$3,$4,$5,$6) returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.role, v.active]);
+    const r = await q("insert into users(display_name,discord_id,steam_id,car_number,classes,role,active) values($1,$2,$3,$4,$5,$6,$7) returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.classes, v.role, v.active]);
     return json(res, 201, r.rows[0]);
   }
   if (m === "PATCH" && id !== undefined) {
@@ -301,7 +309,7 @@ async function adminUsers(req, res, url, id) {
       if (+n === 0) throw new HttpErr(409, "Es muss mindestens ein aktiver Admin bleiben.");
     }
     await ensureFree("discord_id", v.discord_id, id); await ensureFree("steam_id", v.steam_id, id); await ensureFree("car_number", v.car_number, id);
-    const r = await q("update users set display_name=$1,discord_id=$2,steam_id=$3,car_number=$4,role=$5,active=$6 where id=$7 returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.role, v.active, id]);
+    const r = await q("update users set display_name=$1,discord_id=$2,steam_id=$3,car_number=$4,classes=$5,role=$6,active=$7 where id=$8 returning *", [v.display_name, v.discord_id, v.steam_id, v.car_number, v.classes, v.role, v.active, id]);
     return json(res, 200, r.rows[0]);
   }
   throw new HttpErr(404, "Nicht gefunden.");
