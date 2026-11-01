@@ -10,8 +10,8 @@
 .pageHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);margin:0}
 .pageBody{padding:36px 8vw 10vh}
 .devLayout{display:grid;grid-template-columns:260px 1fr;gap:40px;align-items:start}
-@media(max-width:960px){.devLayout{grid-template-columns:1fr}}
-body.ro .devLayout{grid-template-columns:1fr}
+@media(max-width:960px){.devLayout{grid-template-columns:minmax(0,1fr)}}
+body.ro .devLayout{grid-template-columns:minmax(0,1fr)}
 body.ro .devSidebar{display:none}
 .devSidebar{background:var(--panel2);border-radius:4px;padding:22px}
 .devBadge{display:inline-block;font-family:var(--disp);font-weight:600;font-size:.82rem;text-transform:uppercase;color:var(--vi);background:rgba(162,50,207,.14);border-radius:999px;padding:4px 12px;margin-bottom:18px}
