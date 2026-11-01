@@ -49,8 +49,8 @@
     navWrap.appendChild(ticker);
   }
   document.body.insertBefore(navWrap,document.body.firstChild);
-  function renderTicker(){
-    var t=(typeof TRACKS_DATA!=="undefined")&&TRACKS_DATA["spa-francorchamps"];
+  function renderTicker(slug){
+    var t=(typeof TRACKS_DATA!=="undefined")&&TRACKS_DATA[slug||"imola"];
     if(!t)return;
     var items=t.corners.map(function(c,i){
       var n="T"+(i+1),label=c[2],extra=(label&&label!==n)?(" "+label.toUpperCase()):"";
@@ -59,18 +59,33 @@
     var el=document.getElementById("tickerTrack");
     if(el)el.innerHTML=items+items;
   }
+  function tickerSlugFor(events){
+    var now=new Date();
+    var live=(events||[]).filter(function(e){return e.status!=="cancelled"});
+    var ev=live.filter(function(e){return new Date(e.start_at)>=now}).sort(function(a,b){return new Date(a.start_at)-new Date(b.start_at)})[0]
+      ||live[live.length-1];
+    var slug=ev&&typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[ev.track];
+    return slug&&TRACKS_DATA[slug]?slug:"imola";
+  }
   (function ensureTicker(){
     if(noTicker)return;
-    if(typeof TRACKS_DATA!=="undefined"){renderTicker();return}
-    if(!document.querySelector('script[src$="tracks-data.js"]')){
-      var s=document.createElement("script");s.src=base+"tracks-data.js";
-      s.onload=renderTicker;document.head.appendChild(s);
-      return;
+    function withTracksData(cb){
+      if(typeof TRACKS_DATA!=="undefined"){cb();return}
+      if(!document.querySelector('script[src$="tracks-data.js"]')){
+        var s=document.createElement("script");s.src=base+"tracks-data.js";
+        s.onload=cb;document.head.appendChild(s);
+        return;
+      }
+      var tries=0;(function wait(){
+        if(typeof TRACKS_DATA!=="undefined")return cb();
+        if(tries++<40)setTimeout(wait,50);
+      })();
     }
-    var tries=0;(function wait(){
-      if(typeof TRACKS_DATA!=="undefined")return renderTicker();
-      if(tries++<40)setTimeout(wait,50);
-    })();
+    withTracksData(function(){
+      fetch(base+"api/events",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():[]}).catch(function(){return []}).then(function(events){
+        renderTicker(tickerSlugFor(events));
+      });
+    });
   })();
   var footer=document.createElement("footer");
   footer.innerHTML='<div class="footerRow"><div class="footerText"><div class="footerCredit">Created by TheBenniblueTV &amp; Legends Service</div></div><div class="footerSocial">'
