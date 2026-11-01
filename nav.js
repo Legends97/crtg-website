@@ -75,6 +75,18 @@
     +'<a href="https://discord.gg/qxJRq7Asm" target="_blank" rel="noopener">Discord</a>'
     +'</div></div>';
   document.body.appendChild(footer);
+  var cookieAck;try{cookieAck=localStorage.getItem("crtg-cookie-ack")}catch(e){cookieAck="1"}
+  if(!cookieAck){
+    var cookieBar=document.createElement("div");
+    cookieBar.className="cookieBar";
+    cookieBar.innerHTML='<p>Diese Website verwendet nur ein technisch notwendiges Cookie für die Anmeldung (Session) — kein Tracking, keine Werbung.</p>'
+      +'<button type="button" class="btn go">Verstanden</button>';
+    cookieBar.querySelector("button").onclick=function(){
+      try{localStorage.setItem("crtg-cookie-ack","1")}catch(e){}
+      cookieBar.remove();
+    };
+    document.body.appendChild(cookieBar);
+  }
   [["icon","image/png"],["apple-touch-icon",""]].forEach(function(r){
     var l=document.createElement("link");l.rel=r[0];l.href=base+"icon.png";if(r[1])l.type=r[1];document.head.appendChild(l);
   });
