@@ -6,7 +6,7 @@
 <title>Admin – CRTG</title>
 <style>
 main{max-width:1100px;margin:auto;padding:22px 20px 60px}
-h1{margin:0 0 4px;font-size:2.3rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+h1{margin:0 0 4px;font-family:var(--disp);font-size:2.3rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
 .sub{color:var(--mute);margin:0 0 18px}
 .warn{background:rgba(255,169,77,.12);border:1px solid #ffa94d;border-radius:12px;padding:10px 14px;margin-bottom:14px}
 .warn:empty,[hidden]{display:none!important}
@@ -18,11 +18,11 @@ table{width:100%;border-collapse:collapse;min-width:760px}
 th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
 th{color:var(--mute);font-weight:500;font-size:.85rem}
 tr.off td{opacity:.5}
-.miss{color:#ffa94d}.mono{font-variant-numeric:tabular-nums}
+.miss{color:#ffa94d}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tag{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;color:var(--mute)}
 .tag.admin{color:var(--cy);border-color:var(--cy)}
 .classPicker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.classChip{font:inherit;font-size:.8rem;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
+.classChip{font-family:var(--mono);font-size:.78rem;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
 .classChip:hover{border-color:var(--cy)}
 .classChip.on{background:rgba(9,142,223,.18);color:var(--cy);border-color:var(--cy)}
 td .btn{margin-right:6px;padding:5px 12px}
