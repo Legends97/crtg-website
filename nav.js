@@ -2,20 +2,20 @@
 (function(){
   var base=document.currentScript.src.replace(/[^/]*$/,"");
   var items=[
-    ["","Start","M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
-    ["stintplan/","Stintplaner","M3 5h10v4H3zM8 11h13v4H8zM3 17h8v3H3z"],
-    ["meine-stints/","Meine Stints","M12 2a10 10 0 1 0 .001 0zM13 7h-2v6l5 3 1-1.7-4-2.4z"],
-    ["sprit/","Sprit-Rechner","M12 2.5S5 10.2 5 15a7 7 0 0 0 14 0c0-4.8-7-12.5-7-12.5z"]
+    ["","Start",'<path d="M2 7.5 8 2l6 5.5"/><path d="M3.5 6.5V14h9V6.5"/>'],
+    ["stintplan/","Stintplaner",'<path d="M3 2v12"/><path d="M3 2.5 12.5 5 3 7.5"/>'],
+    ["meine-stints/","Meine Stints",'<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l3 2"/>'],
+    ["sprit/","Sprit-Rechner",'<path d="M8 2c2.2 2.8 4 5.3 4 7.4A4 4 0 0 1 4 9.4C4 7.3 5.8 4.8 8 2Z"/>']
   ];
-  var admin=["admin/","Admin","M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"];
+  var admin=["admin/","Admin",'<path d="M8 2 13 4v4c0 3.3-2.1 5.6-5 6.5C5.1 13.6 3 11.3 3 8V4Z"/>'];
   var here=location.pathname.replace(/index\.html$/,"");
   if(here.slice(-1)!=="/")here+="/";
   var root=new URL(base).pathname;
   function tab(i){var on=here===root+i[0];
-    return '<a href="'+base+i[0]+'"'+(on?' class="on" aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+i[2]+'"/></svg><span>'+i[1]+'</span></a>';}
+    return '<a href="'+base+i[0]+'"'+(on?' class="on" aria-current="page"':'')+'><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+i[2]+'</svg><span>'+i[1]+'</span></a>';}
   var nav=document.createElement("nav");
   nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
-  nav.innerHTML='<a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="34" height="34"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div>';
+  nav.innerHTML='<div class="navLeft"><a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="32" height="32"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div></div>';
   document.body.insertBefore(nav,document.body.firstChild);
   var ticker=document.createElement("div");
   ticker.className="ticker";ticker.innerHTML='<div class="track" id="tickerTrack"></div>';
