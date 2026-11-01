@@ -17,6 +17,31 @@
   nav.className="nav";nav.setAttribute("aria-label","Hauptnavigation");
   nav.innerHTML='<a class="brand" href="'+base+'"><img src="'+base+'icon.png" alt="" width="34" height="34"><span>CRTG</span></a><div class="tabs">'+items.map(tab).join("")+'</div>';
   document.body.insertBefore(nav,document.body.firstChild);
+  var ticker=document.createElement("div");
+  ticker.className="ticker";ticker.innerHTML='<div class="track" id="tickerTrack"></div>';
+  document.body.insertBefore(ticker,nav.nextSibling);
+  function renderTicker(){
+    var t=(typeof TRACKS_DATA!=="undefined")&&TRACKS_DATA["spa-francorchamps"];
+    if(!t)return;
+    var items=t.corners.map(function(c,i){
+      var n="T"+(i+1),label=c[2],extra=(label&&label!==n)?(" "+label.toUpperCase()):"";
+      return "<span><b>"+n+"</b>"+extra+"</span>";
+    }).join("");
+    var el=document.getElementById("tickerTrack");
+    if(el)el.innerHTML=items+items;
+  }
+  (function ensureTicker(){
+    if(typeof TRACKS_DATA!=="undefined"){renderTicker();return}
+    if(!document.querySelector('script[src$="tracks-data.js"]')){
+      var s=document.createElement("script");s.src=base+"tracks-data.js";
+      s.onload=renderTicker;document.head.appendChild(s);
+      return;
+    }
+    var tries=0;(function wait(){
+      if(typeof TRACKS_DATA!=="undefined")return renderTicker();
+      if(tries++<40)setTimeout(wait,50);
+    })();
+  })();
   var footer=document.createElement("footer");
   footer.innerHTML='<div class="footerRow"><div class="footerText"><div class="footerCredit">Created by TheBenniblueTV &amp; Legends Service</div></div><div class="footerSocial">'
     +'<a href="https://whatsapp.com/channel/0029Vb8ABAY7z4kk2DTtdN47" target="_blank" rel="noopener">WhatsApp</a>'
