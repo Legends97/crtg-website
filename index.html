@@ -108,22 +108,28 @@ fetch("api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()
   t.outerHTML='<a class="panel" href="admin/"><h2>Admin</h2><p class="desc">Kader, Fahrernummern, Discord-Verknüpfung — und der Hebel, der ein Rennen von Entwurf zu festgeschrieben bringt.</p><span class="go">Zum Admin-Panel →</span></a>';
 });
 // Hero-Strecke: Event mit dem nächstliegenden Datum (nächstes bevorstehendes, sonst letztes vergangene).
-fetch("api/events",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(events=>{
-  if(!events||!events.length)return;
-  const now=new Date();
-  const live=events.filter(e=>e.status!=="cancelled");
-  const ev=live.find(e=>new Date(e.start_at)>=now)||live[live.length-1];
-  if(!ev)return;
-  const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[ev.track];
-  const t=slug&&typeof TRACKS_DATA!=="undefined"&&TRACKS_DATA[slug];
-  if(!t)return;
+// Steht kein Event an, zeigt der Hero Imola statt der fest einprogrammierten Spa-Grafik.
+function setHeroTrack(t){
   const svg=document.getElementById("heroTrackSvg");
   svg.setAttribute("viewBox",t.viewBox);
   svg.innerHTML='<path class="ribbon" d="'+t.paths[0]+'"/><g style="font-family:var(--mono);font-size:9px;fill:var(--mute)">'
     +t.corners.map((c,i)=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/><text x="'+c[0]+'" y="'+(c[1]-7)+'" text-anchor="middle">T'+(i+1)+'</text>').join("")
     +"</g>";
-  document.getElementById("heroDur").textContent=(ev.duration_minutes/60)+"h";
   document.getElementById("heroTrack").textContent=t.name;
+}
+function trackFor(name){
+  const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[name];
+  return slug&&typeof TRACKS_DATA!=="undefined"&&TRACKS_DATA[slug];
+}
+fetch("api/events",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(events=>{
+  const now=new Date();
+  const live=(events||[]).filter(e=>e.status!=="cancelled");
+  const ev=live.find(e=>new Date(e.start_at)>=now)||live[live.length-1];
+  if(!ev){const t=trackFor("Imola");if(t)setHeroTrack(t);return;}
+  const t=trackFor(ev.track);
+  if(!t)return;
+  setHeroTrack(t);
+  document.getElementById("heroDur").textContent=(ev.duration_minutes/60)+"h";
   if(ev.car_class)document.getElementById("heroClass").textContent=ev.car_class;
 });
 </script>
