@@ -330,8 +330,10 @@ async function twitchAppAccessToken() {
   twitchAppTokenExp = Date.now() + (d.expires_in - 60) * 1000;
   return twitchAppToken;
 }
-async function twitchLive(res) {
-  const linked = (await q("select display_name, twitch_login from users where twitch_login is not null and active")).rows;
+// Alle verknüpften Fahrer mit Online/Offline-Status, für die eigene Streamer-Seite (nicht nur
+// die aktuell live sind, damit die Seite auch zeigt wer prinzipiell verknüpft ist).
+async function twitchStatus(res) {
+  const linked = (await q("select display_name, twitch_login from users where twitch_login is not null and active order by display_name")).rows;
   if (!linked.length) return json(res, 200, []);
   const token = await twitchAppAccessToken();
   const p = new URLSearchParams();
@@ -341,14 +343,15 @@ async function twitchLive(res) {
   });
   if (!r.ok) throw new HttpErr(502, "Twitch-Streams konnten nicht geladen werden.");
   const streams = (await r.json()).data || [];
-  const byLogin = new Map(linked.map(u => [u.twitch_login.toLowerCase(), u.display_name]));
-  return json(res, 200, streams.map(s => ({
-    display_name: byLogin.get(s.user_login.toLowerCase()) || s.user_name,
-    twitch_login: s.user_login,
-    title: s.title,
-    game_name: s.game_name,
-    viewer_count: s.viewer_count,
-  })));
+  const byLogin = new Map(streams.map(s => [s.user_login.toLowerCase(), s]));
+  const list = linked.map(u => {
+    const s = byLogin.get(u.twitch_login.toLowerCase());
+    return s
+      ? { display_name: u.display_name, twitch_login: u.twitch_login, live: true, title: s.title, game_name: s.game_name, viewer_count: s.viewer_count }
+      : { display_name: u.display_name, twitch_login: u.twitch_login, live: false };
+  });
+  list.sort((a, b) => (b.live - a.live) || a.display_name.localeCompare(b.display_name));
+  return json(res, 200, list);
 }
 
 // Admin: Fahrer verwalten
@@ -919,9 +922,9 @@ export default async function handler(req, res) {
     if (path === "/api/auth/steam/callback") return await steamCallback(req, res, url, user);
     if (path === "/api/auth/twitch") return twitchLogin(req, res, user);
     if (path === "/api/auth/twitch/callback") return await twitchCallback(req, res, url, user);
-    if (path === "/api/twitch/live" && req.method === "GET") {
+    if (path === "/api/twitch/status" && req.method === "GET") {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      return await twitchLive(res);
+      return await twitchStatus(res);
     }
     if (path === "/api/drivers") {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");

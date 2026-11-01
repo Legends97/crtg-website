@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<script>document.documentElement.dataset.theme=localStorage.getItem("crtg-theme")||"dark"</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRTG Streamer</title>
+<style>
+.pageHead{padding:12px 8vw 0}
+.pageHead h2{font-family:var(--disp);font-weight:600;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);margin:0}
+.pageBody{padding:36px 8vw 10vh}
+.desc{color:var(--mute);font-weight:300;margin:0 0 28px;max-width:60ch}
+.streamerGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.streamerCard{display:block;background:var(--panel);padding:20px 22px;text-decoration:none;color:inherit;transition:background 160ms ease}
+a.streamerCard:hover{background:var(--panel2)}
+.streamerCard.offline{opacity:.55}
+.statusBadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.statusBadge::before{content:"";width:6px;height:6px;border-radius:50%}
+.statusBadge.live{color:#ff5d6c}
+.statusBadge.live::before{background:#ff5d6c}
+.statusBadge.off{color:var(--mute)}
+.statusBadge.off::before{background:var(--line)}
+.streamerName{font-family:var(--disp);font-weight:600;font-size:1.15rem}
+.streamerLogin{color:var(--mute);font-size:.82rem;margin-top:2px}
+.streamerTitle{color:var(--mute);font-size:.88rem;margin-top:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.streamerMeta{color:var(--mute);font-size:.78rem;margin-top:8px}
+.empty{color:var(--mute);padding:20px 0}
+</style>
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<main>
+  <div class="pageHead"><h2>Streamer</h2></div>
+  <div class="kerb"></div>
+  <div class="pageBody">
+    <p class="desc">Wer vom Team gerade auf Twitch live ist — und wer verknüpft, aber gerade offline ist.</p>
+    <div id="list"><p class="empty">Lädt …</p></div>
+  </div>
+</main>
+<div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
+<script>
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function render(list){
+  const box=document.getElementById("list");
+  if(!list||!list.length){box.innerHTML='<p class="empty">Noch niemand hat Twitch verknüpft. Über „Twitch verknüpfen" im Account-Menü nachholbar.</p>';return}
+  box.innerHTML='<div class="streamerGrid">'+list.map(s=>{
+    const href="https://twitch.tv/"+encodeURIComponent(s.twitch_login);
+    if(s.live){
+      return '<a class="streamerCard" href="'+href+'" target="_blank" rel="noopener">'
+        +'<div class="statusBadge live">Live</div>'
+        +'<div class="streamerName">'+esc(s.display_name)+'</div>'
+        +'<div class="streamerLogin">'+esc(s.twitch_login)+'</div>'
+        +(s.title?'<div class="streamerTitle">'+esc(s.title)+'</div>':"")
+        +'<div class="streamerMeta">'+(s.game_name?esc(s.game_name)+" · ":"")+s.viewer_count+' Zuschauer</div>'
+        +'</a>';
+    }
+    return '<a class="streamerCard offline" href="'+href+'" target="_blank" rel="noopener">'
+      +'<div class="statusBadge off">Offline</div>'
+      +'<div class="streamerName">'+esc(s.display_name)+'</div>'
+      +'<div class="streamerLogin">'+esc(s.twitch_login)+'</div>'
+      +'</a>';
+  }).join("")+'</div>';
+}
+function refresh(){
+  fetch("../api/twitch/status",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(render);
+}
+refresh();
+setInterval(refresh,60000);
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>
