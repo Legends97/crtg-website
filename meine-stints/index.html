@@ -10,7 +10,7 @@
 body{margin:0;min-height:100vh;color:var(--text);font:16px/1.45 "Bahnschrift","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
 background:radial-gradient(900px 500px at 8% -10%,rgba(43,208,255,.16),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(155,107,255,.18),transparent 60%),var(--bg)}
 header{max-width:860px;margin:auto;padding:26px 24px 14px}
-h1{margin:0;font-size:2.2rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+h1{margin:0;font-family:var(--disp);font-size:2.2rem;font-style:italic;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
 .sub{color:var(--mute);margin-top:2px}
 .stripe{height:4px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,transparent)}
 main{max-width:860px;margin:auto;padding:8px 24px 48px}
@@ -22,8 +22,8 @@ main{max-width:860px;margin:auto;padding:8px 24px 48px}
 .seg:last-child{border-right:0}
 .seg.mine{background:var(--cy);color:#06131c;font-weight:700}
 .stint{display:flex;align-items:center;gap:16px;background:rgba(19,24,48,.88);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;margin-bottom:10px}
-.stint .n{width:36px;font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
-.stint .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:220px}
+.stint .n{width:40px;font-family:var(--mono);font-size:1.5rem;font-weight:800;font-style:italic;color:var(--c)}
+.stint .t{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;min-width:220px}
 .stint .track{flex:1;color:var(--mute);min-width:0}
 .tag{font-size:.75rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mute);white-space:nowrap}
 .tag.now{color:var(--cy);border-color:var(--cy)}
@@ -95,7 +95,7 @@ function render(){
         const info=[];
         if(s.fuel_liters!=null)info.push(s.fuel_liters.toFixed(1)+" l");
         if(s.pit_stops!=null)info.push(s.pit_stops+" Boxenstopp"+(s.pit_stops===1?"":"s"));
-        return '<div class="stint" style="--c:'+c+'"><span class="n">'+s.number+'</span>'
+        return '<div class="stint" style="--c:'+c+'"><span class="n">S'+s.number+'</span>'
           +'<span class="t">'+fmt(s.start_at)+' – '+fmt(s.end_at)+'</span>'
           +'<span class="track">'+esc(info.join(" · "))+'</span>'
           +'<span class="tag'+tag.cls+'">'+tag.label+'</span></div>';
