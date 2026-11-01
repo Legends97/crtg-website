@@ -599,10 +599,9 @@ function eventPhase(e, now) {
   if (now <= e.signup_closes_at) return "signup_open";
   return "after_signup";
 }
-// Ein Event ohne gesetzte Klasse ist für alle sichtbar; ein Fahrer ohne zugewiesene Klassen
-// (noch nicht konfiguriert) sieht ebenfalls alles, statt plötzlich leer dazustehen.
+// Fahrer ohne zugewiesene Klasse sehen gar keine Events. Admins sehen immer alles.
 const classAllowed = (user, event) =>
-  user.role === "admin" || !event.car_class || !user.classes || !user.classes.length || user.classes.includes(event.car_class);
+  user.role === "admin" || !!(user.classes && user.classes.length && (!event.car_class || user.classes.includes(event.car_class)));
 
 async function listEvents(res, user) {
   if (!user) throw new HttpErr(401, "Nicht angemeldet.");
