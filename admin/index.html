@@ -19,7 +19,11 @@ h1{margin:0;font-family:var(--disp);font-weight:600;text-transform:uppercase;fon
 .addBtn{background:var(--vi);color:#fff;border:none;border-radius:999px;padding:11px 22px;font-weight:600;white-space:nowrap;transition:background 160ms ease,transform 120ms ease-out}
 .addBtn:hover{background:#b34de0}
 .addBtn:active{transform:scale(.97)}
+.twWrap{position:relative}
 .tw{overflow-x:auto}
+@media(max-width:700px){
+.twWrap::after{content:"";position:absolute;top:0;right:0;bottom:0;width:28px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg) 85%)}
+}
 .table{width:100%;border-collapse:collapse;min-width:760px}
 .table th{text-align:left;font-weight:600;color:var(--mute);padding:10px 16px;border-bottom:1px solid var(--line)}
 .table td{padding:14px 16px;border-bottom:1px solid var(--bg)}
@@ -59,7 +63,7 @@ dialog .row{display:flex;gap:10px;margin-top:8px;align-items:center}
     <p class="sub">Konten, Discord-IDs und Steam-IDs des Teams</p>
     <div class="warn" id="warn" role="status"></div>
     <div class="adminBar"><input class="searchInput" id="q" type="search" placeholder="Suchen (Name, Discord-ID, Steam-ID)" aria-label="Suchen"><button class="go addBtn" id="new" type="button">Fahrer anlegen</button></div>
-    <div class="tw"><table class="table"><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Klassen</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
+    <div class="twWrap"><div class="tw"><table class="table"><thead><tr><th>Name</th><th>Fahrernummer</th><th>Discord-ID</th><th>Steam-ID</th><th>Rolle</th><th>Klassen</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><div id="empty" hidden>Keine Fahrer gefunden.</div></div>
     </div>
   </div>
 </main>
