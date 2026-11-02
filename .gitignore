@@ -6,3 +6,5 @@ node_modules
 DEPLOYMENT.md
 plan
 docs
+.impeccable
+.artifact-scratch
