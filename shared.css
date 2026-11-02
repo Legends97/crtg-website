@@ -1,5 +1,5 @@
 /* Gemeinsames Design für alle CRTG-Seiten: Farben, Hintergrund, Navigation, Buttons */
-:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#098edf;--vi:#a232cf;
+:root{color-scheme:dark;--bg:#0b0e1b;--panel:#131830;--panel2:#1a2040;--line:#2a3157;--text:#eaedfa;--mute:#8f98bd;--cy:#098edf;--vi:#a232cf;--gr:#3ddc97;
 --navbg:rgba(11,14,27,.9);--navbgSolid:rgba(11,14,27,.97);
 --disp:"Oswald",system-ui,sans-serif;--body:"Roboto Condensed",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
 :root[data-theme="light"]{color-scheme:light;--bg:#f3f4fa;--panel:#ffffff;--panel2:#edeffa;--line:#d9dcee;--text:#15182c;--mute:#5a5f80;

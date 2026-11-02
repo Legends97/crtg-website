@@ -47,7 +47,7 @@ body.ro .devSidebar{display:none}
 .evMeta{color:var(--mute);font-size:.9rem;margin:0 0 10px}
 .evStats{display:flex;gap:32px;margin-top:18px;flex-wrap:wrap}
 .evStats .n{font-family:var(--mono);font-size:1.5rem;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
-.evStats .n.vi{color:var(--vi)}
+.evStats .n.vi{color:var(--gr)}
 .evStats .l{font-size:.82rem;color:var(--mute);margin-top:2px}
 .pill{font-family:var(--body);font-size:.85rem;font-weight:600;padding:5px 14px;border-radius:999px;background:var(--panel2);display:inline-block}
 .chip{display:inline-flex;flex-direction:column;gap:3px;font-family:var(--mono);background:var(--panel2);border-radius:3px;padding:10px 14px;min-width:92px}
@@ -228,7 +228,7 @@ function renderBanner(){
     const left=new Date(EV.signup_closes_at)-now,mins=Math.max(0,Math.floor(left/60000));
     const d=Math.floor(mins/1440),h=Math.floor(mins%1440/60),m=mins%60;
     const txt=d>0?d+" Tag"+(d===1?"":"en")+", "+h+" Stunde"+(h===1?"":"n"):h>0?h+" Stunde"+(h===1?"":"n")+", "+m+" Minute"+(m===1?"":"n"):m+" Minute"+(m===1?"":"n");
-    return set("var(--vi)","Anmeldung schließt in",esc(txt),"Bis "+esc(DT(EV.signup_closes_at))+" — freie Stunden anklicken.");
+    return set("var(--gr)","Anmeldung schließt in",esc(txt),"Bis "+esc(DT(EV.signup_closes_at))+" — freie Stunden anklicken.");
   }
   if(ph==="after_signup")return set("#ffa94d","Anmeldung geschlossen","Geschlossen","Wer sich nicht einträgt, bekommt was noch frei ist.");
   if(ph==="locked")return set("#3ddc97","Plan festgeschrieben","Festgeschrieben","Erinnerungen sind erzeugt. Änderungen nur noch durch einen Admin.");
