@@ -64,13 +64,15 @@ body.ro .devSidebar{display:none}
 .hourcell .hr{font-family:var(--mono);font-size:.68rem;color:var(--mute)}
 .hourcell .who{font-size:.86rem;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hourcell select{margin-top:4px;width:100%;font-size:.78rem;padding:4px 6px;background:var(--panel);border:none;border-radius:3px;color:var(--text)}
-.hourcell.free{background:rgba(9,142,223,.08);box-shadow:inset 3px 0 0 var(--cy)}
-.hourcell.free .who{color:var(--cy);font-style:italic}
-.hourcell.mine{background:rgba(162,50,207,.16);box-shadow:inset 3px 0 0 var(--vi)}
+.hourcell.free{background:var(--panel2);box-shadow:inset 3px 0 0 var(--mute)}
+.hourcell.free .who{color:var(--mute);font-style:italic}
+.hourcell.mine{background:rgba(9,142,223,.16);box-shadow:inset 3px 0 0 var(--cy)}
+.hourcell.other{background:rgba(162,50,207,.16);box-shadow:inset 3px 0 0 var(--vi)}
+.hourcell.other .who{color:var(--vi)}
 .hourcell.past{opacity:.5;filter:grayscale(.5)}
 .hourcell.past .who{color:var(--mute)}
 .hourcell.live{box-shadow:inset 0 0 0 2px var(--cy)}
-.hourcell.mine .who{color:var(--vi);font-weight:600}
+.hourcell.mine .who{color:var(--cy);font-weight:600}
 .hourcell .fu{font-family:var(--mono);font-size:.68rem;color:var(--mute);margin-top:2px}
 .meineLayout{display:grid;grid-template-columns:1.3fr .9fr;gap:52px;align-items:start}
 @media(max-width:1100px){.meineLayout{grid-template-columns:1fr}#stintTrackCol{order:-1}}
@@ -244,7 +246,7 @@ function renderGrid(){
     const start=new Date(s.start_at).getTime(),end=new Date(s.end_at).getTime();
     const past=end<=now,live=start<=now&&now<end,mine=isMine(s);
     const cls=["hourcell"];
-    if(mine)cls.push("mine");else if(!s.assigned_user)cls.push("free");
+    if(mine)cls.push("mine");else if(!s.assigned_user)cls.push("free");else cls.push("other");
     if(past)cls.push("past");
     if(live)cls.push("live");
     const hit=ADMIN||(!past&&(mine?canRelease:!s.assigned_user&&canClaim));
