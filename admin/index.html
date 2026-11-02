@@ -39,6 +39,17 @@ tr.off td{opacity:.5}
 .rowBtn:hover{background:var(--line)}
 .rowBtn:active{transform:scale(.96)}
 .rowBtn.danger:hover{color:#ff6b6b}
+@media(max-width:700px){
+/* Discord-/Steam-ID sind lang und selten auf einen Blick nötig — beim Bearbeiten
+   stehen sie weiterhin vollständig im Dialog. Ausblenden statt endlos scrollen müssen. */
+.table{min-width:0}
+.table th:nth-child(3),.table td:nth-child(3),.table th:nth-child(4),.table td:nth-child(4){display:none}
+.table th,.table td{padding:8px 8px;font-size:.85rem}
+.table td:nth-child(6){min-width:158px}
+.classPicker{gap:4px;max-width:none}
+.classChip{padding:3px 7px;font-size:.68rem}
+.rowBtn{padding:6px 11px;font-size:.78rem;margin-right:4px}
+}
 #empty,#gate{color:var(--mute);padding:18px 0}
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(480px,92vw);padding:22px}
 dialog::backdrop{background:rgba(5,7,16,.72)}
