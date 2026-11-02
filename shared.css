@@ -63,8 +63,6 @@ body{padding-bottom:76px;padding-top:64px}
   background-image:repeating-linear-gradient(45deg,var(--text) 0 22px,var(--bg) 22px 44px);opacity:.9;
   -webkit-mask-image:linear-gradient(90deg,transparent,black 124px,black calc(100% - 124px),transparent);
   mask-image:linear-gradient(90deg,transparent,black 124px,black calc(100% - 124px),transparent)}
-@media(prefers-reduced-motion:no-preference){.kerb::before{animation:kerbMove 2.6s linear infinite}}
-@keyframes kerbMove{to{transform:translateX(62.23px)}}
 .tread{display:block;width:100%;height:58px;background:var(--panel)}
 .tireBand{height:220px;overflow:hidden;position:relative;background:var(--bg)}
 .tireBand img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;filter:saturate(.85) brightness(.85)}
