@@ -25,7 +25,7 @@ background:radial-gradient(900px 520px at 8% -10%,rgba(9,142,223,.17),transparen
 .nav .tabs a.on{color:var(--cy);background:rgba(9,142,223,.08);border-color:var(--cy)}
 .nav svg{width:16px;height:16px;flex:none}
 .ticker{height:30px;overflow:hidden;position:relative;background:var(--panel2);box-shadow:0 10px 24px -14px rgba(0,0,0,.6)}
-.ticker .track{display:flex;gap:44px;white-space:nowrap;animation:tick 48s linear infinite;position:absolute;height:30px;align-items:center;padding-left:8vw}
+.ticker .track{display:flex;gap:44px;white-space:nowrap;animation:tick 20s linear infinite;position:absolute;height:30px;align-items:center;padding-left:8vw}
 .ticker span{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--mute)}
 .ticker span b{color:var(--text);font-weight:600}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
