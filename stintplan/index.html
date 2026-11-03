@@ -13,7 +13,7 @@
 @media(max-width:960px){.devLayout{grid-template-columns:minmax(0,1fr)}}
 body.ro .devLayout{grid-template-columns:minmax(0,1fr)}
 body.ro .devSidebar{display:none}
-.devSidebar{background:var(--panel2);border-radius:4px;padding:22px}
+.devSidebar{background:var(--panel2);border-radius:8px;padding:22px}
 .devBadge{display:inline-block;font-family:var(--disp);font-weight:600;font-size:.82rem;text-transform:uppercase;color:var(--vi);background:rgba(162,50,207,.14);border-radius:999px;padding:4px 12px;margin-bottom:18px}
 .sideBtn{display:block;width:100%;background:var(--panel);color:var(--text);border:none;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:.92rem;text-align:left;transition:background 160ms ease,transform 120ms ease-out}
 .sideBtn:hover{background:var(--line)}
@@ -53,12 +53,12 @@ body.ro .devSidebar{display:none}
 .chip .v{font-size:1.1rem;color:var(--text);font-variant-numeric:tabular-nums}
 .chip .k{font-size:.72rem;color:var(--mute);margin-top:1px}
 .chipRow{display:flex;gap:10px;flex-wrap:wrap}
-.countdown{background:var(--panel2);border-left:3px solid var(--c,var(--vi));border-radius:3px;padding:16px 20px;margin-bottom:22px}
+.countdown{background:var(--panel2);border-left:3px solid var(--c,var(--vi));border-radius:6px;padding:16px 20px;margin-bottom:22px}
 .countdown-label{font-size:.9rem;color:var(--mute)}
 .countdown-value{font-family:var(--disp);font-size:1.5rem;font-weight:600;color:var(--c,var(--vi));margin-top:2px}
 .countdown-sub{font-size:.82rem;color:var(--mute);margin-top:6px}
 .hourgrid.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:7px;margin-top:22px}
-.hourcell{background:var(--panel2);padding:9px 11px;min-height:56px;transition:background 160ms ease;box-shadow:inset 3px 0 0 var(--line)}
+.hourcell{background:var(--panel2);padding:9px 11px;min-height:56px;border-radius:6px;transition:background 160ms ease;box-shadow:inset 3px 0 0 var(--line)}
 .hourcell.hit{cursor:pointer}
 .hourcell.hit:hover,.hourcell.hit:focus-visible{background:#212852;box-shadow:inset 0 0 0 1px var(--vi);outline:none}
 .hourcell .hr{font-family:var(--mono);font-size:.82rem;color:var(--text);font-weight:600}
