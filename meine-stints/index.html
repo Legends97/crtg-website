@@ -121,7 +121,7 @@ function render(){
         const tag=tagOf(s,now);
         const info=[];
         if(s.fuel_liters!=null)info.push(s.fuel_liters.toFixed(1)+" l");
-        if(s.pit_stops!=null)info.push(s.pit_stops+" Boxenstopp"+(s.pit_stops===1?"":"s"));
+        if(s.pit_stops)info.push(s.pit_stops+" Zwischenstopp"+(s.pit_stops===1?"":"s")+" (Sprit)");
         return '<div class="stintRow"><div>S'+s.number+' · '+esc(fmt(s.start_at))+'–'+esc(fmt(s.end_at))+(info.length?' · '+esc(info.join(" · ")):"")+'</div>'
           +'<span class="tag2 '+tag.cls+'">'+tag.label+'</span></div>';
       }).join("");

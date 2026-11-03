@@ -259,7 +259,7 @@ function renderGrid(){
       ?'<select data-as="'+s.number+'" aria-label="Fahrer für Stint '+s.number+'"><option value="">— frei —</option>'
         +USERS.map(u=>'<option value="'+u.id+'"'+(u.id===userIdOf(s)?" selected":"")+">"+esc(userLabel(u))+"</option>").join("")+"</select>"
       :"";
-    const fuel=s.fuel_liters!=null?'<div class="fu">'+esc(String(s.fuel_liters).replace(".",","))+" L"+(s.pit_stops?" · "+s.pit_stops+" Stopp"+(s.pit_stops===1?"":"s"):"")+"</div>":"";
+    const fuel=s.fuel_liters!=null?'<div class="fu">'+esc(String(s.fuel_liters).replace(".",","))+" L"+(s.pit_stops?" · "+s.pit_stops+" Zwischenstopp"+(s.pit_stops===1?"":"s"):"")+"</div>":"";
     const hitAttrs=hit?' role="button" tabindex="0"':"";
     return '<div class="'+cls.join(" ")+'" data-n="'+s.number+'"'+hitAttrs+'><div class="hr">S'+s.number+' · '+esc(T(s.start_at))+'</div><div class="who">'+name+liveSuffix+"</div>"+fuel+sel+"</div>";
   }).join("");
