@@ -143,7 +143,7 @@ body{background:#fff;color:#111;font-size:12pt}
   </div>
   <div class="field"><label for="fRes">Reserve (Runden)</label><input id="fRes" type="number" step="1" min="0" placeholder="1"></div>
   <div class="fieldGroup">Erinnerungen &amp; Discord</div>
-  <div class="field"><label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label><input id="fLead" placeholder="1440,120,20"></div>
+  <div class="field"><label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label><input id="fLead" placeholder="1440,120,20"><p class="fieldHint">* legt fest, wie viele Minuten vor dem Start erinnert wird — 1440 = 1 Tag, 120 = 2 Std, 20 = 20 Min vorher.</p></div>
   <div class="fieldRow">
     <div class="field"><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
   </div>
@@ -412,7 +412,7 @@ function fillForm(e){
   $("fCons").value=e&&e.fuel_cons_per_lap!=null?e.fuel_cons_per_lap:"";
   $("fTank").value=e&&e.tank_liters!=null?e.tank_liters:"";
   $("fRes").value=e&&e.fuel_reserve_laps!=null?e.fuel_reserve_laps:"";
-  $("fLead").value=e&&e.reminder_lead_times?e.reminder_lead_times.join(","):"";
+  $("fLead").value=e&&e.reminder_lead_times?e.reminder_lead_times.join(","):"1440,120,20";
   $("fVoice").value=e&&e.voice_channel_id?e.voice_channel_id:"";
   $("fSave").textContent=editId?"Änderungen speichern":"Event anlegen";
   $("fHint").textContent=editId?"Bearbeitet: „"+e.name+"“.":"Neues Event. Nach dem Anlegen entstehen die Stunden-Stints automatisch.";
