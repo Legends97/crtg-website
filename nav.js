@@ -88,7 +88,7 @@
     });
   })();
   var footer=document.createElement("footer");
-  footer.innerHTML='<div class="footerRow"><div class="footerText"><div class="footerCredit">Created by TheBenniblueTV &amp; Legends Service</div></div><div class="footerSocial">'
+  footer.innerHTML='<div class="footerRow"><div class="footerText"><div class="footerCredit">Created by TheBenniblueTV &amp; Legends Service</div><div class="footerCredit">Inhaber: Noel Mazurek</div></div><div class="footerSocial">'
     +'<a href="https://whatsapp.com/channel/0029Vb8ABAY7z4kk2DTtdN47" target="_blank" rel="noopener">WhatsApp</a>'
     +'<a href="https://www.tiktok.com/@chaosracing7" target="_blank" rel="noopener">TikTok</a>'
     +'<a href="https://discord.gg/qxJRq7Asm" target="_blank" rel="noopener">Discord</a>'
