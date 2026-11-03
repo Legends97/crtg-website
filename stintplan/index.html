@@ -54,10 +54,10 @@ body.ro .devSidebar{display:none}
 .chip .k{font-size:.72rem;color:var(--mute);margin-top:1px}
 .chipRow{display:flex;gap:10px;flex-wrap:wrap}
 .countdown{background:var(--panel2);border-left:3px solid var(--c,var(--vi));border-radius:6px;padding:16px 20px;margin-bottom:22px}
-.countdown-meta{font-size:.82rem;color:var(--text);opacity:.75;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.countdown-label{font-size:.9rem;color:var(--text);opacity:.75}
+.countdown-meta{font-size:.82rem;color:var(--text);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.countdown-label{font-size:.9rem;color:var(--text)}
 .countdown-value{font-family:var(--disp);font-size:1.5rem;font-weight:600;color:var(--c,var(--vi));margin-top:2px}
-.countdown-sub{font-size:.82rem;color:var(--text);opacity:.75;margin-top:6px}
+.countdown-sub{font-size:.82rem;color:var(--text);margin-top:6px}
 .hourgrid.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:7px;margin-top:22px}
 .hourcell{background:var(--panel2);padding:9px 11px;min-height:56px;border-radius:6px;transition:background 160ms ease;box-shadow:inset 3px 0 0 var(--line)}
 .hourcell.hit{cursor:pointer}
@@ -80,9 +80,9 @@ body.ro .devSidebar{display:none}
 .planLegend{display:flex;gap:20px;flex-wrap:wrap;margin-top:24px;font-size:.85rem;color:var(--mute)}
 .planLegend span{display:flex;align-items:center;gap:7px}
 .planLegend .dot{width:10px;height:10px;border-radius:50%;background:var(--panel2);display:inline-block}
-.planLegend .dot.free{background:rgba(9,142,223,.18);box-shadow:inset 0 0 0 1.5px var(--cy)}
-.planLegend .dot.mine{background:var(--vi)}
-.planLegend .dot.other{background:var(--line)}
+.planLegend .dot.free{background:var(--panel2);box-shadow:inset 0 0 0 1.5px var(--mute)}
+.planLegend .dot.mine{background:var(--cy)}
+.planLegend .dot.other{background:var(--vi)}
 .planLegend .dot.past{background:var(--panel2);opacity:.4}
 .calcNote{color:var(--mute);font-size:.86rem;line-height:1.6;margin:22px 0}
 .planActions{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
