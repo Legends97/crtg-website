@@ -48,7 +48,7 @@ a.panel:hover .go{color:var(--vi);text-decoration:underline}
       <p class="lead">Ein Team, ein Zeitplan. Vom Sprit-Fenster bis zur letzten Boxenstopp-Runde — jeder Stint ist verzeichnet, jede Übergabe nachvollziehbar.</p>
       <div class="stats">
         <div><div class="n" id="heroDur">24h</div><div class="l" id="heroTrack">Spa-Francorchamps</div></div>
-        <div><div class="n">08</div><div class="l">Fahrer im Kader</div></div>
+        <div><div class="n" id="heroDrivers">—</div><div class="l">Fahrer im Kader</div></div>
         <div><div class="n" id="heroClass">GT3</div><div class="l">Klasse</div></div>
       </div>
     </div>
@@ -103,6 +103,10 @@ a.panel:hover .go{color:var(--vi);text-decoration:underline}
 const rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const q=rd("crtg-sprit-v1");
 if(q&&q.cons){document.getElementById("last2").textContent="Zuletzt: "+(+q.stint>0?q.stint+" min Stints":"Stints nach Tank")+" · "+q.cons+" L/Runde · Tank "+q.tank+" L"}
+fetch("api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(drivers=>{
+  const n=(drivers||[]).filter(d=>d.classes&&d.classes.length).length;
+  document.getElementById("heroDrivers").textContent=String(n).padStart(2,"0");
+});
 fetch("api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()=>null).then(u=>{
   if(!u||u.role!=="admin")return;
   const t=document.getElementById("tool4");

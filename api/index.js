@@ -969,7 +969,7 @@ export default async function handler(req, res) {
     }
     if (path === "/api/drivers") {
       if (!user) throw new HttpErr(401, "Nicht angemeldet.");
-      const r = await q("select display_name,car_number from users where active order by car_number nulls last, lower(display_name)");
+      const r = await q("select display_name,car_number,classes from users where active order by car_number nulls last, lower(display_name)");
       return json(res, 200, r.rows);
     }
     const am = path.match(/^\/api\/admin\/users(?:\/(\d+))?$/);
