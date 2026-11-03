@@ -145,7 +145,6 @@ body{background:#fff;color:#111;font-size:12pt}
   <div class="fieldGroup">Erinnerungen &amp; Discord</div>
   <div class="field"><label for="fLead">Erinnerungsstufen (Minuten vorher, kommagetrennt)</label><input id="fLead" placeholder="1440,120,20"></div>
   <div class="fieldRow">
-    <div class="field"><label for="fGuild">Server-ID (optional)</label><input id="fGuild" placeholder="Server-Standard"></div>
     <div class="field"><label for="fVoice">Voice-Kanal-ID (optional)</label><input id="fVoice" placeholder="Server-Standard"></div>
   </div>
   <button class="go addBtn" id="fSave" style="width:100%;margin-top:8px">Event anlegen</button>
@@ -414,7 +413,6 @@ function fillForm(e){
   $("fTank").value=e&&e.tank_liters!=null?e.tank_liters:"";
   $("fRes").value=e&&e.fuel_reserve_laps!=null?e.fuel_reserve_laps:"";
   $("fLead").value=e&&e.reminder_lead_times?e.reminder_lead_times.join(","):"";
-  $("fGuild").value=e&&e.guild_id?e.guild_id:"";
   $("fVoice").value=e&&e.voice_channel_id?e.voice_channel_id:"";
   $("fSave").textContent=editId?"Änderungen speichern":"Event anlegen";
   $("fHint").textContent=editId?"Bearbeitet: „"+e.name+"“.":"Neues Event. Nach dem Anlegen entstehen die Stunden-Stints automatisch.";
@@ -462,7 +460,7 @@ function formBody(){
       throw new Error("Erinnerungsstufen: kommagetrennte Liste positiver Minuten-Werte angeben (z. B. 1440,120,20).");
     b.reminder_lead_times=arr;
   }
-  b.guild_id=$("fGuild").value.trim()||null;
+  b.guild_id="1495824847618703370";
   b.voice_channel_id=$("fVoice").value.trim()||null;
   return b;
 }
