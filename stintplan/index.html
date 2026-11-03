@@ -54,6 +54,7 @@ body.ro .devSidebar{display:none}
 .chip .k{font-size:.72rem;color:var(--mute);margin-top:1px}
 .chipRow{display:flex;gap:10px;flex-wrap:wrap}
 .countdown{background:var(--panel2);border-left:3px solid var(--c,var(--vi));border-radius:6px;padding:16px 20px;margin-bottom:22px}
+.countdown-meta{font-size:.82rem;color:var(--mute);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .countdown-label{font-size:.9rem;color:var(--mute)}
 .countdown-value{font-family:var(--disp);font-size:1.5rem;font-weight:600;color:var(--c,var(--vi));margin-top:2px}
 .countdown-sub{font-size:.82rem;color:var(--mute);margin-top:6px}
@@ -221,7 +222,9 @@ function renderBanner(){
   const el=$("banner");
   if(!el||!EV)return;
   const now=new Date(),ph=phaseOf(EV,now);
-  const set=(c,label,value,sub)=>{el.style.setProperty("--c",c);el.innerHTML='<div class="countdown-label">'+label+'</div><div class="countdown-value">'+value+'</div>'+(sub?'<div class="countdown-sub">'+sub+'</div>':"")};
+  const meta='<div class="countdown-meta">'+esc(EV.track)+(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))
+    +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div>";
+  const set=(c,label,value,sub)=>{el.style.setProperty("--c",c);el.innerHTML=meta+'<div class="countdown-label">'+label+'</div><div class="countdown-value">'+value+'</div>'+(sub?'<div class="countdown-sub">'+sub+'</div>':"")};
   if(ph==="draft")return set("var(--mute)","Entwurf","Nicht veröffentlicht","Noch nicht veröffentlicht – nur für Admins sichtbar.");
   if(ph==="before_signup")return set("var(--gr)","Anmeldung noch nicht offen",esc(DT(EV.signup_opens_at)),"Öffnet am "+esc(DT(EV.signup_opens_at))+".");
   if(ph==="signup_open"){
@@ -275,8 +278,6 @@ function renderView(){
       +"</div>":"";
   v.innerHTML='<div class="meineLayout"><div>'
     +'<div class="evHead"><div><h2>'+esc(EV.name)+'</h2>'
-    +'<div class="evMeta">'+esc(EV.track)+(EV.car_class?" · "+esc(EV.car_class):"")+" · Start "+esc(DT(EV.start_at))
-    +(EV.reminder_lead_times?" · Erinnerungen "+esc(EV.reminder_lead_times.join(", "))+" min":"")+"</div>"
     +'<span class="pill" style="color:'+STATUS_COLOR[EV.status]+'">'+STATUS[EV.status]+"</span>"
     +'<div class="evStats">'+stat(EV.duration_minutes/60+"h","Renndauer")+stat(assigned+"/"+list.length,"Stints belegt")+stat(mine,"davon deine",true)+"</div>"
     +"</div>"+chips+"</div>"
