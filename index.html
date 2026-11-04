@@ -118,7 +118,7 @@ function setHeroTrack(t){
   const svg=document.getElementById("heroTrackSvg");
   svg.setAttribute("viewBox",t.viewBox);
   svg.innerHTML='<path class="ribbon" d="'+t.paths[0]+'"/><g style="font-family:var(--mono);font-size:9px;fill:var(--mute)">'
-    +t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/><text x="'+c[0]+'" y="'+(c[1]-7)+'" text-anchor="middle">'+c[2]+'</text>').join("")
+    +t.corners.map((c,i)=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/><text x="'+c[0]+'" y="'+(c[1]-7)+'" text-anchor="middle">T'+(i+1)+' '+c[2]+'</text>').join("")
     +"</g>";
   document.getElementById("heroTrack").textContent=t.name;
 }
