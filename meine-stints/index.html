@@ -62,7 +62,8 @@ function trackSvgHtml(trackName){
   if(!t)return "";
   if(t.image){
     return '<div class="trackBox"><svg viewBox="'+t.imageViewBox+'" style="width:100%;max-width:280px;overflow:visible">'
-      +'<image href="../'+t.image+'" x="0" y="0" width="960" height="888"/></svg>'
+      +'<image href="../'+t.image+'" x="0" y="0" width="960" height="888"/>'
+      +'<g class="carDot" style="offset-path:path(\''+t.paths[0].replace(/'/g,"\\'")+'\')"><circle r="9.5" fill="var(--bg)" style="filter:drop-shadow(0 0 4px var(--cy)) drop-shadow(0 0 10px var(--cy)) drop-shadow(0 0 18px var(--cy))"/><circle r="9.5" fill="none" stroke="var(--cy)" stroke-width="1.5"/><image href="../icon.png" x="-7.5" y="-7.5" width="15" height="15" clip-path="url(#logoClip)"/></g></svg>'
       +'<div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
   }
   const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
