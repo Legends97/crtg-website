@@ -60,6 +60,11 @@ function trackSvgHtml(trackName){
   const slug=typeof TRACK_SLUG!=="undefined"&&TRACK_SLUG[trackName];
   const t=slug&&TRACKS_DATA[slug];
   if(!t)return "";
+  if(t.image){
+    return '<div class="trackBox"><svg viewBox="'+t.imageViewBox+'" style="width:100%;max-width:280px;overflow:visible">'
+      +'<image href="../'+t.image+'" x="0" y="0" width="960" height="888"/></svg>'
+      +'<div style="font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px">'+esc(t.name)+'</div></div>';
+  }
   const corners=t.corners.map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" style="fill:var(--vi)"/>'
     +'<text x="'+c[0]+'" y="'+(c[1]-7)+'" style="font-family:var(--mono);font-size:8px;fill:var(--mute);text-anchor:middle">'+esc(c[2])+'</text>').join("");
   const carD=t.paths[0].replace(/'/g,"\\'");
