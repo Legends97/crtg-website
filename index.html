@@ -116,9 +116,9 @@ fetch("api/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).catch(()
 // Steht kein Event an, zeigt der Hero Imola statt der fest einprogrammierten Spa-Grafik.
 function setHeroTrack(t){
   const svg=document.getElementById("heroTrackSvg");
-  if(t.image){
+  if(t.heroImage||t.image){
     svg.setAttribute("viewBox",t.imageViewBox);
-    svg.innerHTML='<image href="'+t.image+'" x="0" y="0" width="960" height="888" preserveAspectRatio="xMidYMid meet"/>';
+    svg.innerHTML='<image href="'+(t.heroImage||t.image)+'" x="0" y="0" width="960" height="888" preserveAspectRatio="xMidYMid meet"/>';
   }else{
     svg.setAttribute("viewBox",t.viewBox);
     svg.innerHTML='<path class="ribbon" d="'+t.paths[0]+'"/><g style="font-family:var(--mono);font-size:9px;fill:var(--mute)">'
