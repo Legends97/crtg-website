@@ -82,7 +82,7 @@ a.panel:hover .go{color:var(--vi);text-decoration:underline}
     <a class="panel" href="sprit/">
       <h2>Sprit-Rechner</h2>
       <p class="desc">Rundenzeit, Verbrauch, Tankgröße, Reserve — daraus ergibt sich automatisch, wie viele Boxenstopps ein Stint braucht.</p>
-      <small class="last" id="last2">Noch keine Eingaben gespeichert</small>
+      <small class="last">Läuft lokal im Browser, es wird nichts gespeichert.</small>
       <span class="go">Zum Sprit-Rechner →</span>
     </a>
     <a class="panel" href="meine-stints/">
@@ -100,9 +100,6 @@ a.panel:hover .go{color:var(--vi);text-decoration:underline}
 <script src="tracks-data.js"></script>
 <script src="nav.js"></script>
 <script>
-const rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
-const q=rd("crtg-sprit-v1");
-if(q&&q.cons){document.getElementById("last2").textContent="Zuletzt: "+(+q.stint>0?q.stint+" min Stints":"Stints nach Tank")+" · "+q.cons+" L/Runde · Tank "+q.tank+" L"}
 fetch("api/drivers",{credentials:"same-origin"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(drivers=>{
   const n=(drivers||[]).filter(d=>d.classes&&d.classes.length).length;
   document.getElementById("heroDrivers").textContent=String(n).padStart(2,"0");

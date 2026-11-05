@@ -59,15 +59,15 @@ body{background:#fff;color:#111}
       <div class="cfg">
         <div class="fieldGroup">Rennen</div>
         <div class="fieldRow">
-          <div class="field"><label for="h">Stunden</label><input id="h" type="number" min="0" max="48"></div>
-          <div class="field"><label for="m">Minuten</label><input id="m" type="number" min="0" max="59"></div>
+          <div class="field"><label for="h">Stunden</label><input id="h" type="number" min="0" max="48" autocomplete="off"></div>
+          <div class="field"><label for="m">Minuten</label><input id="m" type="number" min="0" max="59" autocomplete="off"></div>
         </div>
-        <div class="field"><label for="lap">Rundenzeit (m:ss.x)</label><input id="lap" placeholder="1:48.5"></div>
-        <div class="field"><label for="stint">Stint-Zeit (Minuten)</label><input id="stint" type="number" min="0" placeholder="leer = automatisch nach Tank"></div>
+        <div class="field"><label for="lap">Rundenzeit (m:ss.x)</label><input id="lap" placeholder="1:48.5" autocomplete="off"></div>
+        <div class="field"><label for="stint">Stint-Zeit (Minuten)</label><input id="stint" type="number" min="0" placeholder="leer = automatisch nach Tank" autocomplete="off"></div>
         <div class="fieldGroup">Auto</div>
-        <div class="field"><label for="cons">Verbrauch pro Runde (Liter)</label><input id="cons" type="number" step="0.01" min="0"></div>
-        <div class="field"><label for="tank">Tankgröße (Liter)</label><input id="tank" type="number" step="1" min="0"></div>
-        <div class="field"><label for="res">Reserve (Runden)</label><input id="res" type="number" step="1" min="0"></div>
+        <div class="field"><label for="cons">Verbrauch pro Runde (Liter)</label><input id="cons" type="number" step="0.01" min="0" autocomplete="off"></div>
+        <div class="field"><label for="tank">Tankgröße (Liter)</label><input id="tank" type="number" step="1" min="0" autocomplete="off"></div>
+        <div class="field"><label for="res">Reserve (Runden)</label><input id="res" type="number" step="1" min="0" autocomplete="off"></div>
       </div>
       <div>
         <div class="sumRow" id="stats"></div>
@@ -80,15 +80,13 @@ body{background:#fff;color:#111}
 </main>
 <div class="tireBand"><img src="../img/tires.jpg" alt="Renn-Slicks auf Felgen, Boxengasse"></div>
 <script>
-const $=id=>document.getElementById(id),KEY="crtg-sprit-v1",KEYS=["h","m","lap","cons","tank","res","stint"];
+const $=id=>document.getElementById(id),KEYS=["h","m","lap","cons","tank","res","stint"];
 let S={h:3,m:0,lap:"1:48.5",cons:3.1,tank:120,res:1,stint:40};
-try{const x=JSON.parse(localStorage.getItem(KEY));if(x)S=Object.assign(S,x)}catch(e){}
 const lapSec=v=>{v=String(v).trim().replace(",",".");const m=v.match(/^(\d+):(\d+(?:\.\d+)?)$/);return m?+m[1]*60+ +m[2]:(/^\d+(\.\d+)?$/.test(v)?+v:0)};
 const hm=t=>Math.floor(t/60)+":"+String(Math.round(t%60)).padStart(2,"0");
 const L=n=>(Math.round(n*10)/10).toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});
 const chip=(v,k)=>`<div class="chip"><span class="v">${v}</span><span class="k">${k}</span></div>`;
 function calc(){
-  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
   const Tm=(+S.h||0)*60+(+S.m||0),lap=lapSec(S.lap),c=+S.cons,tank=+S.tank,res=Math.max(0,+S.res||0),sm=+S.stint||0;
   $("hint").textContent="";
   if(!(Tm>0&&lap>0&&c>0&&tank>0)){$("stats").innerHTML="";$("plan").innerHTML='<p class="empty">Trage Renndauer, Rundenzeit, Verbrauch und Tankgröße ein.</p>';return}
